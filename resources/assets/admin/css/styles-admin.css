@@ -1,0 +1,34 @@
+.action-icon {
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    color: #fff;
+    transition: all .2s;
+}
+
+.action-icon.view-icon {
+    background-color: var(--bs-green);
+}
+
+.action-icon.edit-icon {
+    background-color: #17a2b8;
+}
+
+.action-icon.delete-icon {
+    background-color: var(--bs-danger);
+}
+
+.action-icon.featured-icon {
+    background-color: var(--bs-warning);
+}
+
+.action-icon.non-featured-icon {
+    background-color: var(--bs-secondary);
+}
+
+.action-icon.view-icon-primary {
+    background-color: var(--bs-primary);
+}
