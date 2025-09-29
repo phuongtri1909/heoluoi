@@ -5,7 +5,7 @@
     <div class="mt-88">
         @include('components.sweetalert')
 
-        <div class="container d-md-none" id="mobileSearchContainer" style="display: none;">
+        <div class="container d-md-none pt-3" id="mobileSearchContainer" style="display: none;">
             <div class="position-relative">
                 <form action="{{ route('searchHeader') }}" method="GET">
                     <input type="text" name="query" class="form-control mt-3 rounded-4" placeholder="Tìm kiếm truyện..."

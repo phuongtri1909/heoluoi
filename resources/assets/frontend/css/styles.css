@@ -16,8 +16,16 @@
     --success-color: #28a745;
 }
 
+@font-face {
+    font-family: 'SVN-Apple';
+    src: url('../fonts/SVN-Apple.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 body {
-    font-family: 'Segoe UI', 'Segoe UI Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-family: 'SVN-Apple', sans-serif;
+    letter-spacing: 0.5px;
 }
 
 .color-hover{
@@ -644,9 +652,7 @@ body.dark-mode .footer-links a:not(:last-child)::after {
 }
 
 .bg-site {
-    background: linear-gradient(45deg,
-            var(--primary-color-3),
-            var(--primary-color-2)) !important;
+    background: var(--primary-color-1) !important;
 }
 
 .text-justify {
@@ -1949,7 +1955,7 @@ body.dark-mode .font-family-dropdown button:hover {
 
 /* Font families */
 body.font-segoe {
-    font-family: 'Segoe UI', 'Segoe UI Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif !important;
+    font-family: 'SVN-Apple', sans-serif !important;
 }
 
 body.font-roboto {

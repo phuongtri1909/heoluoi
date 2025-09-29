@@ -7,21 +7,16 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     @php
-        // Get the logo and favicon from LogoSite model
         $logoSite = \App\Models\LogoSite::first();
-        $logoPath =
-            $logoSite && $logoSite->logo ? Storage::url($logoSite->logo) : asset('images/logo/logo-site.png');
-        $faviconPath =
-            $logoSite && $logoSite->favicon
-                ? Storage::url($logoSite->favicon)
-                : asset('favicon.ico');
+        $logoPath = $logoSite && $logoSite->logo ? Storage::url($logoSite->logo) : asset('images/logo/logo-site.png');
+        $faviconPath = $logoSite && $logoSite->favicon ? Storage::url($logoSite->favicon) : asset('favicon.ico');
     @endphp
 
     <title>@yield('title', 'Trang chủ - ' . config('app.name'))</title>
     <meta name="description" content="@yield('description', 'Truyện ' . config('app.name') . ' - Đọc truyện online, tiểu thuyết, truyện tranh, tiểu thuyết hay nhất')">
     <meta name="keywords" content="@yield('keywords', 'truyện, tiểu thuyết, truyện tranh, đọc truyện online')">
     <meta name="robots" content="index, follow">
-    
+
     @hasSection('meta')
         @yield('meta')
     @else
@@ -45,45 +40,43 @@
     <link rel="icon" href="{{ $faviconPath }}" type="image/x-icon">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="shortcut icon" href="{{ $faviconPath }}" type="image/x-icon">
-    <meta name="author" content="Truyện " . config('app.name') . ">
+    <meta name="author" content="Truyện {{ config('app.name') }}">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <link rel="canonical" href="{{ url()->current() }}">
 
     <meta name="google-site-verification" content="" />
 
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- Bootstrap CSS -->
-
-    {{-- styles --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
-    
+
     @vite('resources/assets/frontend/css/styles.css')
 
     @stack('styles')
 
-    {{-- end styles --}}
 </head>
 
 <body>
     <header>
         <nav
-            class="navbar navbar-expand-lg fixed-top transition-header chapter-header scrolled bg-site shadow-sm py-2 d-block">
-            <div class="">
+            class="navbar navbar-expand-lg fixed-top transition-header chapter-header scrolled bg-site shadow-sm py-0 d-block">
+            <div class="container-fluid">
                 <div class="d-flex align-items-center justify-content-between w-100">
-                    <!-- Logo -->
                     <a class="navbar-brand p-0" href="{{ route('home') }}">
-                        <img height="70" src="{{ $logoPath }}" alt="{{ config('app.name') }} logo">
+                        <img height="100" src="{{ $logoPath }}" alt="{{ config('app.name') }} logo">
                     </a>
 
                     <div class="list-menu d-none d-lg-block">
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
+                            <li class="nav-item">
+                                <a class="color-2 nav-link fw-bold fs-3" href="{{ route('home') }}">
+                                    Trang chủ
+                                </a>
+                            </li>
                             <li class="nav-item dropdown">
-                                <a class="text-white nav-link dropdown-toggle fw-bold" href="#" role="button"
-                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                <a class="color-2 nav-link dropdown-toggle fw-bold fs-3 d-flex align-items-baseline" href="#"
+                                    role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     Thể loại
                                 </a>
                                 <ul class="dropdown-menu category-menu">
@@ -106,23 +99,13 @@
                                 </ul>
                             </li>
                             <li class="nav-item">
-                                <a class="text-white nav-link fw-bold" href="{{ route('story.hot') }}">
-                                    Truyện hot
+                                <a class="color-2 nav-link fw-bold fs-3" href="{{ route('story.hot') }}">
+                                    Sắp ra mắt
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="text-white nav-link fw-bold" href="{{ route('story.new') }}">
-                                    Truyện mới
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="text-white nav-link fw-bold" href="{{ route('story.completed') }}">
-                                    Truyện full
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="text-white nav-link fw-bold" href="{{ route('guide.show') }}">
-                                    Hướng dẫn
+                                <a class="color-2 nav-link fw-bold fs-3" href="{{ route('guide.show') }}">
+                                    Hướng dẫn nạp
                                 </a>
                             </li>
                         </ul>
@@ -133,7 +116,7 @@
                             <div class="position-relative">
                                 <form action="{{ route('searchHeader') }}" method="GET">
                                     <input type="text" name="query" class="form-control search-input"
-                                        placeholder="Tìm kiếm truyện..." value="{{ request('query') }}">
+                                        placeholder="Tìm kiếm ..." value="{{ request('query') }}">
                                     <button type="submit" class="btn search-btn">
                                         <i class="fas fa-search"></i>
                                     </button>
@@ -141,11 +124,15 @@
                             </div>
                         </div>
 
+
+                    </div>
+
+                    <div class="d-flex align-items-center">
                         @auth
-                            <a class="text-white fw-bold nav-link d-none d-lg-block" href="{{ route('login') }}">
+                            <a class="color-2 fw-bold nav-link d-none d-lg-block" href="{{ route('login') }}">
                                 <div class="dropdown">
                                     <a href="#"
-                                        class="d-none d-lg-block d-flex align-items-center text-decoration-none dropdown-toggle text-white fw-bold"
+                                        class="d-none d-lg-block d-flex align-items-center text-decoration-none dropdown-toggle color-3 fs-3 fw-bold"
                                         data-bs-toggle="dropdown">
                                         <img src="{{ auth()->user()->avatar ? Storage::url(auth()->user()->avatar) : asset('images/defaults/avatar_default.jpg') }}"
                                             class="rounded-circle" width="40" height="40" alt="avatar"
@@ -155,32 +142,23 @@
                                     </a>
 
                                     <ul class="dropdown-menu dropdown-menu-end animate slideIn border-cl-shopee">
-                                        @if (auth()->user()->role === 'admin' || auth()->user()->role === 'mod')
+                                        @if (auth()->user()->role === 'admin_main' || auth()->user()->role === 'admin_sub')
                                             <li>
-                                                <a class="dropdown-item fw-semibold"
+                                                <a class="dropdown-item fw-semibold color-4"
                                                     href="{{ route('admin.dashboard') }}">
-                                                    <i class="fas fa-tachometer-alt me-2 color-3"></i> Quản trị
-                                                </a>
-                                            </li>
-                                        @endif
-
-                                        @if (auth()->user()->role === 'author')
-                                            <li>
-                                                <a class="dropdown-item fw-semibold"
-                                                    href="{{ route('user.author.index') }}">
-                                                    <i class="fa-solid fa-user-pen me-2 color-3"></i> Khu vực tác giả
+                                                    <i class="fas fa-tachometer-alt me-2 color-4"></i> Quản trị
                                                 </a>
                                             </li>
                                         @endif
 
                                         <li>
-                                            <a class="dropdown-item fw-semibold" href="{{ route('user.profile') }}">
-                                                <i class="fa-regular fa-circle-user me-2 color-3"></i> Trang cá nhân
+                                            <a class="dropdown-item fw-semibold color-2" href="{{ route('user.profile') }}">
+                                                <i class="fa-regular fa-circle-user me-2 color-2"></i> Trang cá nhân
                                             </a>
                                         </li>
 
                                         <li>
-                                            <a class="dropdown-item fw-semibold" href="{{ route('logout') }}">
+                                            <a class="dropdown-item fw-semibold color-3" href="{{ route('logout') }}">
                                                 <i class="fas fa-sign-out-alt me-2 color-3"></i> Đăng xuất
                                             </a>
                                         </li>
@@ -188,12 +166,13 @@
                                 </div>
                             </a>
                         @else
-                            <a href="{{ route('login') }}" class="btn d-none d-lg-block fw-bold text-white"> <i
-                                    class="fa-regular fa-circle-user fa-lg"></i> Đăng nhập</a>
+                            <a href="{{ route('login') }}"
+                                class="btn d-none d-lg-flex align-items-center fw-bold color-3 fs-3"> <i
+                                    class="fa-regular fa-circle-user fa-lg me-2 color-3"></i> Đăng nhập</a>
                         @endauth
                     </div>
 
-                    <div class="d-flex">
+                    <div class="d-flex d-md-none">
                         <button type="button" class="btn border rounded-pill bg-primary-1 d-md-none"
                             style="width: 40px; height: 40px;" id="mobileSearchToggle">
                             <i class="fas fa-search"></i>
@@ -205,9 +184,7 @@
                             <i class="fa-solid fa-bars fa-xl"></i>
                         </button>
                     </div>
-
                 </div>
-            </div>
         </nav>
 
         <!-- Mobile Menu - Offcanvas -->
@@ -239,12 +216,18 @@
 
                         <hr class="divider my-3">
 
+                        <a href="{{ route('home') }}" class="mobile-menu-item fw-semibold fs-3 color-2">
+                            Trang chủ
+                        </a>
+
+                        <hr class="divider my-3">
+
                         <div class="accordion" id="categoryAccordion">
                             <div class="accordion-item border-0">
                                 <h2 class="accordion-header" id="categoryHeading">
-                                    <button class="accordion-button collapsed mobile-menu-item p-0 fw-semibold"
+                                    <button class="accordion-button collapsed mobile-menu-item p-0 fw-semibold fs-3 color-2"
                                         type="button" data-bs-toggle="collapse" data-bs-target="#categoryCollapse">
-                                        <i class="fa-solid fa-layer-group fa-lg me-2 color-3"></i> Thể loại
+                                        Thể loại
                                     </button>
                                 </h2>
                                 <div id="categoryCollapse" class="accordion-collapse collapse"
@@ -254,7 +237,7 @@
                                             @foreach ($categories->chunk(ceil($categories->count() / 2)) as $categoryGroup)
                                                 <div class="col-6">
                                                     @foreach ($categoryGroup as $category)
-                                                        <a class="mobile-menu-item ps-3 py-2 d-block"
+                                                        <a class="mobile-menu-item ps-3 py-2 d-block color-2 fs-4"
                                                             href="{{ route('categories.story.show', $category->slug) }}">
                                                             {{ $category->name }}
                                                         </a>
@@ -269,26 +252,14 @@
 
                         <hr class="divider my-3">
 
-                        <a href="{{ route('story.hot') }}" class="mobile-menu-item fw-semibold">
-                            <i class="fa-solid fa-fire fa-lg me-2 color-3"></i> Truyện hot
+                        <a href="{{ route('story.hot') }}" class="mobile-menu-item fw-semibold fs-3 color-2">
+                            Sắp ra mắt
                         </a>
 
                         <hr class="divider my-3">
 
-                        <a href="{{ route('story.new') }}" class="mobile-menu-item fw-semibold">
-                            <i class="fa-solid fa-clock fa-lg me-2 color-3"></i> Truyện mới
-                        </a>
-
-                        <hr class="divider my-3">
-
-                        <a href="{{ route('story.completed') }}" class="mobile-menu-item fw-semibold">
-                            <i class="fa-solid fa-check fa-lg me-2 color-3"></i> Truyện full
-                        </a>
-
-                        <hr class="divider my-3">
-
-                        <a href="{{ route('guide.show') }}" class="mobile-menu-item fw-semibold">
-                            <i class="fa-solid fa-circle-info fa-lg me-2 color-3"></i> Hướng dẫn
+                        <a href="{{ route('guide.show') }}" class="mobile-menu-item fw-semibold fs-3 color-2">
+                            Hướng dẫn nạp
                         </a>
 
                         <hr class="divider my-3">
@@ -297,37 +268,30 @@
                             <div class="accordion" id="userAccordion">
                                 <div class="accordion-item border-0">
                                     <h2 class="accordion-header" id="userHeading">
-                                        <button class="accordion-button collapsed mobile-menu-item p-0" type="button"
+                                        <button class="accordion-button collapsed mobile-menu-item p-0 color-2 fs-3" type="button"
                                             data-bs-toggle="collapse" data-bs-target="#userCollapse">
                                             <img src="{{ auth()->user()->avatar ? Storage::url(auth()->user()->avatar) : asset('images/defaults/avatar_default.jpg') }}"
                                                 class="rounded-circle me-2" width="40" height="40" alt="avatar"
                                                 style="object-fit: cover;">
-                                            <span class="fw-semibold">{{ auth()->user()->name }}</span>
+                                            <span class="fw-semibold fs-3">{{ auth()->user()->name }}</span>
                                         </button>
                                     </h2>
                                     <div id="userCollapse" class="accordion-collapse collapse"
                                         data-bs-parent="#userAccordion">
                                         <div class="accordion-body p-0 mt-2">
-                                            @if (auth()->user()->role === 'admin' || auth()->user()->role === 'mod')
-                                                <a class="mobile-menu-item ps-3 py-2 d-block fw-semibold"
+                                            @if (auth()->user()->role === 'admin_main' || auth()->user()->role === 'admin_sub')
+                                                <a class="mobile-menu-item ps-3 py-2 d-block fw-semibold color-4"
                                                     href="{{ route('admin.dashboard') }}">
-                                                    <i class="fas fa-tachometer-alt me-2 color-3"></i> Quản trị
+                                                    <i class="fas fa-tachometer-alt me-2 color-4"></i> Quản trị
                                                 </a>
                                             @endif
 
-                                            @if (auth()->user()->role === 'author')
-                                                <a class="mobile-menu-item ps-3 py-2 d-block fw-semibold"
-                                                    href="{{ route('user.author.index') }}">
-                                                    <i class="fa-solid fa-user-pen me-2 color-3"></i> Khu vực tác giả
-                                                </a>
-                                            @endif
-
-                                            <a class="mobile-menu-item ps-3 py-2 d-block fw-semibold"
+                                            <a class="mobile-menu-item ps-3 py-2 d-block fw-semibold color-2"
                                                 href="{{ route('user.profile') }}">
-                                                <i class="fas fa-user me-2 color-3"></i> Trang cá nhân
+                                                <i class="fas fa-user me-2 color-2"></i> Trang cá nhân
                                             </a>
 
-                                            <a class="mobile-menu-item ps-3 py-2 d-block fw-semibold"
+                                            <a class="mobile-menu-item ps-3 py-2 d-block fw-semibold color-3"
                                                 href="{{ route('logout') }}">
                                                 <i class="fas fa-sign-out-alt me-2 color-3"></i> Đăng xuất
                                             </a>
@@ -336,7 +300,7 @@
                                 </div>
                             </div>
                         @else
-                            <a href="{{ route('login') }}" class="mobile-menu-item fw-semibold">
+                            <a href="{{ route('login') }}" class="mobile-menu-item fw-semibold color-3 fs-3">
                                 <i class="fa-regular fa-circle-user fa-lg me-2 color-3"></i> Đăng nhập
                             </a>
                         @endauth
@@ -360,18 +324,14 @@
                 }
             }
 
-            // Listen for scroll events
             window.addEventListener('scroll', handleScroll);
 
-            // Initial check
             handleScroll();
         });
 
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Existing header transition code...
 
-            // Search form handling
             const searchForm = document.querySelector('.search-container form');
             const searchInput = searchForm.querySelector('input[name="query"]');
 
@@ -382,14 +342,12 @@
                 }
             });
 
-            // Auto-focus search input when clicking on the search container
             document.querySelector('.search-container').addEventListener('click', function() {
                 searchInput.focus();
             });
         });
 
         document.addEventListener("DOMContentLoaded", function() {
-            // Existing header transition code...
             const header = document.querySelector(".transition-header");
             const scrollThreshold = 300;
 
@@ -404,7 +362,6 @@
             window.addEventListener("scroll", handleScroll);
             handleScroll();
 
-            // Search form handling for desktop
             const searchForm = document.querySelector(".search-container form");
             if (searchForm) {
                 const searchInput = searchForm.querySelector('input[name="query"]');
@@ -421,25 +378,21 @@
                 });
             }
 
-            // Mobile search toggle functionality
             const mobileSearchToggle = document.getElementById("mobileSearchToggle");
             const mobileSearchContainer = document.getElementById("mobileSearchContainer");
             const mobileSearchInput = document.getElementById("mobileSearchInput");
 
             if (mobileSearchToggle && mobileSearchContainer) {
                 mobileSearchToggle.addEventListener("click", function() {
-                    // Toggle visibility
                     if (mobileSearchContainer.style.display === "none" || mobileSearchContainer.style
                         .display === "") {
                         mobileSearchContainer.style.display = "block";
 
-                        // Scroll to top of page first
                         window.scrollTo({
                             top: 0,
                             behavior: "smooth"
                         });
 
-                        // Focus the input after scroll completes
                         setTimeout(() => {
                             if (mobileSearchInput) {
                                 mobileSearchInput.focus();
@@ -452,6 +405,3 @@
             }
         });
     </script>
-</body>
-
-</html>
