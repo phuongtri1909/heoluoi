@@ -10,7 +10,9 @@ export default defineConfig({
                 'resources/assets/frontend/js/script.js',
                 'resources/assets/frontend/css/information.css',
                 'resources/assets/frontend/css/advanced-search.css',
-                'resources/assets/frontend/js/advanced-search.js'
+                'resources/assets/frontend/js/advanced-search.js',
+                'resources/assets/admin/css/dashboard.css',
+                'resources/assets/admin/css/styles-admin.css'
             ],
             refresh: true,
         }),
