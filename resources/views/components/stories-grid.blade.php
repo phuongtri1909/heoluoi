@@ -29,7 +29,7 @@
                 </a>
             </h5>
         </div>
-        <div class="story-views-time-container mt-1">
+        {{-- <div class="story-views-time-container mt-1">
             <span class="story-views">
                 <i class="fas fa-eye eye fs-8 text-primary"></i>
                 {{ format_number_short($story->total_views) }}
@@ -47,7 +47,7 @@
                 </span>
                 <span class="mb-0 badge bg-1 text-white small rounded-pill d-flex align-items-center">Chương {{ $story->latestChapter->number }} </span>
             </div>
-        </div>
+        </div> --}}
     </div>
 </div>
 

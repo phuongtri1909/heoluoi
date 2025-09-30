@@ -27,7 +27,7 @@
                                     <label for="slug">Slug</label>
                                     <input type="text" name="slug" id="slug"
                                         class="form-control @error('title') is-invalid @enderror"
-                                        value="{{ old('slug') }}" required>
+                                        value="{{ old('slug') }}">
                                     <small class="form-text text-muted">
                                         Slug là phần đường dẫn của truyện. Ví dụ: truyen-1, truyen-2, ...
                                     </small>

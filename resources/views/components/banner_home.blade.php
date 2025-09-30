@@ -147,7 +147,7 @@
                 document.addEventListener('DOMContentLoaded', function() {
                     const bannerSwiper = new Swiper('.banner-home-swiper', {
                         autoplay: {
-                            delay: 2500,
+                            delay: 25000000,
                             disableOnInteraction: false,
                         },
                         effect: 'coverflow',

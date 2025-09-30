@@ -850,10 +850,6 @@ class HomeController extends Controller
             ->take(12)
             ->get();
 
-        $featuredStories->each(function ($story) {
-            $story->hot_score = $this->calculateHotScore($story);
-            $story->featured_time_remaining = $this->getFeaturedTimeRemaining($story);
-        });
 
         return $featuredStories;
     }
@@ -929,19 +925,6 @@ class HomeController extends Controller
             ($story->ratings_count * 1.5) +
             ($story->average_rating * 2) +
             ($story->bookmarks_count * 1);
-    }
-
-    /**
-     * Lấy thời gian đề cử còn lại (tính bằng giờ)
-     */
-    private function getFeaturedTimeRemaining($story)
-    {
-        // Chỉ kiểm tra is_featured
-        if ($story->is_featured) {
-            return 24; // Mặc định 24 giờ cho admin featured
-        }
-
-        return null; // Không có đề cử nào đang hoạt động
     }
 
     private function getNewStories()
@@ -1029,7 +1012,7 @@ class HomeController extends Controller
             ->where('stories.status', 'published')
             ->withAvg('ratings as average_rating', 'rating')
             ->with(['latestChapter' => function ($query) {
-                $query->select('id', 'story_id', 'number', 'slug', 'created_at')
+                $query->select('id', 'story_id', 'number', 'slug', 'created_at','title')
                     ->where('status', 'published');
             }])
             ->joinSub($latestChapters, 'latest_chapters', function ($join) {

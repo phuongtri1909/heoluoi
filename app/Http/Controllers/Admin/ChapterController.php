@@ -107,6 +107,7 @@ class ChapterController extends Controller
                 'is_free' => $isFree,
                 'price' => $price,
                 'slug' => 'temp-slug-' . time(),
+                'published_at' => now(),
             ]);
 
             $chapter->update([

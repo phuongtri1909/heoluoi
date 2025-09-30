@@ -1,44 +1,86 @@
-<div class="mb-2 text-gray-600">
-    <div class="story-content-wrapper">
-        <div class="story-image-wrapper position-relative d-inline-block">
-            <img src="{{ Storage::url($story->cover) }}" class="story-image-new" alt="{{ $story->title }}">
-            <span class="new-tag">NEW</span>
-            @if ($story->is_18_plus === 1)
-                @include('components.tag18plus')
-            @endif
-        </div>
-        <div class="story-info-section">
-            <div class="story-chapter-inline">
-                <span class="fw-semibold">
-                    <a href="{{ route('show.page.story', $story->slug) }}" class="text-decoration-none color-hover">
-                        {{ $story->title }}
-                    </a>
-                    <span class="chapter-separator">-</span>
+<div class="mb-2 d-flex ">
+    <a href="{{ route('show.page.story', $story->slug) }}" class="story-image-wrapper position-relative d-inline-block rounded-3">
+        <img src="{{ Storage::url($story->cover) }}" class="story-image-new rounded-2 me-3" alt="{{ $story->title }}">
+    </a>
+    <div class="story-info-section">
+        <a href="{{ route('show.page.story', $story->slug) }}" class="text-decoration-none color-hover fs-3 line-height-05">
+            {{ $story->title }}
+        </a>
+        <div class="story-chapter-inline">
 
-                    <span class="chapter-wrapper">
-                        @if ($story->latestChapter)
-                            <a href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $story->latestChapter->slug]) }}"
-                                class="text-decoration-none chapter-link chapter-number">
-                                Chương {{ $story->latestChapter->number }}
-                            </a>
-                        @else
-                            <span class="text-muted">Chưa cập nhật</span>
-                        @endif
-                    </span>
+            <div class="d-flex">
+                @if ($story->author_name)
+                    <p class="mb-0 fs-6">{{ $story->author_name }}</p>
+
+                    <span class="chapter-separator fs-6">|</span>
+                @endif
+
+
+                <span class="chapter-wrapper">
+                    @if ($story->latestChapter)
+                        <a href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $story->latestChapter->slug]) }}"
+                            class="text-decoration-none chapter-link text-muted fs-6">
+                            @php
+                                $chapterNumber = $story->latestChapter->number;
+                                $chapterTitle = $story->latestChapter->title;
+                                
+                                $hasCustomTitle = !empty($chapterTitle) && 
+                                    $chapterTitle !== "Chương {$chapterNumber}" && 
+                                    $chapterTitle !== "Chapter {$chapterNumber}";
+                                
+                                if ($hasCustomTitle) {
+                                    echo "Chương {$chapterNumber}: <span class='chapter-title-text'>{$chapterTitle}</span>";
+                                } else {
+                                    echo "Chương {$chapterNumber}";
+                                }
+                            @endphp
+                        </a>
+                    @else
+                        <span class="text-muted">Chưa cập nhật</span>
+                    @endif
                 </span>
             </div>
-        </div>
 
-        <div class="time-info">
-            <div class="text-muted text-sm mb-1 fs-8">
+
+            <div class="text-muted text-sm mb-2 fs-5">
+                <span class="text-dark fs-5">Cập nhật:</span>
                 @if ($story->latestChapter)
                     {{ $story->latestChapter->created_at->diffForHumans() }}
                 @else
                     Chưa cập nhật
                 @endif
             </div>
+
+            <div class="d-flex">
+                @php
+                    $mainCategories = $story->categories->where('is_main', true);
+                    $subCategories = $story->categories->where('is_main', false);
+                    $displayCategories = collect();
+
+                    // Ưu tiên lấy tối đa 3 category chính
+                    foreach ($mainCategories->take(3) as $category) {
+                        $displayCategories->push($category);
+                    }
+
+                    // Nếu chưa đủ 3 category, lấy thêm category phụ
+                    if ($displayCategories->count() < 3) {
+                        $remainingSlots = 3 - $displayCategories->count();
+                        foreach ($subCategories->take($remainingSlots) as $category) {
+                            $displayCategories->push($category);
+                        }
+                    }
+                @endphp
+
+                @foreach ($displayCategories as $category)
+                    <span
+                        class="badge border border-1 border-color-3 color-3 fs-6 rounded-pill d-flex align-items-center me-2">{{ $category->name }}</span>
+                @endforeach
+            </div>
+
         </div>
     </div>
+
+
 </div>
 
 @once
@@ -49,8 +91,8 @@
             }
 
             .story-image-new {
-                width: 70px;
-                height: 100px;
+                width: 90px;
+                height: 120px;
                 object-fit: cover;
                 display: block;
                 flex-shrink: 0;
@@ -76,6 +118,9 @@
 
             .story-chapter-inline {
                 line-height: 1.4;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
             }
 
             .story-title {
@@ -106,6 +151,39 @@
                 hyphens: auto;
                 line-height: inherit;
                 display: inline;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .chapter-title-text {
+                display: inline-block;
+                max-width: 200px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                vertical-align: top;
+            }
+
+            .d-flex {
+                align-items: center;
+                flex-wrap: nowrap;
+            }
+
+            .d-flex p {
+                flex-shrink: 0;
+                margin-right: 8px;
+            }
+
+            .chapter-separator {
+                flex-shrink: 0;
+                margin: 0 8px;
+            }
+
+            .chapter-wrapper {
+                flex: 1;
+                min-width: 0;
+                overflow: hidden;
             }
 
             .time-info {
@@ -224,10 +302,6 @@
                     font-size: 0.9rem;
                 }
 
-                /* Mobile: Ẩn dấu : */
-                .chapter-separator {
-                    display: none;
-                }
 
                 .new-tag {
                     font-size: 0.6rem;
@@ -244,17 +318,18 @@
                 }
 
                 .chapter-link {
-                    display: block;
+                    display: inline;
                     margin-left: 0;
+                    white-space: nowrap;
+                }
+
+                .chapter-title-text {
+                    max-width: 120px; /* Mobile: 120px */
                 }
             }
 
             @media (max-width: 575.98px) {
 
-                /* Mobile nhỏ: Tiếp tục ẩn dấu : */
-                .chapter-separator {
-                    display: none;
-                }
 
                 .new-tag {
                     font-size: 0.55rem;
@@ -266,6 +341,10 @@
                 .chapter-wrapper {
                     display: block;
                     margin-top: 3px;
+                }
+
+                .chapter-title-text {
+                    max-width: 100px; /* Mobile nhỏ: 100px */
                 }
             }
         </style>

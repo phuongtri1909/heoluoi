@@ -10,6 +10,7 @@
     --purple-color-2: #e9c9f9;
     --primary-bg-1: #d9d9d966;
     --primary-bg-2: #f0f8ff;
+    --primary-bg-3: #f5eee4;
     --bg-list: #fafafa;
     --color-text: #333;
     --tw-text-opacity: 1;
@@ -26,6 +27,7 @@
 body {
     font-family: 'SVN-Apple', sans-serif;
     letter-spacing: 0.5px;
+    background-color: var(--primary-bg-3);
 }
 
 .color-hover{
@@ -42,10 +44,6 @@ body {
 
 .bg-primary-1 {
     background: var(--primary-bg-1) !important;
-}
-
-.border-cl-shopee {
-    border: 1px solid var(--primary-color-3) !important;
 }
 
 .color-success-custom {
@@ -242,6 +240,10 @@ body {
     background: #e2e8f0;
 }
 
+.line-height-05 {
+    line-height: 0.5;
+}
+
 .line-height-16 {
     line-height: 16px;
 }
@@ -328,12 +330,33 @@ body {
     font-size: 1rem;
 }
 
-.border-cl-shopee {
-    border: 1px solid #ee4d2d;
+.border-color-1 {
+    border-color: var(--primary-color-1) !important;
+    
 }
 
-.cl-00b894 {
-    color: #00b894 !important;
+.border-color-2 {
+    border-color: var(--primary-color-2) !important;
+}
+
+.border-color-3 {
+    border-color: var(--primary-color-3) !important;
+}
+
+.border-color-4 {
+    border-color: var(--primary-color-4) !important;
+}
+
+.border-color-5 {
+    border-color: var(--primary-color-5) !important;
+}
+
+.border-color-6 {
+    border-color: var(--primary-color-6) !important;
+}
+
+.border-color-7 {
+    border-color: var(--primary-color-7) !important;
 }
 
 .icon-menu {

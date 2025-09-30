@@ -1,31 +1,31 @@
 <section>
-    <div class="mt-4 bg-list rounded-4 px-0 p-md-4 pb-4">
-        <!-- Header Section -->
-        <div class="d-flex justify-content-between align-items-center p-3 rounded-top-custom">
-            <h2 class="fs-5 m-0 text-dark fw-bold title-dark"><i class="fa-solid fa-fire fa-xl" style="color: #ef4444;"></i> Truyện Đề
-                Cử</h2>
-            <div>
-                <a class="color-3 text-decoration-none" href="{{ route('story.hot') }}">Xem tất cả <i
-                        class="fa-solid fa-arrow-right"></i></a>
-            </div>
-        </div>
-
-        <!-- Stories Grid -->
+    <h2 class="fs-5 m-0 text-dark title-dark fs-2 text-center"> Truyện Đề Cử</h2>
+    <div class="mt-4 bg-list rounded-4 px-0 p-md-4 pb-4 border-5 border border-color-7 position-relative">
+        <!-- Navigation Buttons -->
+        <button class="slider-nav-btn slider-nav-prev" id="prevBtn">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="slider-nav-btn slider-nav-next" id="nextBtn">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+        
         <div id="storiesContainer" class="rounded-bottom-custom">
-            <div class="row gx-0 gx-md-3">
-                @forelse ($hotStories as $story)
-                    <div class="col-6 col-sm-4 col-md-3 col-lg-2 story-item bg-none my-0 mt-3">
-                        @include('components.stories-grid', ['story' => $story])
-                    </div>
-                @empty
-                    <div class="col-12">
-                        <div class="alert alert-info text-center py-4 mb-4">
-                            <i class="fas fa-book-open fa-2x mb-3 text-muted"></i>
-                            <h5 class="mb-1">Không tìm thấy truyện nào</h5>
-                            <p class="text-muted mb-0">Hiện không có truyện nào trong danh mục này.</p>
+            <div class="slider-wrapper">
+                <div class="slider-track" id="sliderTrack">
+                    @forelse ($hotStories as $story)
+                        <div class="slider-item">
+                            @include('components.stories-grid', ['story' => $story])
                         </div>
-                    </div>
-                @endforelse
+                    @empty
+                        <div class="col-12">
+                            <div class="alert alert-info text-center py-4 mb-4">
+                                <i class="fas fa-book-open fa-2x mb-3 text-muted"></i>
+                                <h5 class="mb-1">Không tìm thấy truyện nào</h5>
+                                <p class="text-muted mb-0">Hiện không có truyện nào trong danh mục này.</p>
+                            </div>
+                        </div>
+                    @endforelse
+                </div>
             </div>
         </div>
     </div>
@@ -34,34 +34,80 @@
 @once
     @push('styles')
         <style>
-            .story-item {
-                opacity: 0;
-                transform: translateY(20px);
-                animation: fadeInUp 0.6s ease forwards;
+            /* Slider Styles */
+            .slider-wrapper {
+                overflow: hidden;
+                position: relative;
             }
 
-            .story-item:nth-child(1) {
-                animation-delay: 0.1s;
+            .slider-track {
+                display: flex;
+                transition: transform 0.5s ease-in-out;
+                gap: 1rem;
             }
 
-            .story-item:nth-child(2) {
-                animation-delay: 0.2s;
+            .slider-item {
+                flex: 0 0 auto;
+                width: calc(50% - 0.5rem);
+                min-width: 150px;
             }
 
-            .story-item:nth-child(3) {
-                animation-delay: 0.3s;
+            @media (min-width: 576px) {
+                .slider-item {
+                    width: calc(33.333% - 0.67rem);
+                }
             }
 
-            .story-item:nth-child(4) {
-                animation-delay: 0.4s;
+            @media (min-width: 768px) {
+                .slider-item {
+                    width: calc(25% - 0.75rem);
+                }
             }
 
-            .story-item:nth-child(5) {
-                animation-delay: 0.5s;
+            @media (min-width: 992px) {
+                .slider-item {
+                    width: calc(16.666% - 0.83rem);
+                }
             }
 
-            .story-item:nth-child(6) {
-                animation-delay: 0.6s;
+            /* Navigation Buttons */
+            .slider-nav-btn {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                background: var(--primary-color-7);
+                color: white;
+                border: none;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                z-index: 10;
+                transition: all 0.3s ease;
+                font-size: 14px;
+            }
+
+            .slider-nav-btn:hover {
+                background: var(--primary-color-3);
+                transform: translateY(-50%) scale(1.1);
+            }
+
+            .slider-nav-prev {
+                left: 0px;
+            }
+
+            .slider-nav-next {
+                right: 0px;
+            }
+
+            /* Hide buttons on mobile */
+            @media (max-width: 576px) {
+                .slider-nav-btn {
+                    display: none;
+                }
             }
 
             .rounded-bottom-custom {
@@ -90,6 +136,119 @@
                 border-color: #0dcaf0 !important;
                 color: #0dcaf0 !important;
             }
+
+            body.dark-mode .slider-nav-btn {
+                background: rgba(255, 255, 255, 0.2);
+                color: #fff;
+            }
+
+            body.dark-mode .slider-nav-btn:hover {
+                background: rgba(255, 255, 255, 0.3);
+            }
         </style>
+    @endpush
+
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const sliderTrack = document.getElementById('sliderTrack');
+                const prevBtn = document.getElementById('prevBtn');
+                const nextBtn = document.getElementById('nextBtn');
+                const sliderItems = document.querySelectorAll('.slider-item');
+                
+                if (!sliderTrack || !prevBtn || !nextBtn || sliderItems.length === 0) {
+                    return;
+                }
+
+                let currentIndex = 0;
+                let itemsPerView = getItemsPerView();
+                let maxIndex = Math.max(0, sliderItems.length - itemsPerView);
+
+                function getItemsPerView() {
+                    const width = window.innerWidth;
+                    if (width >= 992) return 6; // lg
+                    if (width >= 768) return 4; // md
+                    if (width >= 576) return 3; // sm
+                    return 2;
+                }
+
+                function updateSlider() {
+                    if (sliderItems.length === 0) return;
+                    
+                    if (sliderItems.length <= itemsPerView) {
+                        prevBtn.style.display = 'none';
+                        nextBtn.style.display = 'none';
+                        return;
+                    } else {
+                        prevBtn.style.display = 'flex';
+                        nextBtn.style.display = 'flex';
+                    }
+                    
+                    const itemWidth = sliderItems[0].offsetWidth + 16;
+                    const translateX = -currentIndex * itemWidth;
+                    sliderTrack.style.transform = `translateX(${translateX}px)`;
+                    
+                    prevBtn.style.opacity = '1';
+                    nextBtn.style.opacity = '1';
+                    prevBtn.disabled = false;
+                    nextBtn.disabled = false;
+                }
+
+                function nextSlide() {
+                    currentIndex = (currentIndex + 1) % (maxIndex + 1);
+                    console.log('Next - currentIndex:', currentIndex, 'maxIndex:', maxIndex, 'items:', sliderItems.length, 'itemsPerView:', itemsPerView);
+                    updateSlider();
+                }
+
+                function prevSlide() {
+                    currentIndex = currentIndex === 0 ? maxIndex : currentIndex - 1;
+                    console.log('Prev - currentIndex:', currentIndex, 'maxIndex:', maxIndex, 'items:', sliderItems.length, 'itemsPerView:', itemsPerView);
+                    updateSlider();
+                }
+
+                nextBtn.addEventListener('click', nextSlide);
+                prevBtn.addEventListener('click', prevSlide);
+
+                window.addEventListener('resize', function() {
+                    itemsPerView = getItemsPerView();
+                    maxIndex = Math.max(0, sliderItems.length - itemsPerView);
+                    currentIndex = Math.min(currentIndex, maxIndex);
+                    updateSlider();
+                });
+
+                let startX = 0;
+                let isDragging = false;
+
+                sliderTrack.addEventListener('touchstart', function(e) {
+                    startX = e.touches[0].clientX;
+                    isDragging = true;
+                });
+
+                sliderTrack.addEventListener('touchmove', function(e) {
+                    if (!isDragging) return;
+                    e.preventDefault();
+                });
+
+                sliderTrack.addEventListener('touchend', function(e) {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    
+                    const endX = e.changedTouches[0].clientX;
+                    const diffX = startX - endX;
+                    
+                    if (Math.abs(diffX) > 50) {
+                        if (diffX > 0) {
+                            nextSlide();
+                        } else {
+                            prevSlide();
+                        }
+                    }
+                });
+
+                setTimeout(function() {
+                    updateSlider();
+                }, 100);
+            });
+        </script>
     @endpush
 @endonce

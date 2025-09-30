@@ -2,22 +2,24 @@
 @section('content')
     @include('components.banner_home')
     <section class="container-xl">
-        @include('components.list_story_home', ['list_story' => $hotStories])
+        @include('components.list_story_home', ['hotStories' => $hotStories])
 
-        @if ($newStories->count() > 0)
+        {{-- @if ($newStories->count() > 0)
             @include('components.list_story_new_slide', ['newStories' => $newStories])
-        @endif
+        @endif --}}
 
-        @include('components.list_story_new_chapter', [
-            'latestUpdatedStories' => $latestUpdatedStories,
-        ])
+       
 
         <div class="row mt-4">
             <div class="col-12 col-md-6">
-                @include('components.list_story_view_rating_fl', [
+                {{-- @include('components.list_story_view_rating_fl', [
                     'topViewedStories' => $topViewedStories,
                     'ratingStories' => $ratingStories,
                     'topFollowedStories' => $topFollowedStories,
+                ]) --}}
+
+                @include('components.list_story_new_chapter', [
+                    'latestUpdatedStories' => $latestUpdatedStories,
                 ])
 
             </div>

@@ -1,46 +1,12 @@
-<section class="mt-5 bg-list rounded-4 px-0 px-md-4 pb-4">
-    <div class="row">
-        <div class="col-12">
-
-            <div class="d-flex justify-content-between align-items-center p-3 px-md-0 rounded-top-custom">
-                <h2 class="fs-5 m-0 text-dark fw-bold title-dark"><i class="fa-solid fa-gear me-1" style="color: #22c55e;"></i> Mới Cập Nhật
-                </h2>
-                <div>
-                    <a class="color-3 text-decoration-none" href="{{ route('story.new.chapter') }}">Xem tất cả <i
-                            class="fa-solid fa-arrow-right"></i></a>
-                </div>
-            </div>
-
-            <div class="row p-3 p-md-0 story-grid">
-                @foreach ($latestUpdatedStories as $index => $story)
-                    <div class="col-12 col-md-6 story-column">
-                        <div class="story-item-wrapper">
-                            <div class="story-content">
-                                @include('components.story_new', ['story' => $story])
-                            </div>
-
-                            @php
-                                $totalCount = $latestUpdatedStories->count();
-                                $isLastInColumn = false;
-                                $isLastItem = ($index === $totalCount - 1);
-
-                                // Desktop logic: Ẩn HR cho 2 item cuối
-                                if ($index >= $totalCount - 2) {
-                                    $isLastInColumn = true;
-                                }
-                            @endphp
-
-                            {{-- HR logic: Desktop dùng $isLastInColumn, Mobile dùng $isLastItem --}}
-                            <hr class="my-3 hr-desktop {{ $isLastInColumn ? 'd-none' : '' }}">
-                            @if(!$isLastItem)
-                                <hr class="my-3 hr-mobile d-block d-md-none">
-                            @endif
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
+<section class="bg-list rounded-4 px-md-4 px-2 border-5 border border-color-4">
+    <div class="p-3 pb-5 px-md-0 rounded-top-custom text-center">
+        <h2 class="m-0 text-dark fw-bold title-dark fs-2 text-center"> TRUYỆN MỚI CẬP NHẬT</h2>
     </div>
+    @foreach ($latestUpdatedStories as $index => $story)
+        @include('components.story_new', ['story' => $story])
+
+        <hr class="my-3 color-1 {{ $index == $latestUpdatedStories->count() - 1 ? 'd-none' : '' }}">
+    @endforeach
 </section>
 
 @push('styles')
