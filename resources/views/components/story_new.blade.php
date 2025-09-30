@@ -1,14 +1,20 @@
 <div class="mb-2 d-flex ">
-    <a href="{{ route('show.page.story', $story->slug) }}" class="story-image-wrapper position-relative d-inline-block rounded-3">
+    <a href="{{ route('show.page.story', $story->slug) }}"
+        class="story-image-wrapper position-relative d-inline-block rounded-3">
         <img src="{{ Storage::url($story->cover) }}" class="story-image-new rounded-2 me-3" alt="{{ $story->title }}">
+       
+        @if($story->completed == true)
+            <span class="full-label"></span>
+        @endif
     </a>
     <div class="story-info-section">
-        <a href="{{ route('show.page.story', $story->slug) }}" class="text-decoration-none color-hover fs-3 line-height-05">
+        <a href="{{ route('show.page.story', $story->slug) }}"
+            class="text-decoration-none color-hover fs-4 line-height-05">
             {{ $story->title }}
         </a>
         <div class="story-chapter-inline">
 
-            <div class="d-flex">
+            <div class="author-chapter-container">
                 @if ($story->author_name)
                     <p class="mb-0 fs-6">{{ $story->author_name }}</p>
 
@@ -23,11 +29,12 @@
                             @php
                                 $chapterNumber = $story->latestChapter->number;
                                 $chapterTitle = $story->latestChapter->title;
-                                
-                                $hasCustomTitle = !empty($chapterTitle) && 
-                                    $chapterTitle !== "Chương {$chapterNumber}" && 
+
+                                $hasCustomTitle =
+                                    !empty($chapterTitle) &&
+                                    $chapterTitle !== "Chương {$chapterNumber}" &&
                                     $chapterTitle !== "Chapter {$chapterNumber}";
-                                
+
                                 if ($hasCustomTitle) {
                                     echo "Chương {$chapterNumber}: <span class='chapter-title-text'>{$chapterTitle}</span>";
                                 } else {
@@ -51,31 +58,7 @@
                 @endif
             </div>
 
-            <div class="d-flex">
-                @php
-                    $mainCategories = $story->categories->where('is_main', true);
-                    $subCategories = $story->categories->where('is_main', false);
-                    $displayCategories = collect();
-
-                    // Ưu tiên lấy tối đa 3 category chính
-                    foreach ($mainCategories->take(3) as $category) {
-                        $displayCategories->push($category);
-                    }
-
-                    // Nếu chưa đủ 3 category, lấy thêm category phụ
-                    if ($displayCategories->count() < 3) {
-                        $remainingSlots = 3 - $displayCategories->count();
-                        foreach ($subCategories->take($remainingSlots) as $category) {
-                            $displayCategories->push($category);
-                        }
-                    }
-                @endphp
-
-                @foreach ($displayCategories as $category)
-                    <span
-                        class="badge border border-1 border-color-3 color-3 fs-6 rounded-pill d-flex align-items-center me-2">{{ $category->name }}</span>
-                @endforeach
-            </div>
+            @include('components.category_badges', ['story' => $story])
 
         </div>
     </div>
@@ -86,6 +69,17 @@
 @once
     @push('styles')
         <style>
+            .full-label {
+                width: 34px;
+                height: 50px;
+                position: absolute;
+                display: block;
+                top: 55%;
+                left: -6%;
+                z-index: 1;
+                background: transparent url(/images/defaults/full-label.png) no-repeat;
+            }
+
             .chapter-number {
                 color: #5e44ef;
             }
@@ -98,7 +92,7 @@
                 flex-shrink: 0;
             }
 
-            .story-image-new:hover {
+            .story-image-wrapper:hover {
                 transform: scale(1.05);
                 transition: transform 0.3s ease;
             }
@@ -165,12 +159,13 @@
                 vertical-align: top;
             }
 
-            .d-flex {
+            .author-chapter-container {
+                display: flex;
                 align-items: center;
                 flex-wrap: nowrap;
             }
 
-            .d-flex p {
+            .author-chapter-container p {
                 flex-shrink: 0;
                 margin-right: 8px;
             }
@@ -323,8 +318,22 @@
                     white-space: nowrap;
                 }
 
+                .author-chapter-container {
+                    flex-wrap: wrap;
+                    gap: 4px;
+                }
+
+                .author-chapter-container p {
+                    margin-right: 4px;
+                }
+
+                .chapter-separator {
+                    margin: 0 4px;
+                }
+
                 .chapter-title-text {
-                    max-width: 120px; /* Mobile: 120px */
+                    max-width: 120px;
+                    /* Mobile: 120px */
                 }
             }
 
@@ -343,8 +352,22 @@
                     margin-top: 3px;
                 }
 
+                .author-chapter-container {
+                    flex-wrap: wrap;
+                    gap: 2px;
+                }
+
+                .author-chapter-container p {
+                    margin-right: 2px;
+                }
+
+                .chapter-separator {
+                    margin: 0 2px;
+                }
+
                 .chapter-title-text {
-                    max-width: 100px; /* Mobile nhỏ: 100px */
+                    max-width: 100px;
+                    /* Mobile nhỏ: 100px */
                 }
             }
         </style>

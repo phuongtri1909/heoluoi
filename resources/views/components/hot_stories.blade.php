@@ -1,226 +1,46 @@
-<div class="sidebar-widget recent-reads rounded-4 shadow-sm">
-    <div class="widget-header bg-2">
-        <h2 class="fs-5 m-0 text-dark fw-bold title-dark"><i class="fa-solid fa-fire fa-lg" style="color: #ef4444;"></i> Truyện Hot
-        </h2>
-        <ul class="nav nav-tabs nav-fill mt-3" id="hotStoriesTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="daily-tab" data-bs-toggle="tab" data-bs-target="#daily"
-                    type="button" role="tab">
-                    Hôm nay
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="weekly-tab" data-bs-toggle="tab" data-bs-target="#weekly" type="button"
-                    role="tab">
-                    Tuần này
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="monthly-tab" data-bs-toggle="tab" data-bs-target="#monthly" type="button"
-                    role="tab">
-                    Tháng này
-                </button>
-            </li>
-        </ul>
+<div class="sidebar-widget recent-reads rounded-4 border-5 border border-color-3 shadow-sm mt-4 mt-md-0">
+    <div class="widget-header border-bottom-0">
+        <div class="text-center">
+            <h2 class="fs-3 text-center m-0 text-dark fw-bold title-dark">BẢNG XẾP HẠNG</h2>
+        </div>
+        <div class="d-flex justify-content-evenly mt-3" id="hotStoriesTabs" role="tablist">
+            <button class="tab-button active fs-5" id="daily-tab" data-bs-toggle="tab" data-bs-target="#daily"
+                type="button" role="tab">
+                NGÀY
+            </button>
+            <button class="tab-button fs-5" id="weekly-tab" data-bs-toggle="tab" data-bs-target="#weekly" type="button"
+                role="tab">
+                TUẦN
+            </button>
+            <button class="tab-button fs-5" id="monthly-tab" data-bs-toggle="tab" data-bs-target="#monthly" type="button"
+                role="tab">
+                THÁNG
+            </button>
+        </div>
     </div>
-    <div class="widget-content mt-4">
-
-
+    <div class="widget-content px-md-4 px-2">
         <!-- Tab Content -->
         <div class="tab-content" id="hotStoriesContent">
             <!-- Daily Hot Stories -->
-            <div class="tab-pane fade show active" id="daily" role="tabpanel">
-                <div class="hot-stories-list">
-                    @foreach ($dailyTopPurchased as $index => $story)
-                        <div class="hot-story-item d-flex p-2 {{ $index < 9 ? 'border-bottom' : '' }}">
-
-                            <div class="story-cover me-2">
-                                <a class="text-decoration-none" href="{{ route('show.page.story', $story->slug) }}">
-                                    <img src="{{ asset('storage/' . $story->cover) }}" alt="{{ $story->title }}"
-                                        class="hot-story-thumb">
-                                </a>
-                            </div>
-                            <div class="story-info w-100 d-flex flex-column justify-content-center">
-                                <h4 class="hot-story-title">
-                                    <a class="text-decoration-none text-dark"
-                                        href="{{ route('show.page.story', $story->slug) }}">{{ $story->title }}</a>
-                                </h4>
-                                <div class="d-flex">
-                                    @php
-                                        $mainCategories = $story->categories->where('is_main', true);
-                                        $displayCategories = collect();
-
-                                        foreach ($mainCategories->take(2) as $category) {
-                                            $displayCategories->push($category);
-                                        }
-
-                                        if ($displayCategories->count() < 2) {
-                                            $subCategories = $story->categories->where('is_main', false);
-                                            foreach (
-                                                $subCategories->take(2 - $displayCategories->count())
-                                                as $category
-                                            ) {
-                                                $displayCategories->push($category);
-                                            }
-                                        }
-                                    @endphp
-
-                                    @foreach ($displayCategories as $category)
-                                        <span
-                                            class="badge bg-1 text-white small rounded-pill d-flex align-items-center me-2">{{ $category->name }}</span>
-                                    @endforeach
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mt-3">
-                                    <p class="mb-0">{{ $story->chapters_count }} chương</p>
-
-                                    <div class="text-muted text-sm">
-                                        @if ($story->latestChapter)
-                                            {{ $story->latest_purchase_diff ?? 'Chưa có ai mua' }}
-                                        @else
-                                            Chưa cập nhật
-                                        @endif
-                                    </div>
-                                </div>
-
-                                <div class="d-flex align-items-center mt-2">
-                                    <span class="story-rank">
-                                        {{ $index + 1 }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
+            @include('components.hot_story_tab', [
+                'tabId' => 'daily',
+                'isActive' => true,
+                'stories' => $dailyTopPurchased
+            ])
 
             <!-- Weekly Hot Stories -->
-            <div class="tab-pane fade" id="weekly" role="tabpanel">
-                <div class="hot-stories-list">
-                    @foreach ($weeklyTopPurchased as $index => $story)
-                        <div class="hot-story-item d-flex p-2 {{ $index < 9 ? 'border-bottom' : '' }}">
-
-                            <div class="story-cover me-2">
-                                <a class="text-decoration-none" href="{{ route('show.page.story', $story->slug) }}">
-                                    <img src="{{ asset('storage/' . $story->cover) }}" alt="{{ $story->title }}"
-                                        class="hot-story-thumb">
-                                </a>
-                            </div>
-                            <div class="story-info w-100 d-flex flex-column justify-content-center">
-                                <h4 class="hot-story-title">
-                                    <a class="text-decoration-none text-dark"
-                                        href="{{ route('show.page.story', $story->slug) }}">{{ $story->title }}</a>
-                                </h4>
-                                <div class="d-flex">
-                                    @php
-                                        $mainCategories = $story->categories->where('is_main', true);
-                                        $displayCategories = collect();
-
-                                        foreach ($mainCategories->take(2) as $category) {
-                                            $displayCategories->push($category);
-                                        }
-
-                                        if ($displayCategories->count() < 2) {
-                                            $subCategories = $story->categories->where('is_main', false);
-                                            foreach (
-                                                $subCategories->take(2 - $displayCategories->count())
-                                                as $category
-                                            ) {
-                                                $displayCategories->push($category);
-                                            }
-                                        }
-                                    @endphp
-
-                                    @foreach ($displayCategories as $category)
-                                        <span
-                                            class="badge bg-1 text-white small rounded-pill d-flex align-items-center me-2">{{ $category->name }}</span>
-                                    @endforeach
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mt-3">
-                                    <p class="mb-0">{{ $story->chapters_count }} chương</p>
-
-                                    <div class="text-muted text-sm">
-                                        @if ($story->latestChapter)
-                                            {{ $story->latest_purchase_diff ?? 'Chưa có ai mua' }}
-                                        @else
-                                            Chưa cập nhật
-                                        @endif
-                                    </div>
-                                </div>
-
-                                <div class="d-flex align-items-center mt-2">
-                                    <span class="story-rank">
-                                        {{ $index + 1 }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
+            @include('components.hot_story_tab', [
+                'tabId' => 'weekly',
+                'isActive' => false,
+                'stories' => $weeklyTopPurchased
+            ])
 
             <!-- Monthly Hot Stories -->
-            <div class="tab-pane fade" id="monthly" role="tabpanel">
-                <div class="hot-stories-list">
-                    @foreach ($monthlyTopPurchased as $index => $story)
-                        <div class="hot-story-item d-flex p-2 {{ $index < 9 ? 'border-bottom' : '' }}">
-
-                            <div class="story-cover me-2">
-                                <a class="text-decoration-none" href="{{ route('show.page.story', $story->slug) }}">
-                                    <img src="{{ asset('storage/' . $story->cover) }}" alt="{{ $story->title }}"
-                                        class="hot-story-thumb">
-                                </a>
-                            </div>
-                            <div class="story-info w-100 d-flex flex-column justify-content-center">
-                                <h4 class="hot-story-title">
-                                    <a class="text-decoration-none text-dark"
-                                        href="{{ route('show.page.story', $story->slug) }}">{{ $story->title }}</a>
-                                </h4>
-                                <div class="d-flex">
-                                    @php
-                                        $mainCategories = $story->categories->where('is_main', true);
-                                        $displayCategories = collect();
-
-                                        foreach ($mainCategories->take(2) as $category) {
-                                            $displayCategories->push($category);
-                                        }
-
-                                        if ($displayCategories->count() < 2) {
-                                            $subCategories = $story->categories->where('is_main', false);
-                                            foreach (
-                                                $subCategories->take(2 - $displayCategories->count())
-                                                as $category
-                                            ) {
-                                                $displayCategories->push($category);
-                                            }
-                                        }
-                                    @endphp
-
-                                    @foreach ($displayCategories as $category)
-                                        <span
-                                            class="badge bg-1 text-white small rounded-pill d-flex align-items-center me-2">{{ $category->name }}</span>
-                                    @endforeach
-                                </div>
-                                <div class="d-flex justify-content-between align-items-center mt-3">
-                                    <p class="mb-0">{{ $story->chapters_count }} chương</p>
-
-                                    <div class="text-muted text-sm">
-                                        @if ($story->latestChapter)
-                                            {{ $story->latest_purchase_diff ?? 'Chưa có ai mua' }}
-                                        @else
-                                            Chưa cập nhật
-                                        @endif
-                                    </div>
-                                </div>
-                                <div class="d-flex align-items-center mt-2">
-                                    <span class="story-rank">
-                                        {{ $index + 1 }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
+            @include('components.hot_story_tab', [
+                'tabId' => 'monthly',
+                'isActive' => false,
+                'stories' => $monthlyTopPurchased
+            ])
         </div>
     </div>
 </div>
@@ -232,17 +52,17 @@
             /* Hot Stories Styles */
 
 
-            .hot-story-item {
+            .hot-stories-list {
                 transition: background-color 0.2s;
             }
 
-            .hot-story-item:hover {
+            .hot-stories-list:hover {
                 background-color: rgba(0, 0, 0, 0.03);
             }
 
             .story-rank {
-                min-width: 30px;
-                min-height: 30px;
+                min-width: 40px;
+                min-height: 40px;
                 width: 30px;
                 height: 30px;
                 flex: 0 0 30px;
@@ -257,11 +77,16 @@
                 background-color: transparent;
             }
 
+            .rank-icon {
+                width: 40px;
+                height: 40px;
+                object-fit: contain;
+            }
+
             .hot-story-thumb {
-                width: 100px;
-                height: 140px;
+                width: 90px;
+                height: 120px;
                 object-fit: cover;
-                border-radius: 4px;
             }
 
             .hot-story-title {
@@ -286,29 +111,61 @@
                 margin-top: 2px;
             }
 
-            /* Style the tab nav */
-            #hotStoriesTabs .nav-link {
-                padding: 0.5rem;
+            .tab-button {
+                background: none;
+                border: 2px solid transparent;
+                padding: 5px 30px;
+                margin: 0 4px;
+                border-radius: 15px;
                 font-size: 0.9rem;
                 font-weight: 500;
-                color: #555;
-                border-top: none;
+                color: #666;
+                cursor: pointer;
+                transition: all 0.3s ease;
             }
 
-            #hotStoriesTabs .nav-link.active {
+            /* Ngày - Color 7 - Outline */
+            #daily-tab {
+                border-color: var(--primary-color-7);
+                color: var(--primary-color-7);
+            }
+
+            /* Tuần - Color 1 - Outline */
+            #weekly-tab {
+                border-color: var(--primary-color-1);
+                color: var(--primary-color-1);
+            }
+
+            /* Tháng - Color 6 - Outline */
+            #monthly-tab {
+                border-color: var(--primary-color-6);
+                color: var(--primary-color-6);
+            }
+
+            .tab-button:hover {
                 color: var(--primary-color-3);
-                border-color: #dee2e6 #dee2e6 #fff;
-                position: relative;
+                background-color: rgba(0, 0, 0, 0.05);
             }
 
-            #hotStoriesTabs .nav-link.active::after {
-                content: '';
-                position: absolute;
-                bottom: -1px;
-                left: 0;
-                right: 0;
-                height: 2px;
-                background-color: var(--primary-color-3);
+            /* Ngày - Color 7 */
+            #daily-tab.active {
+                color: #000;
+                background-color: var(--primary-color-7);
+                border-color: var(--primary-color-7);
+            }
+
+            /* Tuần - Color 1 */
+            #weekly-tab.active {
+                color: #000;
+                background-color: var(--primary-color-1);
+                border-color: var(--primary-color-1);
+            }
+
+            /* Tháng - Color 6 */
+            #monthly-tab.active {
+                color: #000;
+                background-color: var(--primary-color-6);
+                border-color: var(--primary-color-6);
             }
 
             /* Dark mode styles */
@@ -321,11 +178,59 @@
                 background-color: #404040 !important;
             }
 
-            body.dark-mode .hot-story-item {
+            body.dark-mode .tab-button {
+                color: #ccc;
+            }
+
+            /* Dark mode - Ngày - Color 7 - Outline */
+            body.dark-mode #daily-tab {
+                border-color: var(--primary-color-7);
+                color: var(--primary-color-7);
+            }
+
+            /* Dark mode - Tuần - Color 1 - Outline */
+            body.dark-mode #weekly-tab {
+                border-color: var(--primary-color-1);
+                color: var(--primary-color-1);
+            }
+
+            /* Dark mode - Tháng - Color 6 - Outline */
+            body.dark-mode #monthly-tab {
+                border-color: var(--primary-color-6);
+                color: var(--primary-color-6);
+            }
+
+            body.dark-mode .tab-button:hover {
+                color: var(--primary-color-3);
+                background-color: rgba(255, 255, 255, 0.1);
+            }
+
+            /* Dark mode - Ngày - Color 7 */
+            body.dark-mode #daily-tab.active {
+                color: #000;
+                background-color: var(--primary-color-7);
+                border-color: var(--primary-color-7);
+            }
+
+            /* Dark mode - Tuần - Color 1 */
+            body.dark-mode #weekly-tab.active {
+                color: #000;
+                background-color: var(--primary-color-1);
+                border-color: var(--primary-color-1);
+            }
+
+            /* Dark mode - Tháng - Color 6 */
+            body.dark-mode #monthly-tab.active {
+                color: #000;
+                background-color: var(--primary-color-6);
+                border-color: var(--primary-color-6);
+            }
+
+            body.dark-mode .hot-stories-list {
                 border-color: #404040 !important;
             }
 
-            body.dark-mode .hot-story-item:hover {
+            body.dark-mode .hot-stories-list:hover {
                 background-color: rgba(255, 255, 255, 0.05) !important;
             }
 

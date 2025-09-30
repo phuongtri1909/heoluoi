@@ -4,19 +4,8 @@
     <section class="container-xl">
         @include('components.list_story_home', ['hotStories' => $hotStories])
 
-        {{-- @if ($newStories->count() > 0)
-            @include('components.list_story_new_slide', ['newStories' => $newStories])
-        @endif --}}
-
-       
-
         <div class="row mt-4">
             <div class="col-12 col-md-6">
-                {{-- @include('components.list_story_view_rating_fl', [
-                    'topViewedStories' => $topViewedStories,
-                    'ratingStories' => $ratingStories,
-                    'topFollowedStories' => $topFollowedStories,
-                ]) --}}
 
                 @include('components.list_story_new_chapter', [
                     'latestUpdatedStories' => $latestUpdatedStories,
@@ -25,14 +14,13 @@
             </div>
             <div class="col-12 col-md-6">
                 @include('components.hot_stories')
+                @include('components.currently_reading', ['currentlyReading' => $currentlyReading])
             </div>
         </div>
 
         @if ($completedStories->count() > 0)
             @include('components.list_story_full', ['completedStories' => $completedStories])
         @endif
-
-        @include('components.show_categories')
 
     </section>
 @endsection

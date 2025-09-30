@@ -37,7 +37,7 @@ class DepositController extends Controller
     // Xử lý phê duyệt giao dịch (cho admin)
     public function approve(Deposit $deposit)
     {
-        if (!auth()->user() || auth()->user()->role !== 'admin') {
+        if (!auth()->user() || auth()->user()->role !== 'admin_main') {
             return redirect()->back()->with('error', 'Bạn không có quyền thực hiện chức năng này.');
         }
 
@@ -79,7 +79,7 @@ class DepositController extends Controller
     // Xử lý từ chối giao dịch (cho admin)
     public function reject(Request $request, Deposit $deposit)
     {
-        if (!auth()->user() || auth()->user()->role !== 'admin') {
+        if (!auth()->user() || auth()->user()->role !== 'admin_main') {
             return redirect()->back()->with('error', 'Bạn không có quyền thực hiện chức năng này.');
         }
 

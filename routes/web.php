@@ -18,6 +18,7 @@ use App\Http\Controllers\Client\DailyTaskController;
 use App\Http\Controllers\Client\StoryComboController;
 use App\Http\Controllers\Client\CardDepositController;
 use App\Http\Controllers\Client\CoinHistoryController;
+use App\Http\Controllers\Client\PaypalDepositController;
 use App\Http\Controllers\Client\RequestPaymentController;
 
 
@@ -103,6 +104,11 @@ Route::middleware(['ban:login'])->group(function () {
         Route::get('/card-deposit', [CardDepositController::class, 'index'])->name('card.deposit');
         Route::post('/card-deposit', [CardDepositController::class, 'store'])->name('card.deposit.store');
         Route::get('/card-deposit/status/{id}', [CardDepositController::class, 'checkStatus'])->name('card.deposit.status');
+
+        Route::get('/paypal-deposit', [PaypalDepositController::class, 'index'])->name('paypal.deposit');
+        Route::post('/paypal-deposit', [PaypalDepositController::class, 'store'])->name('paypal.deposit.store');
+        Route::post('/paypal-deposit/confirm', [PaypalDepositController::class, 'confirm'])->name('paypal.deposit.confirm');
+        Route::get('/paypal-deposit/status/{transactionCode}', [PaypalDepositController::class, 'checkStatus'])->name('paypal.deposit.status');
     });
 
     Route::group(['middleware' => 'auth'], function () {

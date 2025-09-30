@@ -60,32 +60,6 @@
                         </div>
 
                         <div class="user-nav-item">
-                            @if (Auth::user()->role == 'author' || Auth::user()->role == 'admin')
-                                <a href="{{ route('user.author.stories.create') }}"
-                                    class="user-nav-link text-decoration-none hover-color-3 {{ request()->routeIs('user.author.stories.create') ? 'active' : '' }}">
-                                    <i class="fa-solid fa-plus user-nav-icon"></i>
-                                    <span class="user-nav-text">Đăng truyện</span>
-                                </a>
-                                <a href="{{ route('user.author.stories') }}"
-                                    class="user-nav-link text-decoration-none hover-color-3 {{ request()->routeIs('user.author.stories') ? 'active' : '' }}">
-                                    <i class="fa-solid fa-list user-nav-icon"></i>
-                                    <span class="user-nav-text">Danh sách truyện</span>
-                                </a>
-                                <a href="{{ route('user.author.revenue') }}"
-                                    class="user-nav-link text-decoration-none hover-color-3 {{ request()->routeIs('user.author.index', 'user.author.revenue') ? 'active' : '' }}">
-                                    <i class="fa-solid fa-pen-nib user-nav-icon"></i>
-                                    <span class="user-nav-text">Khu vực tác giả</span>
-                                </a>
-                            @else
-                                <a href="{{ route('user.author.application') }}"
-                                    class="user-nav-link text-decoration-none hover-color-3 {{ request()->routeIs('user.author.application') ? 'active' : '' }}">
-                                    <i class="fa-solid fa-pen-nib user-nav-icon"></i>
-                                    <span class="user-nav-text">Đăng ký làm tác giả</span>
-                                </a>
-                            @endif
-                        </div>
-
-                        <div class="user-nav-item">
                             <a href="{{ route('user.reading.history') }}"
                                 class="user-nav-link text-decoration-none hover-color-3 {{ request()->routeIs('user.reading.history') ? 'active' : '' }}">
                                 <i class="fa-solid fa-book-open user-nav-icon"></i>

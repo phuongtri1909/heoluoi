@@ -1202,10 +1202,6 @@ body.dark-mode .footer-links a:not(:last-child)::after {
     margin: 0;
 }
 
-.widget-content {
-    padding: 1.25rem;
-}
-
 /* Recent Reads */
 .recent-story-item {
     padding: 1rem;

@@ -105,6 +105,12 @@
                                                 #{{ $story->featured_order }}
                                             </span>
                                         @endif
+
+                                        @if($story->completed == true)
+                                            <span class="position-absolute start-0 badge bg-gradient-success" style="font-size: 0.65em; top: 25%;">
+                                                Full
+                                            </span>
+                                        @endif
                                     </div>
                                 </td>
                                 <td class="text-start">

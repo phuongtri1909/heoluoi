@@ -685,6 +685,7 @@ class HomeController extends Controller
         $topFollowedStories = $this->topFollowedStories();
 
         $completedStories = $this->getCompletedStories();
+        $currentlyReading = $this->getCurrentlyReading();
 
         if ($request->ajax()) {
             if ($request->type === 'hot') {
@@ -706,7 +707,28 @@ class HomeController extends Controller
             'latestUpdatedStories',
             'topViewedStories',
             'topFollowedStories',
+            'currentlyReading',
         ));
+    }
+
+    private function getCurrentlyReading()
+    {
+        if (!auth()->check()) {
+            return collect();
+        }
+
+        return UserReading::with([
+            'story' => function ($query) {
+                $query->select('id', 'title', 'slug', 'cover');
+            },
+            'chapter' => function ($query) {
+                $query->select('id', 'story_id', 'number', 'slug');
+            }
+        ])
+            ->where('user_id', auth()->id())
+            ->orderByDesc('updated_at')
+            ->take(5)
+            ->get();
     }
 
     private function getCompletedStories()
@@ -1006,7 +1028,8 @@ class HomeController extends Controller
             'stories.updated_at',
             'stories.cover',
             'stories.cover_thumbnail',
-            'stories.author_name'
+            'stories.author_name',
+            'stories.completed'
         )
             ->where('stories.status', 'published')
             ->withAvg('ratings as average_rating', 'rating')

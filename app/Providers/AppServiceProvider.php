@@ -119,6 +119,7 @@ class AppServiceProvider extends ServiceProvider
             ->withCount(['chapters' => function ($query) {
                 $query->where('status', 'published');
             }])
+            ->withAvg('ratings as average_rating', 'rating')
             ->with([
                 'categories:id,name,slug',
                 'latestChapter' => function ($query) {

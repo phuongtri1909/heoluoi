@@ -151,23 +151,31 @@
                                                 {{ $deposit->created_at->format('d/m/Y H:i') }}
                                             </p>
                                         </td>
-                                        <td class="align-middle">
-                                            <div class="d-flex justify-content-center gap-2">
-                                                <a href="#" data-bs-toggle="modal" data-bs-target="#viewImageModal{{ $deposit->id }}"
-                                                   class="btn btn-link text-info text-gradient px-3 mb-0">
-                                                    <i class="far fa-eye me-2"></i>Xem ảnh
-                                                </a>
+                                        <td class="text-center">
+                                            <div class="d-flex flex-wrap justify-content-center">
+                                                <div class="d-flex flex-column align-items-center mb-2 me-2">
+                                                    <a href="#" data-bs-toggle="modal" data-bs-target="#viewImageModal{{ $deposit->id }}"
+                                                       class="btn btn-link p-1 mb-0 action-icon view-icon" title="Xem ảnh">
+                                                        <i class="fas fa-image"></i>
+                                                    </a>
+                                                </div>
 
                                                 @if($deposit->status === 'pending')
-                                                    <button type="button" class="btn btn-link text-success text-gradient px-3 mb-0"
-                                                            data-bs-toggle="modal" data-bs-target="#approveModal{{ $deposit->id }}">
-                                                        <i class="fas fa-check me-2"></i>Duyệt
-                                                    </button>
+                                                    <div class="d-flex flex-column align-items-center mb-2 me-2">
+                                                        <button type="button" class="btn btn-link p-1 mb-0 action-icon edit-icon"
+                                                                data-bs-toggle="modal" data-bs-target="#approveModal{{ $deposit->id }}"
+                                                                title="Duyệt">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                    </div>
 
-                                                    <button type="button" class="btn btn-link text-danger text-gradient px-3 mb-0"
-                                                            data-bs-toggle="modal" data-bs-target="#rejectModal{{ $deposit->id }}">
-                                                        <i class="fas fa-times me-2"></i>Từ chối
-                                                    </button>
+                                                    <div class="d-flex flex-column align-items-center mb-2">
+                                                        <button type="button" class="btn btn-link p-1 mb-0 action-icon delete-icon"
+                                                                data-bs-toggle="modal" data-bs-target="#rejectModal{{ $deposit->id }}"
+                                                                title="Từ chối">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </div>
                                                 @endif
                                             </div>
                                         </td>

@@ -1,11 +1,11 @@
 <footer id="donate" class="mt-80">
-    <div class="border-top-custom-2">
+    <div class="border-top-custom-2 bg-site">
         <div class="container text-center py-4">
 
             <div class="row">
                 <div class="col-12 col-md-6">
                     <div class="social-icons mb-3 py-3">
-                        @forelse($socials as $social)
+                        @foreach($socials as $social)
                             <a href="{{ $social->url }}" target="_blank" class="social-icon" aria-label="{{ $social->name }}">
                                 @if(strpos($social->icon, 'custom-') === 0)
                                     <span class="{{ $social->icon }}"></span>
@@ -13,14 +13,7 @@
                                     <i class="{{ $social->icon }}"></i>
                                 @endif
                             </a>
-                        @empty
-                            <a href="https://facebook.com" target="_blank" class="social-icon" aria-label="Facebook">
-                                <i class="fab fa-facebook-f"></i>
-                            </a>
-                            <a href="mailto:contact@truyen.com" target="_blank" class="social-icon" aria-label="Email">
-                                <i class="fas fa-envelope"></i>
-                            </a>
-                        @endforelse
+                        @endforeach
                     </div>
                     <div class="footer-links">
                         <a href="{{ route('home') }}" class="text-decoration-none">Trang Chủ</a>
@@ -30,7 +23,7 @@
 
                     <div class="py-3">
                         <span class="copyright text-dark text-sm text-gray-600">
-                            ©{{ date('Y') }} - {{ env('APP_NAME') }} Bảo Lưu Mọi Quyền
+                            © {{ date('Y') }} - {{ config('app.name') }} Bảo Lưu Mọi Quyền
                         </span>
                     </div>
                 </div>
