@@ -2,73 +2,77 @@
 
 @if ($banners && $banners->count() > 0)
     <section class="banner-carousel-section py-4 container">
-        <div class="swiper-container">
-            <div class="swiper banner-home-swiper">
-                <div class="swiper-wrapper">
-                    @foreach ($banners as $banner)
-                        <div class="swiper-slide">
-                            <div class="slide-content">
-                                <a href="{{ $banner->link ?? route('show.page.story', $banner->story->slug) }}"
-                                    rel="noopener noreferrer">
-                                    <img src="{{ asset('storage/' . $banner->image) ?? asset('assets/images/banner_default.jpg') }}"
-                                        alt="{{ $banner->alt_text ?? 'Banner Image' }}" loading="lazy">
-                                    @if ($banner->story && $banner->story->is_18_plus === 1)
-                                        @include('components.tag18plus')
-                                    @endif
-                                </a>
-                                @if ($banner->title)
-                                    <div class="title">
-                                        <span>{{ $banner->title }}</span>
-                                    </div>
-                                @endif
-                            </div>
+        <div class="slider mt-5" id="bannerSlider">
+            @foreach ($banners as $index => $banner)
+                <div class="slide">
+                    <a href="{{ $banner->link ?? route('show.page.story', $banner->story->slug) }}"
+                        rel="noopener noreferrer">
+                        <img src="{{ asset('storage/' . $banner->image) ?? asset('assets/images/banner_default.jpg') }}"
+                            alt="{{ $banner->alt_text ?? 'Banner Image' }}" loading="lazy">
+                        @if ($banner->story && $banner->story->is_18_plus === 1)
+                            @include('components.tag18plus')
+                        @endif
+                    </a>
+                    @if ($banner->title)
+                        <div class="title">
+                            <span>{{ $banner->title }}</span>
                         </div>
-                    @endforeach
+                    @endif
                 </div>
-                <div class="swiper-button-prev"></div>
-                <div class="swiper-button-next"></div>
-            </div>
+            @endforeach
+            <button class="nav prev pe-0">&#10094;</button>
+            <button class="nav next pe-0">&#10095;</button>
         </div>
     </section>
 
     @once
         @push('styles')
-            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css">
             <style>
                 .banner-carousel-section {
                     font-size: 3rem;
                     color: var(--primary);
                     padding: 2rem 0;
+                    overflow: hidden;
                 }
 
-                .swiper-container {
+                .slider {
                     position: relative;
-                }
-
-                .banner-home-swiper {
                     width: 100%;
-                    padding: -70px 0;
+                    height: 500px;
+                    perspective: 1500px;
+                    overflow: hidden;
+                    user-select: none;
                 }
 
-                .banner-home-swiper .swiper-slide {
-                    width: 300px;
-                    height: 404px;
-                    position: relative;
-                    border-radius: 10px;
-                }
-
-                .banner-home-swiper .swiper-slide img {
-                    width: 300px;
-                    height: 404px;
-                    border-radius: 15px;
-                    object-fit: cover;
-                }
-
-                .banner-home-swiper .title {
+                .slide {
                     position: absolute;
-                    bottom: 5px;
+                    top: 50%;
                     left: 50%;
-                    transform: translate(-50%, -20%);
+                    width: 70%;
+                    height: 100%;
+                    border-radius: 16px;
+                    overflow: hidden;
+                    background: #ddd;
+                    transform: translate(-50%, -50%);
+                    transition: transform .45s cubic-bezier(.2, .8, .2, 1),
+                               opacity .45s cubic-bezier(.2, .8, .2, 1),
+                               z-index .45s;
+                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+                    max-width: 100%;
+                }
+
+                .slide img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    display: block;
+                }
+
+                .slide .title {
+                    position: absolute;
+                    bottom: 10px;
+                    left: 50%;
+                    transform: translateX(-50%);
                     width: max-content;
                     text-align: center;
                     padding: 10px 15px;
@@ -79,35 +83,39 @@
                     color: #fff;
                 }
 
-                .banner-home-swiper .swiper-slide-active .title {
-                    box-shadow: 0 20px 30px 2px rgba(165, 117, 44, 0.4);
+                .nav {
+                    position: absolute;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.9);
+                    border: 2px solid rgba(0, 0, 0, 0.1);
+                    cursor: pointer;
+                    z-index: 100;
+                    font-size: 22px;
+                    font-weight: bold;
+                    color: #333;
+                    transition: all 0.3s ease;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
                 }
 
-                @media (min-width: 760px) {
-
-                    .swiper-button-prev,
-                    .swiper-button-next {
-                        display: flex;
-                    }
+                .nav:hover {
+                    background: rgba(255, 255, 255, 1);
+                    transform: translateY(-50%) scale(1.1);
+                    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
                 }
 
-                .swiper-pagination-bullet-active {
-                    background: #facece;
+                .nav.prev {
+                    left: 20px;
                 }
 
-                .swiper-slide-active .title {
-                    display: initial;
-                }
-
-                .swiper-button-next,
-                .swiper-button-prev {
-                    color: #facece !important;
-                    transition: all .2s ease;
-                }
-
-                .swiper-button-next:hover,
-                .swiper-button-prev:hover {
-                    color: #900 !important;
+                .nav.next {
+                    right: 20px;
                 }
 
                 /* Dark mode styles */
@@ -115,62 +123,208 @@
                     background-color: transparent;
                 }
 
-                body.dark-mode .banner-home-swiper .title {
+                body.dark-mode .slide .title {
                     background: rgba(45, 45, 45, 0.8) !important;
                     border-color: rgba(216, 107, 107, 0.6) !important;
                     color: #e0e0e0 !important;
                 }
 
-                body.dark-mode .banner-home-swiper .swiper-slide-active .title {
-                    box-shadow: 0 20px 30px 2px rgba(216, 107, 107, 0.4) !important;
+                body.dark-mode .nav {
+                    background: rgba(45, 45, 45, 0.9);
+                    color: #e0e0e0;
+                    border-color: rgba(255, 255, 255, 0.2);
                 }
 
-                body.dark-mode .swiper-pagination-bullet-active {
-                    background: var(--primary-color-3) !important;
+                body.dark-mode .nav:hover {
+                    background: rgba(45, 45, 45, 1);
+                    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
                 }
 
-                body.dark-mode .swiper-button-next,
-                body.dark-mode .swiper-button-prev {
-                    color: var(--primary-color-3) !important;
+                @media (max-width: 768px) {
+                    .slider {
+                        height: 400px;
+                    }
+
+                    .slide {
+                        width: 80%;
+                        max-width: 80%;
+                    }
+
+                    .nav {
+                        width: 40px;
+                        height: 40px;
+                        font-size: 18px;
+                    }
+
+                    .nav.prev {
+                        left: 10px;
+                    }
+
+                    .nav.next {
+                        right: 10px;
+                    }
+
+                    .slide .title {
+                        font-size: 0.9rem;
+                        padding: 8px 12px;
+                        bottom: 8px;
+                    }
                 }
 
-                body.dark-mode .swiper-button-next:hover,
-                body.dark-mode .swiper-button-prev:hover {
-                    color: var(--primary-color-1) !important;
+                @media (max-width: 576px) {
+                    .slider {
+                        height: 300px;
+                    }
+
+                    .slide {
+                        width: 85%;
+                        max-width: 85%;
+                    }
+
+                    .nav {
+                        width: 35px;
+                        height: 35px;
+                        font-size: 16px;
+                    }
+
+                    .nav.prev {
+                        left: 5px;
+                    }
+
+                    .nav.next {
+                        right: 5px;
+                    }
+
+                    .slide .title {
+                        font-size: 0.8rem;
+                        padding: 6px 10px;
+                        bottom: 6px;
+                    }
+                }
+
+                @media (max-width: 480px) {
+                    .slider {
+                        height: 250px;
+                    }
+
+                    .slide {
+                        width: 90%;
+                        max-width: 90%;
+                    }
+
+                    .nav {
+                        width: 30px;
+                        height: 30px;
+                        font-size: 14px;
+                    }
+
+                    .nav.prev {
+                        left: 2px;
+                    }
+
+                    .nav.next {
+                        right: 2px;
+                    }
+
+                    .slide .title {
+                        font-size: 0.7rem;
+                        padding: 4px 8px;
+                        bottom: 4px;
+                    }
                 }
             </style>
         @endpush
 
         @push('scripts')
-            <script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
-                    const bannerSwiper = new Swiper('.banner-home-swiper', {
-                        autoplay: {
-                            delay: 25000000,
-                            disableOnInteraction: false,
-                        },
-                        effect: 'coverflow',
-                        grabCursor: true,
-                        centeredSlides: true,
-                        loop: true,
-                        slidesPerView: 'auto',
-                        coverflowEffect: {
-                            rotate: 0,
-                            stretch: 0,
-                            depth: 100,
-                            modifier: 2.5,
-                            slideShadows: false
-                        },
-                        pagination: {
-                            el: '.swiper-pagination',
-                            clickable: true,
-                        },
-                        navigation: {
-                            nextEl: '.swiper-button-next',
-                            prevEl: '.swiper-button-prev',
-                        }
+                    const slider = document.getElementById('bannerSlider');
+                    const slides = Array.from(slider.querySelectorAll('.slide'));
+                    const prevBtn = slider.querySelector('.prev');
+                    const nextBtn = slider.querySelector('.next');
+                    let active = Math.floor(slides.length / 2); // slide trung tâm
+
+                    function update() {
+                        const isMobile = window.innerWidth <= 768;
+                        const isSmallMobile = window.innerWidth <= 480;
+                        const gap = isSmallMobile ? 100 : isMobile ? 120 : 160;
+                        const n = slides.length;
+
+                        slides.forEach((slide, i) => {
+                            let offset = i - active;
+                            if (offset > n / 2) offset -= n;
+                            if (offset < -n / 2) offset += n;
+
+                            const abs = Math.abs(offset);
+                            let scale, opacity, zIndex;
+                            if (abs === 0) {
+                                scale = 1;
+                                opacity = 1;
+                                zIndex = 10;
+                            } else if (abs === 1) {
+                                scale = 0.85;
+                                opacity = 0.9;
+                                zIndex = 9;
+                            } else if (abs === 2) {
+                                scale = 0.7;
+                                opacity = 0.6;
+                                zIndex = 8;
+                            } else {
+                                scale = 0.5;
+                                opacity = 0;
+                                zIndex = 0;
+                            }
+
+                            slide.style.zIndex = zIndex;
+                            slide.style.opacity = opacity;
+                            slide.style.transform =
+                                `translate(-50%,-50%) translateX(${offset * gap}px) scale(${scale})`;
+                        });
+                    }
+
+                    function prev() {
+                        active = (active - 1 + slides.length) % slides.length;
+                        update();
+                    }
+
+                    function next() {
+                        active = (active + 1) % slides.length;
+                        update();
+                    }
+
+                    prevBtn.addEventListener('click', prev);
+                    nextBtn.addEventListener('click', next);
+
+                    // Drag / Swipe support
+                    let startX = 0;
+                    let isDown = false;
+
+                    function down(e) {
+                        isDown = true;
+                        startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+                    }
+
+                    function up(e) {
+                        if (!isDown) return;
+                        isDown = false;
+                        const endX = e.type.includes('mouse') ? e.clientX : e.changedTouches[0].clientX;
+                        const diff = endX - startX;
+                        if (diff > 50) prev();
+                        else if (diff < -50) next();
+                    }
+
+                    slider.addEventListener('mousedown', down);
+                    slider.addEventListener('touchstart', down);
+                    slider.addEventListener('mouseup', up);
+                    slider.addEventListener('mouseleave', () => {
+                        isDown = false;
                     });
+                    slider.addEventListener('touchend', up);
+
+                    // Responsive update
+                    window.addEventListener('resize', update);
+
+                    update();
                 });
             </script>
         @endpush

@@ -4,7 +4,7 @@
     <section class="container-xl">
         @include('components.list_story_home', ['hotStories' => $hotStories])
 
-        <div class="row mt-4">
+        <div class="row mt-5">
             <div class="col-12 col-md-6">
 
                 @include('components.list_story_new_chapter', [

@@ -28,6 +28,9 @@
                 @endif
             @endif
         </a>
+        @if($story->completed == true)
+            <span class="full-label-full"></span>
+        @endif
     </div>
 
     <div class="story-content-container flex-grow-1 min-w-0">
@@ -50,13 +53,30 @@
 @once
     @push('styles')
         <style>
+            .full-label-full {
+                width: 34px;
+                height: 50px;
+                position: absolute;
+                display: block;
+                top: 15%;
+                left: -6px;
+                z-index: 15;
+                background: transparent url(/images/defaults/full-label.png) no-repeat;
+                pointer-events: none;
+                transform: translateY(-50%);
+            }
+
             .story-item-full {
                 gap: 0;
                 width: 100%;
+                position: relative;
+                overflow: visible;
             }
 
             .story-image-container {
                 position: relative;
+                overflow: visible;
+                margin-left: 20px;
             }
 
             .story-content-container {
