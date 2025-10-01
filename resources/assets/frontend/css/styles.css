@@ -16,7 +16,6 @@
     --tw-text-opacity: 1;
     --success-color: #28a745;
 }
-
 @font-face {
     font-family: 'SVN-Apple';
     src: url('../fonts/SVN-Apple.ttf') format('truetype');
@@ -25,9 +24,13 @@
 }
 
 body {
-    font-family: 'SVN-Apple', sans-serif;
+    font-family: 'Segoe UI', 'Segoe UI Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     letter-spacing: 0.5px;
     background-color: var(--primary-bg-3);
+}
+
+.font-svn-apple{
+    font-family: 'SVN-Apple', sans-serif !important;
 }
 
 .color-hover{
@@ -126,6 +129,14 @@ body {
 
 .bg-5 {
     background: var(--primary-color-5) !important;
+}
+
+.bg-6 {
+    background: var(--primary-color-6) !important;
+}
+
+.bg-7 {
+    background: var(--primary-color-7) !important;
 }
 
 .bg-pp-1 {
@@ -808,27 +819,6 @@ body.dark-mode .footer-links a:not(:last-child)::after {
     position: relative;
 }
 
-.transition-header.scrolled .nav-link,
-.transition-header.scrolled .navbar-brand,
-.transition-header.scrolled .dropdown-toggle {
-    color: #fff !important;
-    transform: translateY(0);
-    animation: navItemDrop 0.5s forwards;
-    animation-delay: calc(var(--nav-item-order) * 0.05s);
-}
-
-@keyframes navItemDrop {
-    0% {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
 /* Hover effect with a more refined transition */
 .navbar-nav .nav-link:hover {
     color: var(--primary-color-3) !important;
@@ -1502,9 +1492,7 @@ body.dark-mode .text-gray-600{
 
 /* Dark mode for header */
 
-body.dark-mode .navbar-brand,
-body.dark-mode .nav-link,
-body.dark-mode .dropdown-toggle {
+body.dark-mode .navbar-brand {
     color: #e0e0e0 !important;
 }
 

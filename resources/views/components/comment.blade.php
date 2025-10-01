@@ -561,16 +561,6 @@
                 padding-bottom: 5px;
             }
 
-            .section-title:after {
-                content: '';
-                position: absolute;
-                left: 0;
-                bottom: 0;
-                width: 50px;
-                height: 2px;
-                background: var(--primary-color-3);
-            }
-
             .comment-form-container {
                 margin-bottom: 25px;
                 transition: all 0.3s ease;

@@ -31,7 +31,6 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web([
             \App\Http\Middleware\SecureFileUpload::class,
-            \App\Http\Middleware\CheckBan::class,
             \App\Http\Middleware\CheckActive::class,
         ]);
     })

@@ -1,59 +1,36 @@
 @if (isset($story) && $story->has_combo)
     <div class="combo-wrapper animate__animated animate__fadeIn">
         <div class="combo-card">
-            <div class="combo-badge">
-                @php
-                    $totalChapterPrice = $story->total_chapter_price ?? 0;
 
-                    if ($totalChapterPrice > 0) {
-                        $savingPercent = round((($totalChapterPrice - $story->combo_price) / $totalChapterPrice) * 100);
-                        $savingAmount = $totalChapterPrice - $story->combo_price;
-                    } else {
-                        $savingPercent = 0;
-                        $savingAmount = 0;
-                    }
-                    
-                @endphp
+            @php
+                $totalChapterPrice = $story->total_chapter_price ?? 0;
 
-                @if ($savingPercent > 0)
-                    <div class="combo-discount-badge">
-                        <span class="discount-text">-{{ $savingPercent }}%</span>
-                    </div>
-                @endif
-            </div>
+                if ($totalChapterPrice > 0) {
+                    $savingPercent = round((($totalChapterPrice - $story->combo_price) / $totalChapterPrice) * 100);
+                    $savingAmount = $totalChapterPrice - $story->combo_price;
+                } else {
+                    $savingPercent = 0;
+                    $savingAmount = 0;
+                }
 
-            <div class="combo-content">
+            @endphp
 
 
-                <div class="combo-body">
-                    <div class="combo-price-section">
-                        <div class="price-comparison">
-                            @if ($totalChapterPrice > 0)
-                           <div>Tổng mua lẻ: <span class="old-price">{{ number_format($totalChapterPrice) }} Xu</span></div>
-                            @endif
-                            <div class="new-price">{{ number_format($story->combo_price) }} Xu</div>
-                        </div>
-                        <div class="savings-info">
-                            @if ($totalChapterPrice > 0 && $savingAmount > 0)
-                                <div class="savings-tag">
-                                    <i class="fas fa-tags"></i> Tiết kiệm {{ number_format($savingAmount) }} Xu
-                                </div>
-                            @endif
-                        </div>
-                    </div>
+            <div class="combo-content text-center">
 
-                    <div class="combo-description">
-                        <p>
-                            <i class="fas fa-check-circle text-success me-2"></i>
-                            Mua combo truyện <strong>"{{ $story->title }}"</strong> để được đọc tất cả
-                            <strong>{{ $story->vip_chapters_count }}</strong> chương VIP
-                        </p>
-                        <p class="mb-0">
-                            <i class="fas fa-check-circle text-success me-2"></i>
-                            Combo <strong>không bị giới hạn thời gian</strong>, đọc mọi lúc mọi nơi
-                        </p>
-                    </div>
+                <div class="">
+                    <p class="fs-5 mb-0">
+                        Ủng hộ <span class="color-3 fw-semibold">{{ number_format($story->combo_price) }} Cám</span> để
+                        mở full truyện <strong>"{{ $story->title }}"</strong>
+                    </p>
+
+                    <span class="fs-6">Rẻ hơn {{ $savingPercent }}% so với đọc từng chương (tiết kiệm
+                        {{ number_format($savingAmount) }} Cám)</span>
+
+                    <p class="fs-7">Sau khi mua combo truyện, bạn có thể đọc truyện này mãi mãi,không giới hạn số lần.
+                    </p>
                 </div>
+
 
                 <div class="combo-action">
                     @guest
@@ -61,9 +38,9 @@
                             <i class="fas fa-sign-in-alt me-2"></i> Đăng nhập để mua
                         </a>
                     @else
-                        <button class="btn buy-combo-btn"
+                        <button class="btn buy-combo-btn fw-semibold"
                             onclick="showPurchaseModal('story', {{ $story->id }}, '{{ $story->title }}', {{ $story->combo_price }})">
-                            <i class="fas fa-shopping-cart me-2"></i> Mua Ngay
+                            Ủng hộ
                         </button>
                     @endguest
                 </div>
@@ -85,8 +62,7 @@
             .combo-card {
                 position: relative;
                 border: none;
-                border-radius: 16px;
-                background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+                background: #d2d8ab;
                 box-shadow: 0 10px 30px var(--primary-color-1);
                 overflow: hidden;
                 padding: 0;
@@ -125,7 +101,30 @@
 
             /* Content */
             .combo-content {
-                padding: 1.5rem;
+                padding: 2rem 1.5rem;
+                border-top: 3px dashed #1fcad7;
+                border-bottom: none;
+                position: relative;
+            }
+
+            .combo-content::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 3px;
+                height: 50%;
+                border-left: 3px dashed #1fcad7;
+            }
+
+            .combo-content::after {
+                content: '';
+                position: absolute;
+                right: 0;
+                top: 0;
+                width: 2px;
+                height: 50%;
+                border-right: 3px dashed #1fcad7;
             }
 
             .combo-header {
@@ -224,13 +223,13 @@
             }
 
             .buy-combo-btn {
-                padding: 0.75rem 2.5rem;
+                padding: 0.5rem 2.5rem;
                 font-size: 1.1rem;
                 font-weight: 600;
-                background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-color-2) 100%);
+                background: linear-gradient(90deg, var(--primary-color-2) 0%, var(--primary-color-7) 100%);
                 border: none;
                 border-radius: 50px;
-                box-shadow: 0 5px 15px var(--primary-color-2);
+                box-shadow: 0 5px 15px var(--primary-color-7);
                 transition: all 0.3s ease;
                 position: relative;
                 overflow: hidden;
@@ -243,13 +242,13 @@
                 left: -100%;
                 width: 100%;
                 height: 100%;
-                background: linear-gradient(90deg, transparent, var(--primary-color-3), transparent);
+                background: linear-gradient(90deg, transparent, var(--primary-color-7), transparent);
                 transition: 0.5s;
             }
 
             .buy-combo-btn:hover {
                 transform: translateY(-3px);
-                box-shadow: 0 8px 25px var(--primary-color-3);
+                box-shadow: 0 8px 25px var(--primary-color-7);
             }
 
             .buy-combo-btn:hover::after {

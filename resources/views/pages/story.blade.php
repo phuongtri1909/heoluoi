@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
-@section('title', $story->title . ' - Truyện ' . config('app.name') . ' - Đọc Truyện Online Miễn Phí | ' . config('app.name'))
+@section('title', $story->title . ' - Truyện ' . config('app.name') . ' - Đọc Truyện Online Miễn Phí | ' .
+    config('app.name'))
 
 @section('description', Str::limit(html_entity_decode(strip_tags($story->description)), 160))
 
@@ -11,7 +12,9 @@
     'truyện online',
     $story->categories->pluck('name')->implode(', '),
     $story->user->name ?? 'tác giả',
-    'Truyện ' . config('app.name') . ' - Đọc Truyện
+    'Truyện ' .
+    config('app.name') .
+    ' - Đọc Truyện
     Online Miễn Phí',
     $story->completed ? 'truyện hoàn thành' : 'truyện đang cập nhật',
     'novel',
@@ -22,8 +25,10 @@
     <meta property="og:type" content="book">
     <meta property="og:title" content="{{ $story->title }} - {{ config('app.name') }}">
     <meta property="og:description" content="{{ Str::limit(html_entity_decode(strip_tags($story->description)), 160) }}">
-    <meta property="og:image" content="{{ $story->cover_jpeg ? url(Storage::url($story->cover_jpeg)) : url(asset('images/logo/logo-site.png')) }}">
-    <meta property="og:image:secure_url" content="{{ $story->cover_jpeg ? url(Storage::url($story->cover_jpeg)) : url(asset('images/logo/logo-site.png')) }}">
+    <meta property="og:image"
+        content="{{ $story->cover_jpeg ? url(Storage::url($story->cover_jpeg)) : url(asset('images/logo/logo-site.png')) }}">
+    <meta property="og:image:secure_url"
+        content="{{ $story->cover_jpeg ? url(Storage::url($story->cover_jpeg)) : url(asset('images/logo/logo-site.png')) }}">
     <meta property="og:image:width" content="600">
     <meta property="og:image:height" content="800">
     <meta property="og:image:alt" content="Ảnh bìa truyện {{ $story->title }}">
@@ -36,7 +41,8 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ $story->title }} - {{ config('app.name') }}">
     <meta name="twitter:description" content="{{ Str::limit(html_entity_decode(strip_tags($story->description)), 160) }}">
-    <meta name="twitter:image" content="{{ $story->cover_jpeg ? url(Storage::url($story->cover_jpeg)) : url(asset('images/logo/logo-site.png')) }}">
+    <meta name="twitter:image"
+        content="{{ $story->cover_jpeg ? url(Storage::url($story->cover_jpeg)) : url(asset('images/logo/logo-site.png')) }}">
     <meta name="twitter:image:alt" content="Ảnh bìa truyện {{ $story->title }}">
 
     {{-- Additional Book Meta Tags --}}
@@ -48,152 +54,149 @@
     @endforeach
 @endsection
 
-    @push('styles')
-        <style>
-            .card-search {
-                background: #e7e7e7;
-                border-radius: 10px;
-                box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
-                text-align: center;
-                transition: transform 0.3s ease;
-            }
+@push('styles')
+    <style>
+        .card-search {
+            background: #e7e7e7;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
 
-            .search-wrapper {
-                max-width: min(500px, 90%);
-                margin: 0 auto;
-            }
+        .search-wrapper {
+            max-width: min(500px, 90%);
+            margin: 0 auto;
+        }
 
+        .search-wrapper .form-control {
+            height: 50px;
+            border-radius: 25px 0 0 25px;
+            border: none;
+            padding-left: 20px;
+        }
+
+        .search-wrapper .btn {
+            border-radius: 0 25px 25px 0;
+            padding: 0 25px;
+        }
+
+        @media (max-width: 768px) {
             .search-wrapper .form-control {
-                height: 50px;
-                border-radius: 25px 0 0 25px;
-                border: none;
-                padding-left: 20px;
+                height: 40px;
             }
 
             .search-wrapper .btn {
-                border-radius: 0 25px 25px 0;
-                padding: 0 25px;
+                padding: 0 15px;
             }
+        }
 
-            @media (max-width: 768px) {
-                .search-wrapper .form-control {
-                    height: 40px;
-                }
+        .banner-image-home {
+            width: 100%;
+            height: 350px;
+            object-position: center;
+        }
 
-                .search-wrapper .btn {
-                    padding: 0 15px;
-                }
-            }
-
+        @media (max-width: 768px) {
             .banner-image-home {
-                width: 100%;
-                height: 350px;
-                object-position: center;
+                height: 250px;
             }
+        }
 
-            @media (max-width: 768px) {
-                .banner-image-home {
-                    height: 250px;
-                }
+        @media (max-width: 576px) {
+            .banner-image-home {
+                height: 200px;
             }
+        }
 
-            @media (max-width: 576px) {
-                .banner-image-home {
-                    height: 200px;
-                }
-            }
+        /* Dark mode styles for story page */
+        body.dark-mode .card-search {
+            background-color: #404040 !important;
+            color: #e0e0e0 !important;
+        }
 
-            /* Dark mode styles for story page */
-            body.dark-mode .card-search {
-                background-color: #404040 !important;
-                color: #e0e0e0 !important;
-            }
+        body.dark-mode .form-control {
+            background-color: #2d2d2d !important;
+            border-color: #555 !important;
+            color: #e0e0e0 !important;
+        }
 
-            body.dark-mode .form-control {
-                background-color: #2d2d2d !important;
-                border-color: #555 !important;
-                color: #e0e0e0 !important;
-            }
+        body.dark-mode .form-control:focus {
+            background-color: #2d2d2d !important;
+            border-color: var(--primary-color-3) !important;
+            color: #e0e0e0 !important;
+            box-shadow: 0 0 0 0.2rem rgba(57, 205, 224, 0.25) !important;
+        }
 
-            body.dark-mode .form-control:focus {
-                background-color: #2d2d2d !important;
-                border-color: var(--primary-color-3) !important;
-                color: #e0e0e0 !important;
-                box-shadow: 0 0 0 0.2rem rgba(57, 205, 224, 0.25) !important;
-            }
+        body.dark-mode .form-control::placeholder {
+            color: rgba(224, 224, 224, 0.6) !important;
+        }
 
-            body.dark-mode .form-control::placeholder {
-                color: rgba(224, 224, 224, 0.6) !important;
-            }
-
-            body.dark-mode .text-danger {
-                color: #f1aeb5 !important;
-            }
-        </style>
-    @endpush
+        body.dark-mode .text-danger {
+            color: #f1aeb5 !important;
+        }
+    </style>
+@endpush
 
 @section('content')
     <section id="page-story" class="">
-        <div class=""></div>
+        <div class="container">
+            <div class="row">
+            <div class="col-12 col-md-8">
+                @include('components.info_book_home')
 
-        @include('components.info_book_home')
-
-        <div class=" mt-4">
-
-            <div class="container">
-                @if (isset($story) && $story->has_combo)
-                    @include('components.combo_story', ['story' => $story])
-                @endif
-            </div>
-
-            <div class="" id="chapters">
-                @if (!Auth()->check() || (Auth()->check() && Auth()->user()->ban_read == false))
-                    @include('components.all_chapter', [
-                        'chapters' => $chapters,
-                        'story' => $story,
-                        'chapterPurchaseStatus' => $chapterPurchaseStatus,
-                        'isAdmin' => Auth::check() && in_array(Auth::user()->role, ['admin', 'mod']),
-                        'isAuthor' =>
-                            Auth::check() && Auth::user()->role == 'author' && Auth::user()->id == $story->user_id,
-                    ])
-                @else
-                    <div class="text-center py-5">
-                        <i class="fas fa-sad-tear fa-4x text-muted mb-3 animate__animated animate__shakeX"></i>
-                        <h5 class="text-danger">Bạn đã bị cấm đọc truyện!</h5>
+                <div class=" mt-4">
+        
+                    <div class="container">
+                        @if (isset($story) && $story->has_combo)
+                            @include('components.combo_story', ['story' => $story])
+                        @else
+                            @include('components.latest_chapters', ['latestChapters' => $latestChapters])
+                        @endif
                     </div>
-                @endif
-            </div>
-
-            <div class="" id="comments">
-                @if (!Auth()->check() || (Auth()->check() && Auth()->user()->ban_comment == false))
-                    @include('components.comment', [
-                        'pinnedComments' => $pinnedComments,
-                        'regularComments' => $regularComments,
-                    ])
-                @else
-                    <div class="text-center py-5">
-                        <i class="fas fa-sad-tear fa-4x text-muted mb-3 animate__animated animate__shakeX"></i>
-                        <h5 class="text-danger">Bạn đã bị cấm bình luận!</h5>
+        
+                    <div class="" id="chapters">
+                        @if (!Auth()->check() || (Auth()->check() && Auth()->user()->ban_read == false))
+                            @include('components.all_chapter', [
+                                'chapters' => $chapters,
+                                'story' => $story,
+                                'chapterPurchaseStatus' => $chapterPurchaseStatus,
+                            ])
+                        @else
+                            <div class="text-center py-5">
+                                <i class="fas fa-sad-tear fa-4x text-muted mb-3 animate__animated animate__shakeX"></i>
+                                <h5 class="text-danger">Bạn đã bị cấm đọc truyện!</h5>
+                            </div>
+                        @endif
                     </div>
-                @endif
+        
+                    <div class="" id="comments">
+                        @if (!Auth()->check() || (Auth()->check() && Auth()->user()->ban_comment == false))
+                            @include('components.comment', [
+                                'pinnedComments' => $pinnedComments,
+                                'regularComments' => $regularComments,
+                            ])
+                        @else
+                            <div class="text-center py-5">
+                                <i class="fas fa-sad-tear fa-4x text-muted mb-3 animate__animated animate__shakeX"></i>
+                                <h5 class="text-danger">Bạn đã bị cấm bình luận!</h5>
+                            </div>
+                        @endif
+                    </div>
+    
+        
+                    {{-- @include('components.list_story_de_xuat', ['featuredStories' => $featuredStories]) --}}
+                </div>
+            </div> 
+
+            <div class="col-12 col-md-4">
+              
             </div>
-
-
-            {{-- @include('components.list_story_full', ['completedStories' => $completedStories]) --}}
-
-            @include('components.list_story_de_xuat', ['featuredStories' => $featuredStories])
-
-            @include('components.stories_same_author_translator', [
-                'authorStories' => $authorStories,
-                'translatorStories' => $translatorStories,
-                'story' => $story,
-            ])
+            </div>
         </div>
-    </section>
 
-    @auth
-        @include('components.modals.chapter-purchase-modal')
-    @endauth
+       
+    </section>
 
 @endsection
 

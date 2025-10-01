@@ -20,6 +20,7 @@ use App\Models\ChapterPurchase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Auth;
 use App\Services\ReadingHistoryService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Http\Controllers\Controller;
@@ -713,7 +714,7 @@ class HomeController extends Controller
 
     private function getCurrentlyReading()
     {
-        if (!auth()->check()) {
+        if (!Auth::check()) {
             return collect();
         }
 
@@ -725,7 +726,7 @@ class HomeController extends Controller
                 $query->select('id', 'story_id', 'number', 'slug');
             }
         ])
-            ->where('user_id', auth()->id())
+            ->where('user_id', Auth::id())
             ->orderByDesc('updated_at')
             ->take(5)
             ->get();
@@ -1192,8 +1193,8 @@ class HomeController extends Controller
         $chapters = Chapter::where('story_id', $story->id)
             ->published()
             ->with(['purchases' => function ($query) {
-                if (auth()->check()) {
-                    $query->where('user_id', auth()->id());
+                if (Auth::check()) {
+                    $query->where('user_id', Auth::id());
                 } else {
                     $query->whereRaw('1 = 0');
                 }
@@ -1202,10 +1203,10 @@ class HomeController extends Controller
             ->paginate(50);
 
         $chapterPurchaseStatus = [];
-        if (auth()->check()) {
+        if (Auth::check()) {
             $chapterIds = $chapters->pluck('id');
             $purchasedChapterIds = \App\Models\ChapterPurchase::whereIn('chapter_id', $chapterIds)
-                ->where('user_id', auth()->id())
+                ->where('user_id', Auth::id())
                 ->pluck('chapter_id')
                 ->toArray();
 
@@ -1283,6 +1284,8 @@ class HomeController extends Controller
                 ->get();
         }
 
+        $latestChapters = $this->getLatestChapters($story->id);
+
         return view('pages.story', compact(
             'story',
             'stats',
@@ -1294,8 +1297,20 @@ class HomeController extends Controller
             'featuredStories',
             'authorStories',
             'translatorStories',
-            'chapterPurchaseStatus'
+            'chapterPurchaseStatus',
+            'latestChapters'
         ));
+    }
+
+    private function getLatestChapters($storyId)
+    {
+        return Chapter::where('story_id', $storyId)
+            ->where('status', 'published')
+            ->where('created_at', '>=', now()->subHours(24))
+            ->select('id', 'story_id', 'number', 'title', 'slug', 'created_at')
+            ->orderBy('created_at', 'desc')
+            ->take(4)
+            ->get();
     }
 
     public function getStoryChapters(Request $request, $storyId)
@@ -1331,10 +1346,10 @@ class HomeController extends Controller
         $chapters = $chaptersQuery->paginate(50);
 
         $chapterPurchaseStatus = [];
-        if (auth()->check()) {
+        if (Auth::check()) {
             $chapterIds = $chapters->pluck('id');
             $purchasedChapterIds = \App\Models\ChapterPurchase::whereIn('chapter_id', $chapterIds)
-                ->where('user_id', auth()->id())
+                ->where('user_id', Auth::id())
                 ->pluck('chapter_id')
                 ->toArray();
 
@@ -1368,8 +1383,8 @@ class HomeController extends Controller
             ->where('story_id', $story->id);
 
         // Apply permissions
-        if (auth()->check()) {
-            if (in_array(auth()->user()->role, ['admin', 'mod', 'author'])) {
+        if (Auth::check()) {
+            if (in_array(Auth::user()->role, ['admin', 'mod', 'author'])) {
                 // Admin, mod, and author can see all chapters
                 $chapter = $query->firstOrFail();
             } else {
@@ -1406,7 +1421,7 @@ class HomeController extends Controller
             ->orderBy('number', 'desc');
 
         // Apply published filter for non-admin/mod users
-        if (!auth()->check() || !in_array(auth()->user()->role, ['admin', 'mod', 'author'])) {
+        if (!Auth::check() || !in_array(Auth::user()->role, ['admin', 'mod', 'author'])) {
             $nextChapterQuery->where('status', 'published');
             $prevChapterQuery->where('status', 'published');
         }
@@ -1420,7 +1435,7 @@ class HomeController extends Controller
             ->orderBy('number', 'desc')
             ->take(5);
 
-        if (!auth()->check() || !in_array(auth()->user()->role, ['admin', 'mod', 'author'])) {
+        if (!Auth::check() || !in_array(Auth::user()->role, ['admin', 'mod', 'author'])) {
             $recentChaptersQuery->where('status', 'published');
         }
 
@@ -1435,8 +1450,8 @@ class HomeController extends Controller
 
         // Retrieve reading progress if exists
         $userReading = null;
-        if (auth()->check()) {
-            $userReading = UserReading::where('user_id', auth()->id())
+        if (Auth::check()) {
+            $userReading = UserReading::where('user_id', Auth::id())
                 ->where('story_id', $story->id)
                 ->where('chapter_id', $chapter->id)
                 ->first();
@@ -1458,8 +1473,8 @@ class HomeController extends Controller
         $hasPurchasedStory = false;
 
         // Admin, mod, author và chủ sở hữu truyện luôn có quyền truy cập
-        if (auth()->check()) {
-            $user = auth()->user();
+        if (Auth::check()) {
+            $user = Auth::user();
 
             if (
                 in_array($user->role, ['admin', 'mod']) ||
@@ -1587,7 +1602,7 @@ class HomeController extends Controller
         }
 
         // Visibility check
-        if (!auth()->check() || !in_array(auth()->user()->role, ['admin', 'mod'])) {
+        if (!Auth::check() || !in_array(Auth::user()->role, ['admin', 'mod'])) {
             $query->where('status', 'published');
         }
 

@@ -46,6 +46,9 @@
 
     <meta name="google-site-verification" content="" />
 
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
@@ -66,7 +69,7 @@
                         <img height="100" src="{{ $logoPath }}" alt="{{ config('app.name') }} logo">
                     </a>
 
-                    <div class="list-menu d-none d-lg-block">
+                    <div class="list-menu d-none d-lg-block font-svn-apple">
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
                             <li class="nav-item">
@@ -138,7 +141,7 @@
                                             class="rounded-circle" width="40" height="40" alt="avatar"
                                             style="object-fit: cover;">
 
-                                        <span class="ms-2">{{ auth()->user()->name }}</span>
+                                        <span class="ms-2 font-svn-apple">{{ auth()->user()->name }}</span>
                                     </a>
 
                                     <ul class="dropdown-menu dropdown-menu-end animate slideIn border-cl-shopee">
@@ -167,7 +170,7 @@
                             </a>
                         @else
                             <a href="{{ route('login') }}"
-                                class="btn d-none d-lg-flex align-items-center fw-bold color-3 fs-3"> <i
+                                class="btn d-none d-lg-flex align-items-center fw-bold color-3 fs-3 font-svn-apple"> <i
                                     class="fa-regular fa-circle-user fa-lg me-2 color-3"></i> Đăng nhập</a>
                         @endauth
                     </div>

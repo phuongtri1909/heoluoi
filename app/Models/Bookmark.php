@@ -72,9 +72,11 @@ class Bookmark extends Model
             
         if ($bookmark) {
             $bookmark->delete();
+            $totalBookmarks = self::where('story_id', $storyId)->count();
             return [
                 'status' => 'removed',
-                'message' => 'Đã xóa truyện khỏi danh sách theo dõi'
+                'message' => 'Đã xóa truyện khỏi danh sách theo dõi',
+                'total_bookmarks' => $totalBookmarks
             ];
         } else {
             $data = [
@@ -90,10 +92,12 @@ class Bookmark extends Model
             }
             
             self::create($data);
+            $totalBookmarks = self::where('story_id', $storyId)->count();
             
             return [
                 'status' => 'added',
-                'message' => 'Đã thêm truyện vào danh sách theo dõi'
+                'message' => 'Đã thêm truyện vào danh sách theo dõi',
+                'total_bookmarks' => $totalBookmarks
             ];
         }
     }

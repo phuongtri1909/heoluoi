@@ -112,27 +112,7 @@ class UserController extends Controller
 
         return view('pages.information.bookmarks', compact('bookmarks'));
     }
-
-
-    public function toggleBookmark(Request $request)
-    {
-        $request->validate([
-            'story_id' => 'required|exists:stories,id',
-        ]);
-
-        $result = Bookmark::toggleBookmark(Auth::id(), $request->story_id);
-
-        if ($request->ajax()) {
-            return response()->json([
-                'status' => 'success',
-                'bookmark_status' => $result['status'],
-                'message' => $result['message']
-            ]);
-        }
-
-        return redirect()->back()->with('success', $result['message']);
-    }
-
+    
     // Remove bookmark
     public function removeBookmark(Request $request)
     {

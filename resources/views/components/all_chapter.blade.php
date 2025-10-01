@@ -107,33 +107,18 @@
 
 <section id="all-chapter" class="mt-5">
     <div class="container">
-        <div class="section-title d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-3">
-            <div class="title-container">
-                <i class="fa-solid fa-book-open fa-xl color-2"></i>
-                <h5 class="fw-bold ms-2 d-inline mb-0">DANH SÁCH CHƯƠNG</h5>
-                <a href="#" class="sort-btn text-decoration-none text-dark" id="sortBtn">
-                    <i class="fas fa-sort-amount-down-alt fa-xl text-dark" id="sortIcon"></i>
-                </a>
-            </div>
 
-            <div class="section-title-actions mt-2 mt-md-0">
-                <div class="search-box">
-                    <input type="text" class="form-control" placeholder="Tìm kiếm chương..." id="searchChapterInput">
-                </div>
-            </div>
+        <div class="section-title d-flex align-items-baseline bg-1 px-3 py-1">
+            <h5 class="mb-0">Danh Sách Chương ({{ $chapters->count() }} chương)</h5>
         </div>
 
-        <div class="d-block d-md-flex align-items-center mb-3 pagination-container">
-            <x-pagination :paginator="$chapters" />
-        </div>
-
-        <div class="list-chapter">
+        <div class="list-chapter mt-5">
             <div id="chapters-container">
                 @include('components.chapter-items', [
-                    'chapters' => $chapters, 
+                    'chapters' => $chapters,
                     'story' => $story,
                     'chapterPurchaseStatus' => $chapterPurchaseStatus,
-                    'sortOrder' => 'asc'
+                    'sortOrder' => 'asc',
                 ])
             </div>
         </div>
@@ -147,100 +132,45 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const sortBtn = document.getElementById('sortBtn');
-            const sortIcon = document.getElementById('sortIcon');
             const chaptersContainer = document.getElementById('chapters-container');
-            const searchInput = document.getElementById('searchChapterInput');
-            let currentSortOrder = 'asc'; // Mặc định sắp xếp từ cũ đến mới (Chương 1 lên đầu)
+            let currentSortOrder = 'asc'; 
 
-            // Xử lý sự kiện sắp xếp
-            sortBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-
-                // Đổi trạng thái sắp xếp
-                currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
-
-                // Thay đổi icon
-                if (currentSortOrder === 'asc') {
-                    sortIcon.className = 'fas fa-sort-amount-down-alt'; // Từ cũ đến mới (1->n)
-                } else {
-                    sortIcon.className = 'fas fa-sort-amount-up'; // Từ mới đến cũ (n->1)
-                }
-
-                // Lấy danh sách chương với thứ tự mới
-                fetchChapters(currentSortOrder);
-            });
-
-            // Tìm kiếm chương
-            let searchTimeout;
-            searchInput.addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                searchTimeout = setTimeout(function() {
-                    fetchChapters(currentSortOrder, searchInput.value);
-                }, 500);
-            });
-
-            // Xử lý phân trang AJAX
             initAjaxPagination();
-
             function initAjaxPagination() {
-                // Áp dụng cho cả hai phần phân trang (trên và dưới)
                 document.querySelectorAll('.pagination-container').forEach(container => {
                     container.addEventListener('click', function(e) {
-                        // Chỉ xử lý click vào liên kết phân trang, không phải phần tử khác
                         if (e.target.closest('a.page-link')) {
                             e.preventDefault();
-
-                            // Lấy URL từ liên kết
                             const pageUrl = e.target.closest('a.page-link').getAttribute('href');
                             if (!pageUrl) return;
-
-                            // Lấy số trang từ URL
                             const urlParams = new URLSearchParams(pageUrl.split('?')[1]);
                             const page = urlParams.get('page') || 1;
-
-                            // Gọi AJAX để lấy trang mới
-                            fetchChapters(currentSortOrder, searchInput.value, page);
-
-                            // Cập nhật URL mà không reload trang
+                            fetchChapters(currentSortOrder, page);
                             window.history.pushState({}, '', pageUrl);
                         }
                     });
                 });
             }
 
-            // Hàm gọi AJAX để lấy danh sách chương
-            function fetchChapters(sortOrder, searchTerm = '', page = 1) {
-                // Hiển thị loading
+            function fetchChapters(sortOrder, page = 1) {
                 chaptersContainer.innerHTML =
                     '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Đang tải...</p></div>';
-
-                // Gọi AJAX để lấy danh sách chương
                 $.ajax({
                     url: '{{ route('chapters.list', ['storyId' => $story->id]) }}',
                     type: 'GET',
                     data: {
                         sort_order: sortOrder,
-                        search: searchTerm,
                         page: page
                     },
                     success: function(response) {
-                        // Cập nhật nội dung chương
                         chaptersContainer.innerHTML = response.html;
-
-                        // Cập nhật phần phân trang (nếu có trong response)
                         if (response.pagination) {
                             document.querySelectorAll('.pagination-container').forEach(container => {
                                 container.outerHTML = response.pagination;
                             });
-                            // Khởi tạo lại xử lý phân trang AJAX
                             initAjaxPagination();
                         }
-
-                        // Không cuộn lại vị trí cho sắp xếp và tìm kiếm
-                        // Chỉ cuộn cho phân trang
                         if (page !== 1) {
-                            // Cuộn mượt đến đầu danh sách chương nếu là phân trang
                             const chapterList = document.querySelector('.list-chapter');
                             if (chapterList) {
                                 const offsetPosition = chapterList.offsetTop - 20;
@@ -250,9 +180,6 @@
                                 });
                             }
                         }
-
-                        // Khởi tạo tooltips cho chương VIP
-                        initVipTooltips();
                     },
                     error: function() {
                         chaptersContainer.innerHTML =
@@ -260,18 +187,6 @@
                     }
                 });
             }
-
-            // Khởi tạo tooltips cho chương VIP
-            function initVipTooltips() {
-                // Khởi tạo tooltips bằng Bootstrap Native API
-                const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-                [...tooltipTriggerList].map(tooltipTriggerEl => {
-                    return new bootstrap.Tooltip(tooltipTriggerEl);
-                });
-            }
-
-            // Khởi tạo tooltips khi trang mới load
-            initVipTooltips();
         });
     </script>
 @endpush
