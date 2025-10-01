@@ -2,7 +2,7 @@
     <tr>
         <td>{{ $bookmark->id }}</td>
         <td>
-            <a href="{{ route('stories.show', $bookmark->story_id) }}">
+            <a href="{{ route('admin.stories.show', $bookmark->story_id) }}">
                 {{ $bookmark->story->title ?? 'Không xác định' }}
             </a>
         </td>

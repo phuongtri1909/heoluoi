@@ -30,8 +30,8 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         // Check permissions
-        if ($authUser->role === 'mod') {
-            if ($user->role === 'admin' || $user->role === 'mode') {
+        if ($authUser->role === 'admin_sub') {
+            if ($user->role === 'admin_main' || $user->role === 'admin_sub') {
                 abort(403, 'Unauthorized action.');
             }
         }

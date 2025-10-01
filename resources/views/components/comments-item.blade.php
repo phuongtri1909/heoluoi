@@ -12,9 +12,9 @@
             <p class="meta mb-2">
                 <a class="fw-bold ms-2 text-decoration-none" target="_blank">
                     @if ($comment->user)
-                        @if ($comment->user->role === 'admin')
+                        @if ($comment->user->role === 'admin_main')
                             <span class="role-badge admin-badge">
-                                @if (auth()->check() && auth()->user()->role === 'admin')
+                                @if (auth()->check() && auth()->user()->role === 'admin_main' || auth()->user()->role === 'admin_sub')
                                     <a href="{{ route('admin.users.show', $comment->user->id) }}" target="_blank"
                                         class="text-decoration-none admin-badge">
                                         <i class="fas fa-crown"></i> {{ $comment->user->name }}
@@ -23,9 +23,9 @@
                                     <i class="fas fa-crown"></i> {{ $comment->user->name }}
                                 @endif
                             </span>
-                        @elseif($comment->user->role === 'mod')
+                        @elseif($comment->user->role === 'admin_sub')
                             <span class="role-badge mod-badge">
-                                @if (auth()->check() && auth()->user()->role === 'admin')
+                                @if (auth()->check() && auth()->user()->role === 'admin_main' || auth()->user()->role === 'admin_sub')
                                     <a href="{{ route('admin.users.show', $comment->user->id) }}" target="_blank"
                                         class="text-decoration-none mod-badge">
                                         <i class="fas fa-shield-alt"></i> {{ $comment->user->name }}
@@ -35,7 +35,7 @@
                                 @endif
                             </span>
                         @else
-                            @if (auth()->check() && (auth()->user()->role === 'admin' || auth()->user()->role === 'mod'))
+                            @if (auth()->check() && (auth()->user()->role === 'admin_main' || auth()->user()->role === 'admin_sub'))
                                 <a href="{{ route('admin.users.show', $comment->user->id) }}" target="_blank"
                                     class="text-decoration-none text-dark">
                                     {{ $comment->user->name }}
@@ -65,7 +65,7 @@
                 @endif
 
                 @if (auth()->check())
-                    @if (auth()->user()->role === 'admin' ||
+                    @if (auth()->user()->role === 'admin_main' || auth()->user()->role === 'admin_sub' ||
                             (auth()->user()->role === 'mod' && $comment->user && in_array($comment->user->role, ['user', 'vip'])))
                         <span class="delete-comment text-danger ms-2" style="cursor: pointer;"
                             data-id="{{ $comment->id }}">
@@ -73,7 +73,7 @@
                         </span>
                     @endif
 
-                    @if ($level == 0 && auth()->user()->role === 'admin')
+                    @if ($level == 0 && auth()->user()->role === 'admin_main' || auth()->user()->role === 'admin_sub')
                         <button class="btn btn-sm pin-btn pin-comment ms-2" data-id="{{ $comment->id }}">
                             @if ($isPinned)
                                 <i class="fas fa-thumbtack text-warning" title="Bỏ ghim"></i>

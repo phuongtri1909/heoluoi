@@ -117,7 +117,7 @@
                                         <label class="form-check-label">Cấm đọc truyện</label>
                                     </div>
 
-                                    @if (auth()->user()->role === 'admin')
+                                    @if (auth()->user()->role === 'admin_main' || auth()->user()->role === 'admin_sub')
                                         <div class="form-check form-switch">
                                             <input class="form-check-input ban-toggle" type="checkbox" data-type="ip"
                                                 {{ $user->banned_ips()->exists() ? 'checked' : '' }}>
@@ -453,7 +453,7 @@
                                             <tr>
                                                 <td>{{ $purchase->id }}</td>
                                                 <td>
-                                                    <a href="{{ route('stories.show', $purchase->story_id) }}">
+                                                    <a href="{{ route('admin.stories.show', $purchase->story_id) }}">
                                                         {{ $purchase->story->title ?? 'Không xác định' }}
                                                     </a>
                                                 </td>
@@ -498,7 +498,7 @@
                                             <tr>
                                                 <td>{{ $purchase->id }}</td>
                                                 <td>
-                                                    <a href="{{ route('stories.show', $purchase->chapter->story_id) }}">
+                                                    <a href="{{ route('admin.stories.show', $purchase->chapter->story_id) }}">
                                                         {{ $purchase->chapter->story->title ?? 'Không xác định' }}
                                                     </a>
                                                 </td>
@@ -547,7 +547,7 @@
                                                 <td>{{ $earning->id }}</td>
                                                 <td>{{ $earning->user->name }}</td>
                                                 <td>
-                                                    <a href="{{ route('stories.show', $earning->chapter->story_id) }}">
+                                                    <a href="{{ route('admin.stories.show', $earning->chapter->story_id) }}">
                                                         {{ $earning->chapter->story->title ?? 'Không xác định' }}
                                                     </a>
                                                 </td>
@@ -594,7 +594,7 @@
                                                 <td>{{ $earning->id }}</td>
                                                 <td>{{ $earning->user->name }}</td>
                                                 <td>
-                                                    <a href="{{ route('stories.show', $earning->story_id) }}">
+                                                    <a href="{{ route('admin.stories.show', $earning->story_id) }}">
                                                         {{ $earning->story->title ?? 'Không xác định' }}
                                                     </a>
                                                 </td>
@@ -656,7 +656,7 @@
                                             <tr>
                                                 <td>{{ $bookmark->id }}</td>
                                                 <td>
-                                                    <a href="{{ route('stories.show', $bookmark->story_id) }}">
+                                                    <a href="{{ route('admin.stories.show', $bookmark->story_id) }}">
                                                         {{ $bookmark->story->title ?? 'Không xác định' }}
                                                     </a>
                                                 </td>

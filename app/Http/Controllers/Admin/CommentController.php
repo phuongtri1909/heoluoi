@@ -119,7 +119,7 @@ class CommentController extends Controller
         } else {
             $finalQuery->where(function($q) {
                 $q->whereHas('user', function($userQuery) {
-                    $userQuery->where('role', '!=', 'admin');
+                    $userQuery->where('role', '!=', 'admin_main');
                 })
                 ->orWhereDoesntHave('story', function($storyQuery) {
                     $storyQuery->whereColumn('stories.user_id', 'comments.user_id');
@@ -144,7 +144,7 @@ class CommentController extends Controller
         
         $pendingCommentsCount = Comment::where('approval_status', 'pending')
             ->whereHas('user', function($q) {
-                $q->where('role', '!=', 'admin');
+                $q->where('role', '!=', 'admin_main' || 'admin_sub');
             })
             ->whereDoesntHave('story', function($q) {
                 $q->whereColumn('stories.user_id', 'comments.user_id');
@@ -166,8 +166,8 @@ class CommentController extends Controller
         }
 
         if (
-            $authUser->role === 'admin' ||
-            ($authUser->role === 'mod' && (!$comment->user || $comment->user->role !== 'admin'))
+            $authUser->role === 'admin_main' || $authUser->role === 'admin_sub' ||
+            (!$comment->user || $comment->user->role !== 'admin_main' || $comment->user->role !== 'admin_sub')
         ) {
             $comment->delete();
             return redirect()->route('admin.comments.all')->with('success', 'Xóa bình luận thành công');
@@ -183,7 +183,7 @@ class CommentController extends Controller
     {
         $comment = Comment::findOrFail($commentId);
         
-        if (auth()->user()->role !== 'admin' && auth()->user()->role !== 'mod') {
+        if (auth()->user()->role !== 'admin_main' && auth()->user()->role !== 'admin_sub') {
             return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
         }
 
@@ -206,7 +206,7 @@ class CommentController extends Controller
     {
         $comment = Comment::findOrFail($commentId);
         
-        if (auth()->user()->role !== 'admin' && auth()->user()->role !== 'mod') {
+        if (auth()->user()->role !== 'admin_main' && auth()->user()->role !== 'admin_sub') {
             return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
         }
 

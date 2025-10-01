@@ -2,8 +2,7 @@
     <div class="container px-2 px-md-3">
         <div class="section-title d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-3">
             <div class="title-container mb-2">
-                <i class="fa-regular fa-comments fa-xl color-2"></i>
-                <h5 class="fw-bold ms-2 d-inline mb-0">BÌNH LUẬN TRUYỆN</h5>
+                <h5 class="fw-bold ms-2 d-inline mb-0">BÌNH LUẬN ({{ $regularComments->count() }})</h5>
             </div>
         </div>
         
@@ -11,15 +10,15 @@
             <div class="col-12">
                 <div class="comment-form-container">
                     <div class="form-floating submit-comment animate__animated animate__fadeIn">
-                        <textarea class="form-control" id="comment-input" placeholder="Nhập bình luận..." rows="2" maxlength="700"></textarea>
-                        <label for="comment-input">Bình luận</label>
-                        <button class="btn btn-sm btn-primary btn-send-comment" id="btn-comment">
-                            <i class="fa-regular fa-paper-plane"></i>
+                        <textarea class="form-control" id="comment-input" placeholder="Nhập bình luận..." rows="2" maxlength="900"></textarea>
+                        <label for="comment-input">Nhận xét ít nhất 15 ký tự và tối đa 500 ký tự</label>
+                        <button class="btn btn-sm bg-7 text-white btn-send-comment" id="btn-comment">
+                            Bình luận
                         </button>
                     </div>
                 </div>
 
-                <div class="blog-comment">
+                <div class="blog-comment mt-5">
                     <ul class="comments mb-0" id="comments-list">
                         @include('components.comments-list', [
                             'pinnedComments' => $pinnedComments,
@@ -207,7 +206,7 @@
                             </div>
                             <div class="d-flex justify-content-end gap-2 mt-2">
                                 <button class="btn btn-sm btn-light cancel-reply">Hủy</button>
-                                <button class="btn btn-sm btn-primary submit-reply" data-id="${commentId}">Gửi</button>
+                                <button class="btn btn-sm bg-7 text-white submit-reply" data-id="${commentId}">Gửi</button>
                             </div>
                         </div>
                     `;
@@ -554,6 +553,10 @@
                 position: relative;
             }
 
+            #comments .form-floating .form-control{
+                height: 100px;
+            }
+
             .section-title {
                 font-weight: 600;
                 position: relative;
@@ -591,14 +594,8 @@
 
             .btn-send-comment {
                 position: absolute;
-                right: 12px;
-                bottom: 8px;
-                border-radius: 50%;
-                width: 36px;
-                height: 36px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
+                right: 0px;
+                bottom: -35px;
                 transition: all 0.3s ease;
             }
 

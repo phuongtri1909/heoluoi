@@ -3,7 +3,7 @@
         <td>{{ $earning->id }}</td>
         <td>{{ $earning->user->name }}</td>
         <td>
-            <a href="{{ route('stories.show', $earning->chapter->story_id) }}">
+            <a href="{{ route('admin.stories.show', $earning->chapter->story_id) }}">
                 {{ $earning->chapter->story->title ?? 'Không xác định' }}
             </a>
         </td>

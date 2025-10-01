@@ -316,9 +316,6 @@
             </div>
             <div class="col-12 col-lg-4 mt-3 mt-sm-0">
                 <div class="mt-4">
-                    {{-- Author Facebook Link --}}
-                    @include('components.author_facebook_link')
-                    
                     {{-- hot stories --}}
                     @include('components.hot_stories')
                 </div>

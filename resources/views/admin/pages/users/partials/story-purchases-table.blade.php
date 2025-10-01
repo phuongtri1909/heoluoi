@@ -2,7 +2,7 @@
     <tr>
         <td>{{ $purchase->id }}</td>
         <td>
-            <a href="{{ route('stories.show', $purchase->story_id) }}">
+            <a href="{{ route('admin.stories.show', $purchase->story_id) }}">
                 {{ $purchase->story->title ?? 'Không xác định' }}
             </a>
         </td>

@@ -3,7 +3,7 @@
         <div class="comment-user">
             @if($comment->user)
                 <a href="{{ route('admin.users.show', $comment->user->id) }}">{{ $comment->user->name }}</a>
-                <span class="badge bg-{{ $comment->user->role == 'admin' ? 'danger' : ($comment->user->role == 'mod' ? 'warning' : 'info') }} text-white">
+                <span class="badge bg-{{ $comment->user->role == 'admin_main' ? 'danger' : ($comment->user->role == 'admin_sub' ? 'warning' : 'info') }} text-white">
                     {{ ucfirst($comment->user->role) }}
                 </span>
             @else
@@ -11,7 +11,7 @@
             @endif
             
             @if($comment->story)
-                <a href="{{ route('stories.show', $comment->story->id) }}" class="badge bg-primary story-badge">
+                <a href="{{ route('admin.stories.show', $comment->story->id) }}" class="badge bg-primary story-badge">
                     {{ Str::limit($comment->story->title, 30) }}
                 </a>
             @endif
@@ -43,7 +43,7 @@
             @endif
             
             @if($comment->approval_status === 'pending')
-                @if($comment->user && $comment->user->role === 'admin')
+                @if($comment->user && $comment->user->role === 'admin_main' || $comment->user->role === 'admin_sub')
                     <span class="badge bg-info">Admin</span>
                 @elseif($comment->story && $comment->story->user_id === $comment->user_id)
                     <span class="badge bg-primary">Tác giả</span>
@@ -68,7 +68,8 @@
                     foreach ($comment->replies as $reply) {
                         if ($reply->approval_status === 'pending' && 
                             $reply->user && 
-                            $reply->user->role !== 'admin' && 
+                            $reply->user->role !== 'admin_main' && 
+                            $reply->user->role !== 'admin_sub' && 
                             $reply->story && 
                             $reply->story->user_id !== $reply->user_id) {
                             $pendingReplies++;
@@ -77,7 +78,8 @@
                             foreach ($reply->replies as $nestedReply) {
                                 if ($nestedReply->approval_status === 'pending' && 
                                     $nestedReply->user && 
-                                    $nestedReply->user->role !== 'admin' && 
+                                    $nestedReply->user->role !== 'admin_main' && 
+                                    $nestedReply->user->role !== 'admin_sub' && 
                                     $nestedReply->story && 
                                     $nestedReply->story->user_id !== $nestedReply->user_id) {
                                     $pendingReplies++;
@@ -87,7 +89,8 @@
                                     foreach ($nestedReply->replies as $level3Reply) {
                                         if ($level3Reply->approval_status === 'pending' && 
                                             $level3Reply->user && 
-                                            $level3Reply->user->role !== 'admin' && 
+                                            $level3Reply->user->role !== 'admin_main' && 
+                                            $level3Reply->user->role !== 'admin_sub' && 
                                             $level3Reply->story && 
                                             $level3Reply->story->user_id !== $level3Reply->user_id) {
                                             $pendingReplies++;
@@ -130,7 +133,8 @@
         <div class="d-flex gap-2">
             @if($comment->approval_status === 'pending' && 
                 $comment->user && 
-                $comment->user->role !== 'admin' && 
+                $comment->user->role !== 'admin_main' && 
+                $comment->user->role !== 'admin_sub' && 
                 $comment->story && 
                 $comment->story->user_id !== $comment->user_id)
                 <button class="btn btn-link text-success btn-sm p-0 approve-comment-btn" data-comment-id="{{ $comment->id }}">
@@ -141,7 +145,7 @@
                 </button>
             @endif
             
-            <form action="{{ route('comments.destroy', $comment->id) }}" method="POST" class="d-inline">
+            <form action="{{ route('admin.comments.destroy', $comment->id) }}" method="POST" class="d-inline">
                 @csrf
                 @method('DELETE')
                 <button type="submit" class="btn btn-link text-danger btn-sm p-0 delete-comment-btn">

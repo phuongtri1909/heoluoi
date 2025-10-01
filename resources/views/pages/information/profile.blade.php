@@ -76,20 +76,7 @@
                         </button>
                     </div>
                 </div>
-                
-                @if($user->role === 'author' || $user->role === 'admin')
-                    <div class="profile-info-item">
-                        <div class="profile-info-label">
-                            <i class="fab fa-facebook"></i> <span class="d-none d-sm-inline">Facebook</span>
-                        </div>
-                        <div class="profile-info-value d-flex align-items-center">
-                            <a href="{{ $user->facebook_link }}" target="_blank" class="me-2 d-inline-block">{{ $user->facebook_link ?: 'Chưa cập nhật' }}</a>
-                            <button class="btn btn-sm profile-edit-btn" data-bs-toggle="modal" data-bs-target="#editModal" data-type="facebook_link">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                        </div>
-                    </div>
-                @endif
+            
             </div>
         </div>
     </div>
@@ -224,19 +211,7 @@
                         <label for="editValue" class="form-label">Số điện thoại</label>
                         <input type="number" class="form-control" id="editValue" name="phone" value="{{ $user->phone ?? '' }}" required>
                     `);
-                } else if (type == 'facebook_link') {
-                    @if($user->role === 'author' || $user->role === 'admin')
-                        modal.find('.modal-title').text('Chỉnh sửa Facebook');
-                        formContent.append(`
-                            <label for="editValue" class="form-label">Link Facebook (Fanpage/Nhóm)</label>
-                            <input type="url" class="form-control" id="editValue" name="facebook_link" value="{{ $user->facebook_link ?? '' }}" placeholder="https://facebook.com/your-page">
-                            <div class="form-text">Nhập link Facebook fanpage hoặc nhóm của bạn</div>
-                        `);
-                    @else
-                        showToast('Chỉ tác giả mới có thể cập nhật Facebook link', 'error');
-                        return;
-                    @endif
-                } else {
+                }else {
                     showToast('Thao tác sai, hãy thử lại', 'error');
                 }
             });
