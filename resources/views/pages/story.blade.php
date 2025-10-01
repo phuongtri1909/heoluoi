@@ -139,63 +139,63 @@
 @endpush
 
 @section('content')
-    <section id="page-story" class="">
+    <section id="page-story" class="py-5">
         <div class="container">
             <div class="row">
-            <div class="col-12 col-md-8">
-                @include('components.info_book_home')
+                <div class="col-12 col-md-8">
+                    @include('components.info_book_home')
 
-                <div class=" mt-4">
-        
-                    <div class="container">
+                    <div class=" mt-4">
+
+
                         @if (isset($story) && $story->has_combo)
                             @include('components.combo_story', ['story' => $story])
                         @else
                             @include('components.latest_chapters', ['latestChapters' => $latestChapters])
                         @endif
-                    </div>
-        
-                    <div class="" id="chapters">
-                        @if (!Auth()->check() || (Auth()->check() && Auth()->user()->ban_read == false))
-                            @include('components.all_chapter', [
-                                'chapters' => $chapters,
-                                'story' => $story,
-                                'chapterPurchaseStatus' => $chapterPurchaseStatus,
-                            ])
-                        @else
-                            <div class="text-center py-5">
-                                <i class="fas fa-sad-tear fa-4x text-muted mb-3 animate__animated animate__shakeX"></i>
-                                <h5 class="text-danger">Bạn đã bị cấm đọc truyện!</h5>
-                            </div>
-                        @endif
-                    </div>
-        
-                    <div class="" id="comments">
-                        @if (!Auth()->check() || (Auth()->check() && Auth()->user()->ban_comment == false))
-                            @include('components.comment', [
-                                'pinnedComments' => $pinnedComments,
-                                'regularComments' => $regularComments,
-                            ])
-                        @else
-                            <div class="text-center py-5">
-                                <i class="fas fa-sad-tear fa-4x text-muted mb-3 animate__animated animate__shakeX"></i>
-                                <h5 class="text-danger">Bạn đã bị cấm bình luận!</h5>
-                            </div>
-                        @endif
-                    </div>
-    
-        
-                    {{-- @include('components.list_story_de_xuat', ['featuredStories' => $featuredStories]) --}}
-                </div>
-            </div> 
 
-            <div class="col-12 col-md-4">
-              
-            </div>
+
+                        <div class="" id="chapters">
+                            @if (!Auth()->check() || (Auth()->check() && Auth()->user()->ban_read == false))
+                                @include('components.all_chapter', [
+                                    'chapters' => $chapters,
+                                    'story' => $story,
+                                    'chapterPurchaseStatus' => $chapterPurchaseStatus,
+                                ])
+                            @else
+                                <div class="text-center py-5">
+                                    <i class="fas fa-sad-tear fa-4x text-muted mb-3 animate__animated animate__shakeX"></i>
+                                    <h5 class="text-danger">Bạn đã bị cấm đọc truyện!</h5>
+                                </div>
+                            @endif
+                        </div>
+
+                        <div class="" id="comments">
+                            @if (!Auth()->check() || (Auth()->check() && Auth()->user()->ban_comment == false))
+                                @include('components.comment', [
+                                    'pinnedComments' => $pinnedComments,
+                                    'regularComments' => $regularComments,
+                                ])
+                            @else
+                                <div class="text-center py-5">
+                                    <i class="fas fa-sad-tear fa-4x text-muted mb-3 animate__animated animate__shakeX"></i>
+                                    <h5 class="text-danger">Bạn đã bị cấm bình luận!</h5>
+                                </div>
+                            @endif
+                        </div>
+
+
+                        {{-- @include('components.list_story_de_xuat', ['featuredStories' => $featuredStories]) --}}
+                    </div>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    @include('components.related_stories', ['relatedStories' => $relatedStories])
+                </div>
             </div>
         </div>
 
-       
+
     </section>
 
 @endsection

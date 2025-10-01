@@ -106,8 +106,6 @@
 @endpush
 
 <section id="all-chapter" class="mt-5">
-    <div class="container">
-
         <div class="section-title d-flex align-items-baseline bg-1 px-3 py-1">
             <h5 class="mb-0">Danh Sách Chương ({{ $chapters->count() }} chương)</h5>
         </div>
@@ -126,7 +124,6 @@
         <div class="d-block d-md-flex align-items-center mb-3 pagination-container">
             <x-pagination :paginator="$chapters" />
         </div>
-    </div>
 </section>
 
 @push('scripts')

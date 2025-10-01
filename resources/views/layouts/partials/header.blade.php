@@ -115,7 +115,7 @@
                     </div>
 
                     <div class="d-flex align-items-center">
-                        <div class="search-container d-flex align-items-center me-2 d-none d-md-block">
+                        <div class="search-container d-flex align-items-center me-2 d-none d-md-block d-lg-none">
                             <div class="position-relative">
                                 <form action="{{ route('searchHeader') }}" method="GET">
                                     <input type="text" name="query" class="form-control search-input"
@@ -132,10 +132,10 @@
 
                     <div class="d-flex align-items-center">
                         @auth
-                            <a class="color-2 fw-bold nav-link d-none d-lg-block" href="{{ route('login') }}">
+                            <a class="color-2 fw-bold nav-link d-none d-md-block" href="{{ route('login') }}">
                                 <div class="dropdown">
                                     <a href="#"
-                                        class="d-none d-lg-block d-flex align-items-center text-decoration-none dropdown-toggle color-3 fs-3 fw-bold"
+                                        class="d-none d-md-block d-flex align-items-center text-decoration-none dropdown-toggle color-3 fs-3 fw-bold"
                                         data-bs-toggle="dropdown">
                                         <img src="{{ auth()->user()->avatar ? Storage::url(auth()->user()->avatar) : asset('images/defaults/avatar_default.jpg') }}"
                                             class="rounded-circle" width="40" height="40" alt="avatar"
@@ -182,7 +182,7 @@
                         </button>
 
                         <!-- Mobile Menu Toggle Button - Visible on screens smaller than lg -->
-                        <button class="navbar-toggler border-0 d-lg-none" type="button" data-bs-toggle="offcanvas"
+                        <button class="navbar-toggler border-0 d-md-none" type="button" data-bs-toggle="offcanvas"
                             data-bs-target="#offcanvasExample">
                             <i class="fa-solid fa-bars fa-xl"></i>
                         </button>

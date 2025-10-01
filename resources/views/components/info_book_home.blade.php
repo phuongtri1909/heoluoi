@@ -4,7 +4,7 @@
 
 <section id="info-book-home">
     <div class="mt-3">
-        <div class="info-card-home h-100 py-5">
+        <div class="info-card-home h-100">
             <div class="row">
                 <div class="col-12 col-md-6 col-lg-4 col-xl-3 d-flex flex-column mb-3 mb-md-0 ">
                     <div class="shadow rounded-2 position-relative">
@@ -33,7 +33,7 @@
                 <div class="col-12 col-md-6 col-lg-8 col-xl-9">
                     <div class="h-100 d-flex flex-column justify-content-between">
                         <div class="mb-3 text-start">
-                            <h2 class="fw-semibold color-3 fs-3">{{ $story->title }}</h2>
+                            <h2 class="fw-semibold color-3 fs-4">{{ $story->title }}</h2>
                             <div class="mt-3">
                                 <div class="d-flex">
                                     <div class="rating">
@@ -47,7 +47,7 @@
                                             }
                                             $fullStars = floor($userRating);
                                         @endphp
-    
+
                                         <div class="stars-container">
                                             <div class="stars" id="rating-stars" data-story-id="{{ $story->id }}">
                                                 @for ($i = 1; $i <= 5; $i++)
@@ -56,9 +56,9 @@
                                                 @endfor
                                             </div>
                                             <div id="rating-message">
-    
+
                                             </div>
-    
+
                                             @if (!auth()->check())
                                                 <div class="rating-login-message mt-2 text-muted small">
                                                     <a href="{{ route('login') }}">Đăng nhập</a> để đánh giá truyện!
@@ -67,8 +67,8 @@
                                         </div>
                                     </div>
                                 </div>
-    
-    
+
+
                                 <div class="info-row d-flex align-items-end">
                                     <div class="info-label mt-2">
                                         <span class="text-muted fw-semibold">Dịch giả</span>
@@ -80,8 +80,8 @@
                                         </a>
                                     </div>
                                 </div>
-    
-    
+
+
                                 <div class="info-row d-flex mt-2">
                                     <div class="info-label">
                                         <span class="text-muted fw-semibold">Tác Giả</span>
@@ -93,7 +93,7 @@
                                         </a>
                                     </div>
                                 </div>
-    
+
                                 <div class="info-row d-flex mt-2">
                                     <div class="info-label">
                                         <span class="text-muted fw-semibold">Tình Trạng</span>
@@ -106,17 +106,17 @@
                                             @else
                                                 <span class="text-primary fw-bold">Đang tiến hành</span>
                                             @endif
-    
+
                                         </a>
                                     </div>
                                 </div>
-    
-    
+
+
                                 <!-- Thể loại -->
                                 <div class="info-row d-flex mt-2">
-    
+
                                     <span class="text-dark fw-semibold me-2">Thể Loại: </span>
-    
+
                                     <div class="info-content">
                                         <div class="d-flex flex-wrap gap-2">
                                             @foreach ($storyCategories as $category)
@@ -131,11 +131,11 @@
                                         </div>
                                     </div>
                                 </div>
-    
-                               
+
+
                             </div>
                         </div>
-                       
+
                         <div class="d-flex">
                             <a href="#all-chapter"
                                 class="btn btn-sm bg-7 text-decoration-none fw-semibold rounded-0 me-3">
@@ -170,21 +170,19 @@
     </div>
 </section>
 
-<section id="description">
-    <div class="container">
-        <div class="section-title d-flex align-items-baseline bg-1 px-3 py-1">
-            <h5 class="mb-0">Giới Thiệu</h5>
-        </div>
+<section id="description" class="mt-5">
+    <div class="section-title d-flex align-items-baseline bg-1 px-3 py-1">
+        <h5 class="mb-0">Giới Thiệu</h5>
+    </div>
 
-        <div class="description-container">
-            <div class="description-content text-muted mt-4 mb-0 text-justify"
-                id="description-content-{{ $story->id }}">
-                {!! $story->description !!}
-            </div>
-            <div class="description-toggle-btn mt-2 text-end d-none">
-                <button class="btn btn-sm btn-link show-more-btn">Xem thêm »</button>
-                <button class="btn btn-sm btn-link show-less-btn d-none">« Thu gọn</button>
-            </div>
+    <div class="description-container">
+        <div class="description-content text-muted mt-4 mb-0 text-justify"
+            id="description-content-{{ $story->id }}">
+            {!! $story->description !!}
+        </div>
+        <div class="description-toggle-btn mt-2 text-end d-none">
+            <button class="btn btn-sm btn-link show-more-btn">Xem thêm »</button>
+            <button class="btn btn-sm btn-link show-less-btn d-none">« Thu gọn</button>
         </div>
     </div>
 </section>
@@ -383,7 +381,7 @@
         .img-book {
             transition: transform 0.3s ease;
             width: 300px;
-            height: 300px;
+            height: 450px;
             object-fit: cover;
 
         }
@@ -517,6 +515,12 @@
 
         .action-button {
             user-select: none;
+        }
+
+        @media (min-width: 992px) {
+            .img-book{
+                height: 300px;
+            }
         }
     </style>
 @endpush

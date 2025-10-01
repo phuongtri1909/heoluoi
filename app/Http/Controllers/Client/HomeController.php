@@ -1285,6 +1285,7 @@ class HomeController extends Controller
         }
 
         $latestChapters = $this->getLatestChapters($story->id);
+        $relatedStories = $this->getRelatedStoriesByCategory($story);
 
         return view('pages.story', compact(
             'story',
@@ -1298,7 +1299,8 @@ class HomeController extends Controller
             'authorStories',
             'translatorStories',
             'chapterPurchaseStatus',
-            'latestChapters'
+            'latestChapters',
+            'relatedStories'
         ));
     }
 
@@ -1310,6 +1312,30 @@ class HomeController extends Controller
             ->select('id', 'story_id', 'number', 'title', 'slug', 'created_at')
             ->orderBy('created_at', 'desc')
             ->take(4)
+            ->get();
+    }
+
+    private function getRelatedStoriesByCategory($story)
+    {
+        // Lấy thể loại đầu tiên của truyện
+        $firstCategory = $story->categories->first();
+        
+        if (!$firstCategory) {
+            return collect();
+        }
+
+        return Story::whereHas('categories', function ($query) use ($firstCategory) {
+                $query->where('categories.id', $firstCategory->id);
+            })
+            ->where('id', '!=', $story->id)
+            ->where('status', 'published')
+            ->withCount(['chapters' => function ($query) {
+                $query->where('status', 'published');
+            }])
+            ->select('id', 'title', 'slug', 'cover')
+            ->withSum('chapters', 'views')
+            ->orderByDesc('chapters_sum_views')
+            ->take(8)
             ->get();
     }
 

@@ -1,5 +1,4 @@
 <section id="comments">
-    <div class="container px-2 px-md-3">
         <div class="section-title d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-3">
             <div class="title-container mb-2">
                 <h5 class="fw-bold ms-2 d-inline mb-0">BÌNH LUẬN ({{ $regularComments->count() }})</h5>
@@ -37,7 +36,6 @@
                 @endif
             </div>
         </div>
-    </div>
 </section>
 
 
@@ -782,12 +780,6 @@
 
                 .reaction-btn {
                     padding: 3px 8px;
-                }
-
-                .btn-send-comment {
-                    bottom: 6px;
-                    width: 32px;
-                    height: 32px;
                 }
 
                 .meta {
