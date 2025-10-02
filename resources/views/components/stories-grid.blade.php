@@ -21,7 +21,7 @@
             @endif
         </a>
     </div>
-    <div class="story-info px-2 text-sm text-gray-600 fw-semibold">
+    <div class="story-info text-sm text-gray-600 fw-semibold">
         <div>
             <h5 class="story-title mb-0 text-sm fw-semibold lh-base">
                 <a href="{{ route('show.page.story', $story->slug) }}" class="text-decoration-none text-dark fw-bold fs-6">
