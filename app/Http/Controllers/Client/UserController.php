@@ -71,7 +71,7 @@ class UserController extends Controller
             ], 200);
         }
 
-        $otp = $this->generateRandomOTP();
+        $otp = generateRandomOTP();
         if ($user->reset_password_at != null) {
             $resetPasswordAt = Carbon::parse($user->reset_password_at);
             if (!$resetPasswordAt->lt(Carbon::now()->subMinutes(3))) {

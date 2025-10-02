@@ -14,7 +14,7 @@
                     @if ($comment->user)
                         @if ($comment->user->role === 'admin_main')
                             <span class="role-badge admin-badge">
-                                @if (auth()->check() && auth()->user()->role === 'admin_main' || auth()->user()->role === 'admin_sub')
+                                @if (auth()->check() && (auth()->user()->role === 'admin_main' || auth()->user()->role === 'admin_sub'))
                                     <a href="{{ route('admin.users.show', $comment->user->id) }}" target="_blank"
                                         class="text-decoration-none admin-badge">
                                         <i class="fas fa-crown"></i> {{ $comment->user->name }}
@@ -25,7 +25,7 @@
                             </span>
                         @elseif($comment->user->role === 'admin_sub')
                             <span class="role-badge mod-badge">
-                                @if (auth()->check() && auth()->user()->role === 'admin_main' || auth()->user()->role === 'admin_sub')
+                                @if (auth()->check() && (auth()->user()->role === 'admin_main' || auth()->user()->role === 'admin_sub'))
                                     <a href="{{ route('admin.users.show', $comment->user->id) }}" target="_blank"
                                         class="text-decoration-none mod-badge">
                                         <i class="fas fa-shield-alt"></i> {{ $comment->user->name }}
@@ -73,7 +73,7 @@
                         </span>
                     @endif
 
-                    @if ($level == 0 && auth()->user()->role === 'admin_main' || auth()->user()->role === 'admin_sub')
+                    @if ($level == 0 && (auth()->user()->role === 'admin_main' || auth()->user()->role === 'admin_sub'))
                         <button class="btn btn-sm pin-btn pin-comment ms-2" data-id="{{ $comment->id }}">
                             @if ($isPinned)
                                 <i class="fas fa-thumbtack text-warning" title="Bỏ ghim"></i>

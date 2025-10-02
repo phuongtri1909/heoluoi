@@ -1,25 +1,46 @@
 <!-- Purchase Modal -->
 <div class="modal fade" id="purchaseModal" tabindex="-1" aria-labelledby="purchaseModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="purchaseModalLabel">Mua chương</h5>
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-light border-0 text-center">
+                <div class="w-100">
+                    <h5 class="modal-title fw-bold color-7 mb-0" id="purchaseModalLabel">Xác nhận mua chương</h5>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <div class="purchase-info text-center mb-4">
-                    <div class="purchase-item-info">
-                        <h5 id="purchase-item-title"></h5>
-                        <p class="text-muted">Để đọc nội dung này, bạn cần mua với giá <span id="purchase-item-price" class="fw-bold text-primary"></span> xu.</p>
+            <div class="modal-body p-4">
+                <div class="purchase-info text-center">
+                    <div class="purchase-item-info mb-3">
+                        <h5 id="purchase-item-title" class="fw-bold mb-2"></h5>
+                        <p class="fw-semibold mb-0">Bạn cần ủng hộ <span id="purchase-item-price" class="fw-bold color-7"></span> Cám để đọc chương này</p>
                     </div>
-                    <div class="user-balance mt-3 alert alert-info">
-                        <i class="fas fa-coins me-2"></i> Số dư của bạn: <span id="user-balance" class="fw-bold">{{ auth()->check() ? number_format(auth()->user()->coins) : 0 }}</span> xu
+                    
+                    <div class="user-balance mt-3 p-3 bg-light rounded-3">
+                        <p class="mb-0 fw-semibold">
+                            <i class="fas fa-coins me-2 text-warning"></i>
+                            Hiện bạn đang có <span id="user-balance" class="fw-bold color-7">{{ auth()->check() ? number_format(auth()->user()->coins) : 0 }}</span> Cám
+                        </p>
                     </div>
-                    <div id="insufficient-balance" class="alert alert-warning d-none">
-                        <i class="fas fa-exclamation-triangle me-2"></i> Bạn không đủ xu để mua. Vui lòng nạp thêm.
+                    
+                    <div id="insufficient-balance" class="alert alert-warning mt-3 d-none">
+                        <i class="fas fa-exclamation-triangle me-2"></i> Bạn không đủ Cám để đọc chương này. Vui lòng nạp thêm.
                         <div class="mt-2">
-                            <a href="{{ route('user.deposit') }}" class="btn btn-sm btn-warning">Nạp xu ngay</a>
+                            <a href="{{ route('user.deposit') }}" class="btn btn-sm btn-warning">Nạp Cám ngay</a>
                         </div>
+                    </div>
+
+                    <div class="dots mt-3 mb-3">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+
+                    <div class="purchase-info-list text-start">
+                        <ul class="fw-semibold small text-muted mb-0">
+                            <li>Sau khi mua, bạn có thể [Đọc chương] này không giới hạn số lần.</li>
+                            <li>Bạn chỉ bị trừ Cám khi [Đọc chương] này lần đầu tiên.</li>
+                            <li>Kiểm tra Cám hiện tại <a href="{{ route('user.profile') }}" class="color-7">Tài khoản</a>. Nạp thêm Cám tại <a href="{{ route('user.deposit') }}" class="color-7">Nạp Cám</a>.</li>
+                        </ul>
                     </div>
                 </div>
                 <form id="purchase-form" method="POST">
@@ -28,13 +49,85 @@
                     <input type="hidden" id="purchase-item-id" name="chapter_id" value="">
                 </form>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-primary" id="confirm-purchase-btn">Xác nhận mua</button>
+            <div class="modal-footer border-0 pt-0 justify-content-center">
+                <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn bg-7 fw-bold text-dark px-4" id="confirm-purchase-btn">
+                    <i class="fas fa-shopping-cart me-1"></i> ĐỌC CHƯƠNG
+                </button>
             </div>
         </div>
     </div>
 </div>
+
+@push('styles')
+<style>
+/* Purchase Modal Dots Animation */
+.dots span {
+    width: 10px;
+    height: 10px;
+    background: var(--primary-color-7);
+    border-radius: 50%;
+    display: inline-block;
+    animation: blink 1.2s infinite ease-in-out;
+    margin: 0 2px;
+}
+
+.dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes blink {
+    0%, 80%, 100% {
+        opacity: 0.3;
+    }
+    40% {
+        opacity: 1;
+    }
+}
+
+/* Modal styling */
+.modal-content {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.purchase-info-list ul {
+    padding-left: 1.2rem;
+}
+
+.purchase-info-list li {
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+/* Dark mode support for modal */
+body.dark-mode .modal-content {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+}
+
+body.dark-mode .modal-header {
+    background-color: #404040 !important;
+}
+
+body.dark-mode .user-balance {
+    background-color: #404040 !important;
+    color: #e0e0e0;
+}
+
+body.dark-mode .purchase-info-list {
+    color: #ccc;
+}
+
+body.dark-mode .dots span {
+    background: var(--primary-color-7);
+}
+</style>
+@endpush
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

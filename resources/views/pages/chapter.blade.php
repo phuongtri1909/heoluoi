@@ -8,8 +8,10 @@
     <meta property="og:type" content="article">
     <meta property="og:title" content="Chương {{ $chapter->number }}: {{ $chapter->title }} - {{ $story->title }}">
     <meta property="og:description" content="{{ Str::limit(html_entity_decode(strip_tags($chapter->content)), 100) }}">
-    <meta property="og:image" content="{{ $story->cover_jpeg ? url(Storage::url($story->cover_jpeg)) : url(asset('images/logo/logo-site.png')) }}">
-    <meta property="og:image:secure_url" content="{{ $story->cover_jpeg ? url(Storage::url($story->cover_jpeg)) : url(asset('images/logo/logo-site.png')) }}">
+    <meta property="og:image"
+        content="{{ $story->cover_jpeg ? url(Storage::url($story->cover_jpeg)) : url(asset('images/logo/logo-site.png')) }}">
+    <meta property="og:image:secure_url"
+        content="{{ $story->cover_jpeg ? url(Storage::url($story->cover_jpeg)) : url(asset('images/logo/logo-site.png')) }}">
     <meta property="og:image:width" content="600">
     <meta property="og:image:height" content="800">
     <meta property="og:image:alt" content="Ảnh bìa truyện {{ $story->title }} - Chương {{ $chapter->number }}">
@@ -23,7 +25,7 @@
     <meta property="article:author" content="{{ $story->author_name ?? ($story->user->name ?? 'Unknown') }}">
     <meta property="article:published_time" content="{{ $chapter->created_at->format('c') }}">
     <meta property="article:section" content="{{ $story->categories->first()->name ?? 'Truyện' }}">
-    @foreach($story->categories as $category)
+    @foreach ($story->categories as $category)
         <meta property="article:tag" content="{{ $category->name }}">
     @endforeach
 
@@ -31,189 +33,165 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Chương {{ $chapter->number }}: {{ $chapter->title }} - {{ $story->title }}">
     <meta name="twitter:description" content="{{ Str::limit(strip_tags($chapter->content), 160) }}">
-    <meta name="twitter:image" content="{{ $story->cover_jpeg ? url(Storage::url($story->cover_jpeg)) : url(asset('images/logo/logo-site.png')) }}">
+    <meta name="twitter:image"
+        content="{{ $story->cover_jpeg ? url(Storage::url($story->cover_jpeg)) : url(asset('images/logo/logo-site.png')) }}">
     <meta name="twitter:image:alt" content="Ảnh bìa truyện {{ $story->title }} - Chương {{ $chapter->number }}">
 @endsection
 
 @section('content')
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <section id="chapter" class="mt-80 mb-5">
-        <div class="container-md">
-            <div>
-                @if (session('success'))
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        {{ session('success') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <section id="chapter" class="mt-80 mb-5 py-5">
+        <div class="container">
+            <div class="bg-white p-2 p-md-5 pb-1">
+
+                <div class="p-2 p-md-5">
+                    <div class="chapter-header text-center mb-4 animate__animated animate__fadeIn">
+                        <h1 class="chapter-title fw-bold color-7">
+
+                            {{ $chapter->title && trim($chapter->title) !== 'Chương ' . $chapter->number
+                                ? $chapter->title
+                                : 'Chương ' . $chapter->number }}
+
+                        </h1>
+
+                        <div class="chapter-meta d-flex justify-content-center align-items-center flex-wrap gap-2 mt-2">
+
+                            <span class="fw-bold fs-4 text-muted">Chương {{ $chapter->number }}</span>
+                        </div>
                     </div>
-                @endif
 
-                @if (session('error'))
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        {{ session('error') }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                @endif
-
-                <div class="d-flex justify-content-center">
-                    <nav aria-label="breadcrumb " class="pt-3">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a class="text-decoration-none color-3"
-                                    href="{{ route('home') }}">Trang chủ</a></li>
-                            <li class="breadcrumb-item story-title-breadcrumb text-truncate"><a
-                                    class="text-decoration-none color-3 "
-                                    href="{{ route('show.page.story', $story->slug) }}">{{ $story->title }}</a></li>
-                            <li class="breadcrumb-item active color-3" aria-current="page">Chương {{ $chapter->number }}:
-                                {{ $chapter->title }}</li>
-                        </ol>
-                    </nav>
-                </div>
-
-                <div class="chapter-header text-center mb-4 animate__animated animate__fadeIn">
-                    <h2 class="chapter-title h3 fw-bold">
-
-                        {{ $chapter->title && trim($chapter->title) !== 'Chương ' . $chapter->number
-                            ? 'Chương ' . $chapter->number . ': ' . $chapter->title
-                            : 'Chương ' . $chapter->number }}
-
-                    </h2>
-                    <div class="chapter-meta d-flex justify-content-center align-items-center flex-wrap gap-2 mt-2">
-
-                        <span class="badge text-dark p-2">
-                            <i class="fa-regular fa-clock me-1 color-3"></i>
-                            Đăng lúc
-                            @if ($chapter->schedule_publish_at)
-                                {{ $chapter->schedule_publish_at->format('H:i d/m/Y') }}
+                    <div class="chapter-nav my-4 animate__animated animate__fadeIn animate__delay-1s">
+                        <div class="d-flex w-100 gap-2">
+                            @if ($prevChapter)
+                                <a href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $prevChapter->slug]) }}"
+                                    class="btn bg-7 rounded-1 btn-prev text-dark d-flex align-items-center justify-content-center fw-bold py-2"
+                                    style="flex: 2;">
+                                    <i class="fas fa-arrow-left me-1"></i> <span class="d-none d-sm-inline">Trước</span>
+                                </a>
                             @else
-                                {{ $chapter->created_at->format('H:i d/m/Y') }}
+                                <button disabled
+                                    class="btn btn-outline-secondary rounded-1 btn-prev d-flex align-items-center justify-content-center fw-bold py-2"
+                                    style="flex: 2;">
+                                    <i class="fas fa-arrow-left me-1"></i> <span class="d-none d-sm-inline">Trước</span>
+                                </button>
                             @endif
-                        </span>
-                        <span class="badge text-dark p-2">
-                            <i class="fa-regular fa-eye color-pp-1"></i> {{ $chapter->views }}
-                        </span>
-                        <span class="badge text-dark p-2">
-                            <a href="#comments" class="text-decoration-none text-dark"><i
-                                    class="fa-regular fa-comments color-success-custom"></i>
-                                {{ $chapter->comments_count }}</a>
 
-                        </span>
-                    </div>
-                </div>
-
-                <div
-                    class="chapter-nav d-flex justify-content-center align-items-center my-4 animate__animated animate__fadeIn animate__delay-1s">
-                    @if ($prevChapter)
-                        <a href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $prevChapter->slug]) }}"
-                            class="btn bg-1 rounded-5 btn-prev me-2 text-white d-sm-flex align-items-center">
-                            <i class="fas fa-arrow-left me-1 h-100"></i> <span class="d-none d-sm-block">Chương
-                                trước</span>
-                        </a>
-                    @else
-                        <button disabled
-                            class="btn btn-outline-secondary rounded-5 btn-prev me-2 d-sm-flex align-items-center">
-                            <i class="fas fa-arrow-left me-1"></i> <span class="d-none d-sm-block">Chương trước</span>
-                        </button>
-                    @endif
-
-                    <div class="dropdown chapter-list-dropdown">
-                        <button class="btn dropdown-toggle rounded-0 bg-1 text-white" type="button"
-                            id="chapterListDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa-solid fa-bars me-2"></i>Chương {{ $chapter->number }}
-                        </button>
-                        <div class="dropdown-menu chapter-dropdown-menu" aria-labelledby="chapterListDropdown">
-                            <div class="chapter-dropdown-header">
-                                <h6>Danh sách chương</h6>
-                            </div>
-                            <div class="dropdown-divider"></div>
-                            <div class="chapter-dropdown-body">
-                                @foreach ($story->chapters->sortBy('number') as $chap)
-                                    <a class="dropdown-item {{ $chap->id === $chapter->id ? 'active' : '' }}"
-                                        href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $chap->slug]) }}">
-                                        Chương {{ $chap->number }}: {{ $chap->title }}
-                                    </a>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
-
-                    @if ($nextChapter)
-                        <a href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $nextChapter->slug]) }}"
-                            class="btn bg-1 text-white btn-next rounded-5 ms-2 d-sm-flex align-items-center">
-                            <span class="d-none d-sm-block">Chương tiếp</span> <i class="fas fa-arrow-right ms-2"></i>
-                        </a>
-                    @else
-                        <button disabled
-                            class="btn btn-outline-secondary btn-next rounded-5 ms-2 d-sm-flex align-items-center">
-                            <span class="d-none d-sm-block ">Chương tiếp</span> <i class="fas fa-arrow-right ms-2"></i>
-                        </button>
-                    @endif
-                </div>
-
-                <!-- Chapter Content -->
-                <div id="chapter-content" class="rounded-4 chapter-content mb-4">
-                    @if (isset($hasAccess) && $hasAccess && isset($hasPasswordAccess) && $hasPasswordAccess)
-                        <div style="line-height: 2;">
-                            {!! nl2br(e($chapter->content)) !!}
-                        </div>
-                    @elseif (isset($hasAccess) && $hasAccess && isset($hasPasswordAccess) && !$hasPasswordAccess && $chapter->is_free && !empty($chapter->password))
-                        <!-- Modal nhập mật khẩu cho chương miễn phí -->
-                        <div class="password-notice bg-light p-4 rounded-3 text-center my-4">
-                            <div class="mb-3">
-                                <i class="fas fa-key fa-3x text-primary mb-3"></i>
-                                <h4 class="fw-bold">Chương này có mật khẩu</h4>
-                                @if (!empty($chapter->password_hint))
-                                    <div class="alert alert-info mt-3">
-                                        <i class="fas fa-lightbulb me-2"></i>
-                                        <strong>Hướng dẫn:</strong> {{ $chapter->password_hint }}
+                            <div class="dropdown chapter-list-dropdown" style="flex: 1;">
+                                <button
+                                    class="btn dropdown-toggle rounded-1 bg-7 text-dark fw-bold py-2 w-100 d-flex align-items-center justify-content-center h-100"
+                                    type="button" id="chapterListDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa-solid fa-file-lines"></i>
+                                </button>
+                                <div class="dropdown-menu chapter-dropdown-menu" aria-labelledby="chapterListDropdown">
+                                    <div class="chapter-dropdown-header">
+                                        <h6>Danh sách chương</h6>
                                     </div>
-                                @endif
-                                <p class="text-muted">Vui lòng nhập mật khẩu để xem nội dung chương</p>
+                                    <div class="dropdown-divider"></div>
+                                    <div class="chapter-dropdown-body">
+                                        @foreach ($story->chapters->sortBy('number') as $chap)
+                                            <a class="dropdown-item {{ $chap->id === $chapter->id ? 'active' : '' }}"
+                                                href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $chap->slug]) }}">
+                                                Chương {{ $chap->number }}: {{ $chap->title }}
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                </div>
                             </div>
 
-                            <form id="passwordForm" class="password-form">
-                                @csrf
-                                <div class="input-group mb-3" style="max-width: 400px; margin: 0 auto;">
-                                    <input type="password" class="form-control" id="chapterPassword" 
-                                           placeholder="Nhập mật khẩu..." required>
-                                    <button class="btn btn-primary" type="submit">
-                                        <i class="fas fa-unlock me-1"></i> Xác nhận
-                                    </button>
-                                </div>
-                            </form>
+                            @if ($nextChapter)
+                                <a href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $nextChapter->slug]) }}"
+                                    class="btn bg-7 text-dark btn-next rounded-1 d-flex align-items-center justify-content-center fw-bold py-2"
+                                    style="flex: 2;">
+                                    <span class="d-none d-sm-inline">Sau</span> <i class="fas fa-arrow-right ms-1"></i>
+                                </a>
+                            @else
+                                <button disabled
+                                    class="btn btn-outline-secondary btn-next rounded-1 d-flex align-items-center justify-content-center fw-bold py-2"
+                                    style="flex: 2;">
+                                    <span class="d-none d-sm-inline">Sau</span> <i class="fas fa-arrow-right ms-1"></i>
+                                </button>
+                            @endif
                         </div>
-                    @else
-                        <div class="chapter-preview">
-                            <!-- Hiển thị thông báo mua chương -->
-                            <div class="purchase-notice bg-light p-4 rounded-3 text-center my-4">
-                                <div class="mb-3">
-                                    <i class="fas fa-lock fa-3x text-warning mb-3"></i>
-                                    <h4 class="fw-bold">Nội dung này yêu cầu mua để đọc</h4>
-                                    <p class="text-muted">Bạn cần mua chương này hoặc toàn bộ truyện để tiếp tục đọc</p>
-                                </div>
+                    </div>
 
-                                <div class="purchase-options d-flex flex-column flex-md-row justify-content-center gap-3">
-                                    @if ($chapter->price > 0)
-                                        <div class="chapter-purchase-option p-3 border rounded">
-                                            <h5 class="fw-bold">Mua chương này</h5>
-                                            <p class="price mb-2"><i class="fas fa-coins text-warning"></i>
-                                                {{ number_format($chapter->price) }} xu</p>
-                                            @guest
-                                                <a href="{{ route('login') }}" class="btn btn-primary">Đăng nhập để mua</a>
-                                            @else
-                                                <form action="{{ route('purchase.chapter') }}" method="POST"
-                                                    class="purchase-form" id="purchase-chapter-form">
-                                                    @csrf
-                                                    <input type="hidden" name="chapter_id" value="{{ $chapter->id }}">
-                                                    <button type="button" class="btn btn-primary purchase-chapter-btn"
-                                                        onclick="showPurchaseModal('chapter', {{ $chapter->id }}, 'Chương {{ $chapter->number }}: {{ $chapter->title }}', {{ $chapter->price }})">
-                                                        <i class="fas fa-shopping-cart me-1"></i> Mua ngay
-                                                    </button>
-                                                </form>
-                                            @endguest
+                    <!-- Chapter Content -->
+                    <div id="chapter-content" class="rounded-4 chapter-content mb-4">
+                        @if (isset($hasAccess) && $hasAccess)
+                            <div style="line-height: 2;">
+                                {!! nl2br(e($chapter->content)) !!}
+                            </div>
+                        @else
+                            <div class="chapter-preview">
+                                <!-- Hiển thị thông báo mua chương -->
+                                <div class="purchase-notice bg-light p-4 rounded-3 text-center my-4">
+                                    <div class="mb-3">
+                                        <p class="fw-semibold mb-0">Bạn cần ủng hộ {{ $story->price }} Cám để đọc chương
+                                            này</p>
+                                        @auth
+                                            <p class="mb-0 fw-semibold">
+                                                Hiện bạn đang có {{ auth()->user()->coins }} Cám
+                                            </p>
+                                        @endauth
+
+                                        @guest
+                                            <p class="mb-0 fw-semibold">
+                                                Bạn cần <a href="{{ route('login') }}" class="color-7">Đăng nhập</a> để đọc
+                                                truyện
+                                            </p>
+                                        @endguest
+
+                                        <div class="dots">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
                                         </div>
+
+                                        <div class="d-flex justify-content-center">
+                                            <ul class="text-start fw-semibold">
+                                                <li>
+                                                    Sau khi mua, bạn có thể [Đọc chương] này không giới hạn số lần.
+                                                </li>
+                                                <li>
+                                                    Bạn chỉ bị trừ Cám khi [Đọc chương] này lần đầu tiên.
+                                                </li>
+                                                <li>
+                                                    Chọn [Tự động mở chương] để tự động hiển thị nội dung chương khóa khi
+                                                    chuyển chương mới.
+                                                </li>
+                                                <li>
+                                                    Kiểm tra Cám hiện tại <a href="{{ route('user.profile') }}"
+                                                        class="color-7">Tài khoản</a>. Nạp thêm Cám tại <a
+                                                        href="{{ route('user.deposit') }}" class="color-7">Nạp Cám</a>.
+                                                </li>
+                                                <li>
+                                                    Nếu có thắc mắc hoặc cần hỗ trợ nạp liên hệ <a
+                                                        href="https://www.facebook.com/profile.php?id=61572454674711"
+                                                        class="color-7">Facebook</a>.
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+
+
+                                    @if ($chapter->price > 0)
+                                        @guest
+                                            <a href="{{ route('login') }}" class="btn bg-7 fw-bold rounded-1 px-2 py-3">ĐĂNG NHẬP</a>
+                                        @else
+                                            <form action="{{ route('purchase.chapter') }}" method="POST"
+                                                class="purchase-form" id="purchase-chapter-form">
+                                                @csrf
+                                                <input type="hidden" name="chapter_id" value="{{ $chapter->id }}">
+                                                <button type="button" class="btn bg-7 purchase-chapter-btn fw-bold rounded-1 px-2 py-3"
+                                                    onclick="showPurchaseModal('chapter', {{ $chapter->id }}, 'Chương {{ $chapter->number }}: {{ $chapter->title }}', {{ $chapter->price }})">
+                                                    <i class="fas fa-shopping-cart me-1"></i> ĐỌC CHƯƠNG
+                                                </button>
+                                            </form>
+                                        @endguest
                                     @endif
 
-                                    @if ($story->combo_price > 0)
+                                    {{-- @if ($story->combo_price > 0)
                                         <div class="story-purchase-option p-3 border rounded bg-light">
                                             <h5 class="fw-bold">Mua trọn bộ truyện</h5>
                                             <p class="price mb-2"><i class="fas fa-coins text-warning"></i>
@@ -224,7 +202,8 @@
                                                 {{ $story->chapters->count() ?? 0 }} chương
                                             </p>
                                             @guest
-                                                <a href="{{ route('login') }}" class="btn btn-success">Đăng nhập để mua</a>
+                                                <a href="{{ route('login') }}" class="btn btn-success">Đăng nhập để
+                                                    mua</a>
                                             @else
                                                 <form action="{{ route('purchase.story.combo') }}" method="POST"
                                                     class="purchase-form" id="purchase-story-form">
@@ -237,61 +216,73 @@
                                                 </form>
                                             @endguest
                                         </div>
-                                    @endif
+                                    @endif --}}
                                 </div>
                             </div>
-                        </div>
-                    @endif
-                </div>
+                        @endif
+                    </div>
 
-                <!-- Chapter Navigation Bottom -->
-                <div
-                    class="chapter-nav d-flex justify-content-center align-items-center my-4 animate__animated animate__fadeIn animate__delay-1s">
-                    @if ($prevChapter)
-                        <a href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $prevChapter->slug]) }}"
-                            class="btn bg-1 rounded-5 btn-prev me-2 text-white d-sm-flex align-items-center">
-                            <i class="fas fa-arrow-left me-1 h-100"></i> <span class="d-none d-sm-block">Chương
-                                trước</span>
-                        </a>
-                    @else
-                        <button disabled
-                            class="btn btn-outline-secondary rounded-5 btn-prev me-2 d-sm-flex align-items-center">
-                            <i class="fas fa-arrow-left me-1"></i> <span class="d-none d-sm-block">Chương trước</span>
-                        </button>
-                    @endif
+                    <!-- Chapter Navigation Bottom -->
+                    <div class="chapter-nav my-4 animate__animated animate__fadeIn animate__delay-1s">
+                        <div class="d-flex w-100 gap-2">
+                            @if ($prevChapter)
+                                <a href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $prevChapter->slug]) }}"
+                                    class="btn bg-7 rounded-1 btn-prev text-dark d-flex align-items-center justify-content-center fw-bold py-2"
+                                    style="flex: 2;">
+                                    <i class="fas fa-arrow-left me-1"></i> <span class="d-none d-sm-inline">Trước</span>
+                                </a>
+                            @else
+                                <button disabled
+                                    class="btn btn-outline-secondary rounded-1 btn-prev d-flex align-items-center justify-content-center fw-bold py-2"
+                                    style="flex: 2;">
+                                    <i class="fas fa-arrow-left me-1"></i> <span class="d-none d-sm-inline">Trước</span>
+                                </button>
+                            @endif
 
-                    <div class="dropdown chapter-list-dropdown">
-                        <button class="btn dropdown-toggle rounded-0 bg-1 text-white" type="button"
-                            id="chapterListDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa-solid fa-bars me-2"></i>Chương {{ $chapter->number }}
-                        </button>
-                        <div class="dropdown-menu chapter-dropdown-menu" aria-labelledby="chapterListDropdown">
-                            <div class="chapter-dropdown-header">
-                                <h6>Danh sách chương</h6>
+                            <div class="dropdown chapter-list-dropdown" style="flex: 1;">
+                                <button
+                                    class="btn dropdown-toggle rounded-1 bg-7 text-dark fw-bold py-2 w-100 d-flex align-items-center justify-content-center h-100"
+                                    type="button" id="chapterListDropdown" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                    <i class="fa-solid fa-file-lines"></i>
+                                </button>
+                                <div class="dropdown-menu chapter-dropdown-menu" aria-labelledby="chapterListDropdown">
+                                    <div class="chapter-dropdown-header">
+                                        <h6>Danh sách chương</h6>
+                                    </div>
+                                    <div class="dropdown-divider"></div>
+                                    <div class="chapter-dropdown-body">
+                                        @foreach ($story->chapters->sortBy('number') as $chap)
+                                            <a class="dropdown-item {{ $chap->id === $chapter->id ? 'active' : '' }}"
+                                                href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $chap->slug]) }}">
+                                                Chương {{ $chap->number }}: {{ $chap->title }}
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                </div>
                             </div>
-                            <div class="dropdown-divider"></div>
-                            <div class="chapter-dropdown-body">
-                                @foreach ($story->chapters->sortByDesc('number') as $chap)
-                                    <a class="dropdown-item {{ $chap->id === $chapter->id ? 'active' : '' }}"
-                                        href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $chap->slug]) }}">
-                                        Chương {{ $chap->number }}: {{ $chap->title }}
-                                    </a>
-                                @endforeach
-                            </div>
+
+                            @if ($nextChapter)
+                                <a href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $nextChapter->slug]) }}"
+                                    class="btn bg-7 text-dark btn-next rounded-1 d-flex align-items-center justify-content-center fw-bold py-2"
+                                    style="flex: 2;">
+                                    <span class="d-none d-sm-inline">Sau</span> <i class="fas fa-arrow-right ms-1"></i>
+                                </a>
+                            @else
+                                <button disabled
+                                    class="btn btn-outline-secondary btn-next rounded-1 d-flex align-items-center justify-content-center fw-bold py-2"
+                                    style="flex: 2;">
+                                    <span class="d-none d-sm-inline">Sau</span> <i class="fas fa-arrow-right ms-1"></i>
+                                </button>
+                            @endif
                         </div>
                     </div>
 
-                    @if ($nextChapter)
-                        <a href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $nextChapter->slug]) }}"
-                            class="btn bg-1 text-white btn-next rounded-5 ms-2 d-sm-flex align-items-center">
-                            <span class="d-none d-sm-block">Chương tiếp</span> <i class="fas fa-arrow-right ms-2"></i>
+                    <div class="text-center">
+                        <a href="" class="btn btn-danger">
+                            <i class="fas fa-exclamation-triangle me-1"></i> Báo lỗi chương
                         </a>
-                    @else
-                        <button disabled
-                            class="btn btn-outline-secondary btn-next rounded-5 ms-2 d-sm-flex align-items-center">
-                            <span class="d-none d-sm-block ">Chương tiếp</span> <i class="fas fa-arrow-right ms-2"></i>
-                        </button>
-                    @endif
+                    </div>
                 </div>
             </div>
         </div>
@@ -299,28 +290,19 @@
 
 
     <div class="container">
-        <div class="row">
-            <div class="col-12 col-lg-8">
-                @if (!Auth()->check() || (Auth()->check() && Auth()->user()->ban_comment == false))
-                    @include('components.comment', [
-                        'pinnedComments' => $pinnedComments,
-                        'regularComments' => $regularComments,
-                    ])
-                @else
-                    <div class="text-center py-5">
-                        <i class="fas fa-sad-tear fa-4x text-muted mb-3 animate__animated animate__shakeX"></i>
-                        <h5 class="text-danger">Bạn đã bị cấm bình luận!</h5>
-                    </div>
-                @endif
 
+        @if (!Auth()->check() || (Auth()->check() && Auth()->user()->ban_comment == false))
+            @include('components.comment', [
+                'pinnedComments' => $pinnedComments,
+                'regularComments' => $regularComments,
+            ])
+        @else
+            <div class="text-center py-5">
+                <i class="fas fa-sad-tear fa-4x text-muted mb-3 animate__animated animate__shakeX"></i>
+                <h5 class="text-danger">Bạn đã bị cấm bình luận!</h5>
             </div>
-            <div class="col-12 col-lg-4 mt-3 mt-sm-0">
-                <div class="mt-4">
-                    {{-- hot stories --}}
-                    @include('components.hot_stories')
-                </div>
-            </div>
-        </div>
+        @endif
+
     </div>
 
     {{-- @include('components.list_story_de_xuat', ['newStories' => $newStories]) --}}
@@ -334,14 +316,34 @@
 
 @push('styles')
     <style>
-        .btn-prev {
-            border-top-right-radius: 0 !important;
-            border-bottom-right-radius: 0 !important;
+        .dots span {
+            width: 10px;
+            height: 10px;
+            background: var(--primary-color-7);
+            border-radius: 50%;
+            display: inline-block;
+            animation: blink 1.2s infinite ease-in-out;
         }
 
-        .btn-next {
-            border-top-left-radius: 0 !important;
-            border-bottom-left-radius: 0 !important;
+        .dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes blink {
+
+            0%,
+            80%,
+            100% {
+                opacity: 0.3;
+            }
+
+            40% {
+                opacity: 1;
+            }
         }
 
         .story-title-breadcrumb {
@@ -785,7 +787,7 @@
             if (passwordForm) {
                 passwordForm.addEventListener('submit', function(e) {
                     e.preventDefault();
-                    
+
                     const password = document.getElementById('chapterPassword').value;
                     if (!password.trim()) {
                         Swal.fire({
@@ -795,58 +797,59 @@
                         });
                         return;
                     }
-                    
+
                     // Hiển thị loading
                     const submitBtn = passwordForm.querySelector('button[type="submit"]');
                     const originalText = submitBtn.innerHTML;
                     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Đang kiểm tra...';
                     submitBtn.disabled = true;
-                    
+
                     // Gửi request kiểm tra mật khẩu
-                    fetch('{{ route("chapter.check-password", ["storySlug" => $story->slug, "chapterSlug" => $chapter->slug]) }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                        },
-                        body: JSON.stringify({
-                            password: password
+                    fetch('{{ route('chapter.check-password', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]) }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                    .getAttribute('content')
+                            },
+                            body: JSON.stringify({
+                                password: password
+                            })
                         })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Thành công!',
-                                text: data.message,
-                                timer: 1500,
-                                showConfirmButton: false
-                            }).then(() => {
-                                // Reload trang để hiển thị nội dung
-                                window.location.reload();
-                            });
-                        } else {
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Thành công!',
+                                    text: data.message,
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                }).then(() => {
+                                    // Reload trang để hiển thị nội dung
+                                    window.location.reload();
+                                });
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Mật khẩu không đúng!',
+                                    text: data.message
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
                             Swal.fire({
                                 icon: 'error',
-                                title: 'Mật khẩu không đúng!',
-                                text: data.message
+                                title: 'Lỗi!',
+                                text: 'Đã xảy ra lỗi khi kiểm tra mật khẩu. Vui lòng thử lại.'
                             });
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Lỗi!',
-                            text: 'Đã xảy ra lỗi khi kiểm tra mật khẩu. Vui lòng thử lại.'
+                        })
+                        .finally(() => {
+                            // Khôi phục button
+                            submitBtn.innerHTML = originalText;
+                            submitBtn.disabled = false;
                         });
-                    })
-                    .finally(() => {
-                        // Khôi phục button
-                        submitBtn.innerHTML = originalText;
-                        submitBtn.disabled = false;
-                    });
                 });
             }
 

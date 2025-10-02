@@ -19,19 +19,15 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const topButton = document.getElementById('topButton');
-        let lastScrollTop = 0;
         
         window.addEventListener('scroll', function() {
             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
             
-            // Chỉ hiện khi scroll lên và đã scroll quá 300px
-            if (scrollTop > 300 && scrollTop < lastScrollTop) {
+            if (scrollTop > 300) {
                 topButton.style.display = 'block';
             } else {
                 topButton.style.display = 'none';
             }
-            
-            lastScrollTop = scrollTop;
         });
         
         topButton.addEventListener('click', function() {

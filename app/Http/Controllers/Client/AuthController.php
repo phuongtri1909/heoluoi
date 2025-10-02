@@ -242,7 +242,7 @@ class AuthController
             $randomPassword = Str::random(10);
             $user->password = bcrypt($randomPassword);
 
-            $otp = $this->generateRandomOTP();
+            $otp = generateRandomOTP();
             $user->save();
 
             Mail::to($user->email)->send(new OTPMail($otp));
@@ -438,7 +438,7 @@ class AuthController
                     }
                 }
 
-                $randomOTPForgotPW = $this->generateRandomOTP();
+                $randomOTPForgotPW = generateRandomOTP();
                 $user->key_reset_password = bcrypt($randomOTPForgotPW);
                 $user->reset_password_at = Carbon::now();
                 $user->save();

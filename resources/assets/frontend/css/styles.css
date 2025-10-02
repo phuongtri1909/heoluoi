@@ -83,24 +83,63 @@ body {
     line-height: 1rem !important;
 }
 
+.color-text{
+    color: var(--color-text) !important;
+}
+
 .color-1 {
     color: var(--primary-color-1) !important;
+}
+
+a.color-1:hover {
+    filter: brightness(80%);
 }
 
 .color-2 {
     color: var(--primary-color-2) !important;
 }
 
+a.color-2:hover {
+    filter: brightness(80%);
+}
+
 .color-3 {
     color: var(--primary-color-3) !important;
 }
-
+a.color-3:hover {
+    filter: brightness(80%);
+}
 .color-4 {
     color: var(--primary-color-4) !important;
 }
 
+a.color-4:hover {
+    filter: brightness(80%);
+}
+
+
 .color-5 {
     color: var(--primary-color-5) !important;
+}
+
+a.color-5:hover {
+    filter: brightness(80%);
+}
+
+.color-6 {
+    color: var(--primary-color-6) !important;
+}
+
+a.color-6:hover {
+    filter: brightness(80%);
+}
+
+.color-7 {
+    color: var(--primary-color-7) !important;
+}
+
+a.color-7:hover {
+    filter: brightness(80%);
 }
 
 .color-pp-1 {
@@ -1842,6 +1881,8 @@ body.dark-mode .font-family-dropdown button:hover {
     position: fixed !important;
     bottom: 0 !important;
     left: 0 !important;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: all;
 }
 
 .reading-settings-toggle {
@@ -1872,13 +1913,14 @@ body.dark-mode .font-family-dropdown button:hover {
     bottom: 60px;
     left: 0;
     display: flex;
-    flex-direction: column;
-    gap: 10px;
+    flex-direction: column-reverse;
+    gap: 8px;
     opacity: 0;
     visibility: hidden;
     transition: all 0.3s ease;
     transform: translateY(10px);
     z-index: 1001;
+    pointer-events: all;
 }
 
 .reading-settings-menu.active {
@@ -1962,7 +2004,7 @@ body.dark-mode .font-family-dropdown button:hover {
 
 /* Font families */
 body.font-segoe {
-    font-family: 'SVN-Apple', sans-serif !important;
+    font-family: 'Segoe UI', sans-serif !important;
 }
 
 body.font-roboto {
@@ -1981,18 +2023,136 @@ body.font-merriweather {
     font-family: 'Merriweather', serif !important;
 }
 
-/* Book mode styles */
-body.book-mode #chapter-content {
-    background-color: #f8f5e8;
-    padding: 30px;
-    color: #333;
-    border: 1px solid #ddd;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+body.font-noto-sans {
+    font-family: 'Noto Sans', sans-serif !important;
 }
 
-/* Dark mode book mode */
-body.dark-mode.book-mode #chapter-content {
-    background-color: #2d2d2d;
-    color: #e0e0e0;
+/* ===== BACKGROUND COLOR DROPDOWN STYLES ===== */
+.background-color-dropdown {
+    position: absolute;
+    left: 60px;
+    bottom: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    padding: 8px;
+    display: none;
+    border: 1px solid #ddd;
+    width: 200px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1002;
+}
+
+.background-color-dropdown.active {
+    display: block;
+}
+
+.background-color-dropdown button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: 6px;
+    color: #333;
+    transition: all 0.2s ease;
+    margin-bottom: 4px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.background-color-dropdown button:last-child {
+    margin-bottom: 0;
+}
+
+.background-color-dropdown button:hover {
+    background-color: rgba(var(--primary-color-3-rgb, 59, 130, 246), 0.1);
+    transform: translateX(2px);
+}
+
+.color-preview {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    margin-right: 12px;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+}
+
+/* Dark mode for background color dropdown */
+body.dark-mode .background-color-dropdown {
+    background-color: #2d2d2d !important;
+    border-color: #404040 !important;
+}
+
+body.dark-mode .background-color-dropdown button {
+    color: #e0e0e0 !important;
+}
+
+body.dark-mode .background-color-dropdown button:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    transform: translateX(2px);
+}
+
+body.dark-mode .color-preview {
     border-color: #404040;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* ===== CHAPTER CONTENT BACKGROUND COLORS ===== */
+/* Light themes */
+#chapter-content.bg-white {
+    background-color: #fff !important;
+    color: #000 !important;
+}
+
+#chapter-content.bg-sepia {
+    background-color: #f5e4c1 !important;
+    color: #3e2723 !important;
+}
+
+#chapter-content.bg-warm {
+    background-color: #ffedd5 !important;
+    color: #7c2d12 !important;
+}
+
+#chapter-content.bg-cream {
+    background-color: #faf4d4 !important;
+    color: #365314 !important;
+}
+
+#chapter-content.bg-mint {
+    background-color: #ecfef6 !important;
+    color: #064e3b !important;
+}
+
+/* Dark themes */
+#chapter-content.bg-gray-dark {
+    background-color: #374151 !important;
+    color: #f9fafb !important;
+}
+
+#chapter-content.bg-black {
+    background-color: #000 !important;
+    color: #e5e7eb !important;
+}
+
+#chapter-content.bg-navy {
+    background-color: #001f3f !important;
+    color: #dbeafe !important;
+}
+
+#chapter-content.bg-forest {
+    background-color: #052e16 !important;
+    color: #d1fae5 !important;
+}
+
+#chapter-content.bg-midnight {
+    background-color: #0d1224 !important;
+    color: #e2e8f0 !important;
 }

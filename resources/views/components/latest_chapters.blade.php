@@ -10,12 +10,12 @@
                                 <span class="latest-chapter-icon text-dark">
                                     <img src="{{ asset('images/d/play.png') }}" alt="Chapter Icon" class="" height="10">
                                 </span>
-                                <span class="fw-semibold">
+                                <a class="fw-semibold text-decoration-none color-text" href="{{ route('chapter', ['storySlug' => $chapter->story->slug, 'chapterSlug' => $chapter->slug]) }}">
                                     Chương {{ $chapter->number }}
                                     @if($chapter->title && $chapter->title !== 'Chương ' . $chapter->number)
                                         : {{ $chapter->title }}
                                     @endif
-                                </span>
+                                </a>
                             </div>
                             <span class="border border-1 border-color-2 fs-7 p-1">
                                 New

@@ -1503,17 +1503,14 @@ class HomeController extends Controller
             $user = Auth::user();
 
             if (
-                in_array($user->role, ['admin', 'mod']) ||
-                ($user->role == 'author' && $story->user_id == $user->id)
+                in_array($user->role, ['admin_main', 'admin_sub'])
             ) {
                 $hasAccess = true;
             } else {
-                // Kiểm tra nếu đã mua chương này
                 $hasPurchasedChapter = ChapterPurchase::where('user_id', $user->id)
                     ->where('chapter_id', $chapter->id)
                     ->exists();
 
-                // Kiểm tra nếu đã mua truyện này
                 $hasPurchasedStory = StoryPurchase::where('user_id', $user->id)
                     ->where('story_id', $story->id)
                     ->exists();
@@ -1522,7 +1519,6 @@ class HomeController extends Controller
             }
         }
 
-        // Nếu chương miễn phí
         if (!$chapter->price || $chapter->price == 0) {
             $hasAccess = true;
         }
@@ -1537,23 +1533,17 @@ class HomeController extends Controller
             }
         }
 
-        // Ẩn nội dung nếu không có quyền truy cập
         if (!$hasAccess) {
-            // Không xóa content hoàn toàn để có thể hiển thị phần preview nếu cần
             $originalContent = $chapter->content;
 
-            // Lấy một phần đầu của nội dung làm preview (ví dụ: 10% đầu tiên)
             $previewLength = min(300, intval(strlen($originalContent) * 0.1));
             $chapter->preview_content = substr($originalContent, 0, $previewLength) . '...';
         }
 
-        // Xử lý nội dung dựa trên quyền truy cập
         if (!$hasAccess || !$hasPasswordAccess) {
-            // Xóa hoàn toàn nội dung để đảm bảo bảo mật
             $chapter->content = '';
         }
 
-        // Get comments
         $pinnedComments = Comment::with(['user', 'approvedReplies.user', 'reactions'])
             ->where('story_id', $story->id)
             ->whereNull('reply_id')
