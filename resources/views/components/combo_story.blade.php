@@ -1,4 +1,4 @@
-@if (isset($story) && $story->has_combo)
+@if (isset($story) && $story->has_combo && (!auth()->check() || !\App\Models\StoryPurchase::hasUserPurchased(auth()->id(), $story->id)))
     <div class="combo-wrapper animate__animated animate__fadeIn">
         <div class="combo-card">
 
@@ -61,12 +61,23 @@
             /* Main Card */
             .combo-card {
                 position: relative;
-                border: none;
+                border: 2px solid var(--primary-color-2);
                 background: #d2d8ab;
+                border-radius: 12px;
+                padding: 15px;
                 box-shadow: 0 10px 30px var(--primary-color-1);
                 overflow: hidden;
-                padding: 0;
                 transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            }
+
+            .combo-card::before {
+                content: '';
+                position: absolute;
+                top: -2px;
+                left: 20px;
+                width: 160px;
+                height: 2px;
+                background-color: var(--primary-bg-3);
             }
 
             .combo-card:hover {
@@ -74,14 +85,9 @@
                 box-shadow: 0 15px 35px var(--primary-color-2);
             }
 
-            .combo-card::before {
-                content: '';
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 6px;
-                background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-color-2) 100%);
+            /* Dark mode styles for combo_story component */
+            body.dark-mode .combo-card::before {
+                background-color: #1a1a1a;
             }
 
             /* Badge */
@@ -102,30 +108,9 @@
             /* Content */
             .combo-content {
                 padding: 2rem 1.5rem;
-                border-top: 3px dashed #1fcad7;
-                border-bottom: none;
                 position: relative;
             }
 
-            .combo-content::before {
-                content: '';
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 3px;
-                height: 50%;
-                border-left: 3px dashed #1fcad7;
-            }
-
-            .combo-content::after {
-                content: '';
-                position: absolute;
-                right: 0;
-                top: 0;
-                width: 2px;
-                height: 50%;
-                border-right: 3px dashed #1fcad7;
-            }
 
             .combo-header {
                 display: flex;

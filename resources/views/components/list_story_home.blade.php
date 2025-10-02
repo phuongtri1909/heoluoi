@@ -1,5 +1,5 @@
 <section class="mt-4">
-    <h2 class="fs-5 m-0 text-dark title-dark fs-2 text-center"> TRUYỆN ĐỀ CỬ</h2>
+    <h2 class="fs-5 m-0 text-dark title-dark fs-2 text-center fw-bold font-svn-apple"> TRUYỆN ĐỀ CỬ</h2>
     <div class="mt-4 bg-list rounded-4 p-1 p-md-4 pb-4 border-5 border border-color-7 position-relative">
         <!-- Navigation Buttons -->
         <button class="slider-nav-btn slider-nav-prev" id="prevBtn">

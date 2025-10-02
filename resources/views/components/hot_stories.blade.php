@@ -1,9 +1,9 @@
 <div class="sidebar-widget recent-reads rounded-4 border-5 border border-color-3 shadow-sm mt-4 mt-md-0">
     <div class="widget-header border-bottom-0">
         <div class="text-center">
-            <h2 class="fs-3 text-center m-0 text-dark fw-bold title-dark">BẢNG XẾP HẠNG</h2>
+            <h2 class="fs-3 text-center m-0 text-dark fw-bold title-dark font-svn-apple">BẢNG XẾP HẠNG</h2>
         </div>
-        <div class="d-flex justify-content-evenly mt-3" id="hotStoriesTabs" role="tablist">
+        <div class="d-flex justify-content-evenly mt-3 font-svn-apple" id="hotStoriesTabs" role="tablist">
             <button class="tab-button active fs-5" id="daily-tab" data-bs-toggle="tab" data-bs-target="#daily"
                 type="button" role="tab">
                 NGÀY
@@ -92,8 +92,6 @@
             .hot-story-title {
                 font-size: 0.9rem;
                 margin-bottom: 5px;
-                line-height: 1.3;
-                max-height: 2.6rem;
                 overflow: hidden;
             }
 
@@ -122,6 +120,25 @@
                 color: #666;
                 cursor: pointer;
                 transition: all 0.3s ease;
+                flex: 1;
+                min-width: 0;
+            }
+
+            /* Responsive tabs */
+            @media (max-width: 576px) {
+                .tab-button {
+                    padding: 5px 15px;
+                    font-size: 0.8rem;
+                    margin: 0 2px;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .tab-button {
+                    padding: 5px 8px;
+                    font-size: 0.75rem;
+                    margin: 0 1px;
+                }
             }
 
             /* Ngày - Color 7 - Outline */
@@ -132,8 +149,8 @@
 
             /* Tuần - Color 1 - Outline */
             #weekly-tab {
-                border-color: var(--primary-color-1);
-                color: var(--primary-color-1);
+                border-color: var(--primary-color-4);
+                color: var(--primary-color-4);
             }
 
             /* Tháng - Color 6 - Outline */

@@ -9,14 +9,14 @@
     </a>
     <div class="story-info-section">
         <a href="{{ route('show.page.story', $story->slug) }}"
-            class="text-decoration-none color-hover fs-4 line-height-05">
+            class="text-decoration-none color-hover fs-5 fw-semibold line-height-05">
             {{ $story->title }}
         </a>
         <div class="story-chapter-inline">
 
             <div class="author-chapter-container">
                 @if ($story->author_name)
-                    <p class="mb-0 fs-6">{{ $story->author_name }}</p>
+                    <p class="mb-0 fs-6 fw-semibold">{{ $story->author_name }}</p>
 
                     <span class="chapter-separator fs-6">|</span>
                 @endif
@@ -49,8 +49,8 @@
             </div>
 
 
-            <div class="text-muted text-sm mb-2 fs-5">
-                <span class="text-dark fs-5">Cập nhật:</span>
+            <div class="text-muted text-sm mb-2 fs-6">
+                <span class="text-dark fs-6 fw-semibold">Cập nhật:</span>
                 @if ($story->latestChapter)
                     {{ $story->latestChapter->created_at->diffForHumans() }}
                 @else

@@ -39,4 +39,24 @@ class StoryPurchase extends Model
     {
         return $this->amount_paid;
     }
+
+    /**
+     * Check if a user has purchased a story combo
+     */
+    public static function hasUserPurchased($userId, $storyId)
+    {
+        return self::where('user_id', $userId)
+                   ->where('story_id', $storyId)
+                   ->exists();
+    }
+
+    /**
+     * Get user's purchased stories
+     */
+    public static function getUserPurchasedStories($userId)
+    {
+        return self::where('user_id', $userId)
+                   ->with('story')
+                   ->get();
+    }
 }

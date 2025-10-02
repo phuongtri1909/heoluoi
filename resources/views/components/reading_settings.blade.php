@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function() {
             let currentFontSize = parseInt(window.getComputedStyle(chapterContent).fontSize);
 
             fontIncreaseBtn.addEventListener('click', function() {
-                if (currentFontSize < 24) {
+                if (currentFontSize < 64) {
                     currentFontSize += 1;
                     chapterContent.style.fontSize = currentFontSize + 'px';
                     localStorage.setItem('chapter-font-size', currentFontSize);

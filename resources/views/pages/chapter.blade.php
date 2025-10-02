@@ -43,155 +43,163 @@
 
     <section id="chapter" class="mt-80 mb-5 py-5">
         <div class="container">
-            <div class="bg-white p-2 p-md-5 pb-1">
+            <div class="bg-white p-2 p-md-5 pt-md-0 pb-1">
 
                 <div class="p-2 p-md-5">
-                    <div class="chapter-header text-center mb-4 animate__animated animate__fadeIn">
-                        <h1 class="chapter-title fw-bold color-7">
+                    <div class="p-0 p-md-5 pt-md-0">
+                        <div class="chapter-header text-center mb-4 animate__animated animate__fadeIn">
+                            <h1 class="chapter-title fw-bold color-7">
 
-                            {{ $chapter->title && trim($chapter->title) !== 'Chương ' . $chapter->number
-                                ? $chapter->title
-                                : 'Chương ' . $chapter->number }}
+                                {{ $chapter->title && trim($chapter->title) !== 'Chương ' . $chapter->number
+                                    ? $chapter->title
+                                    : 'Chương ' . $chapter->number }}
 
-                        </h1>
+                            </h1>
 
-                        <div class="chapter-meta d-flex justify-content-center align-items-center flex-wrap gap-2 mt-2">
+                            <div class="chapter-meta d-flex justify-content-center align-items-center flex-wrap gap-2 mt-2">
 
-                            <span class="fw-bold fs-4 text-muted">Chương {{ $chapter->number }}</span>
+                                <span class="fw-bold fs-4 text-muted">Chương {{ $chapter->number }}</span>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="chapter-nav my-4 animate__animated animate__fadeIn animate__delay-1s">
-                        <div class="d-flex w-100 gap-2">
-                            @if ($prevChapter)
-                                <a href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $prevChapter->slug]) }}"
-                                    class="btn bg-7 rounded-1 btn-prev text-dark d-flex align-items-center justify-content-center fw-bold py-2"
-                                    style="flex: 2;">
-                                    <i class="fas fa-arrow-left me-1"></i> <span class="d-none d-sm-inline">Trước</span>
-                                </a>
-                            @else
-                                <button disabled
-                                    class="btn btn-outline-secondary rounded-1 btn-prev d-flex align-items-center justify-content-center fw-bold py-2"
-                                    style="flex: 2;">
-                                    <i class="fas fa-arrow-left me-1"></i> <span class="d-none d-sm-inline">Trước</span>
-                                </button>
-                            @endif
+                        <div class="chapter-nav my-4 animate__animated animate__fadeIn animate__delay-1s">
+                            <div class="d-flex w-100 gap-2">
+                                @if ($prevChapter)
+                                    <a href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $prevChapter->slug]) }}"
+                                        class="btn bg-7 rounded-1 btn-prev text-dark d-flex align-items-center justify-content-center fw-bold py-2"
+                                        style="flex: 2;">
+                                        <i class="fas fa-arrow-left me-1"></i> <span class="d-none d-sm-inline">Trước</span>
+                                    </a>
+                                @else
+                                    <button disabled
+                                        class="btn btn-outline-secondary rounded-1 btn-prev d-flex align-items-center justify-content-center fw-bold py-2"
+                                        style="flex: 2;">
+                                        <i class="fas fa-arrow-left me-1"></i> <span class="d-none d-sm-inline">Trước</span>
+                                    </button>
+                                @endif
 
-                            <div class="dropdown chapter-list-dropdown" style="flex: 1;">
-                                <button
-                                    class="btn dropdown-toggle rounded-1 bg-7 text-dark fw-bold py-2 w-100 d-flex align-items-center justify-content-center h-100"
-                                    type="button" id="chapterListDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fa-solid fa-file-lines"></i>
-                                </button>
-                                <div class="dropdown-menu chapter-dropdown-menu" aria-labelledby="chapterListDropdown">
-                                    <div class="chapter-dropdown-header">
-                                        <h6>Danh sách chương</h6>
-                                    </div>
-                                    <div class="dropdown-divider"></div>
-                                    <div class="chapter-dropdown-body">
-                                        @foreach ($story->chapters->sortBy('number') as $chap)
-                                            <a class="dropdown-item {{ $chap->id === $chapter->id ? 'active' : '' }}"
-                                                href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $chap->slug]) }}">
-                                                Chương {{ $chap->number }}: {{ $chap->title }}
-                                            </a>
-                                        @endforeach
+                                <div class="dropdown chapter-list-dropdown" style="flex: 1;">
+                                    <button
+                                        class="btn dropdown-toggle rounded-1 bg-7 text-dark fw-bold py-2 w-100 d-flex align-items-center justify-content-center h-100"
+                                        type="button" id="chapterListDropdown" data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                        <i class="fa-solid fa-file-lines"></i>
+                                    </button>
+                                    <div class="dropdown-menu chapter-dropdown-menu" aria-labelledby="chapterListDropdown">
+                                        <div class="chapter-dropdown-header">
+                                            <h6>Danh sách chương</h6>
+                                        </div>
+                                        <div class="dropdown-divider"></div>
+                                        <div class="chapter-dropdown-body">
+                                            @foreach ($story->chapters->sortBy('number') as $chap)
+                                                <a class="dropdown-item {{ $chap->id === $chapter->id ? 'active' : '' }}"
+                                                    href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $chap->slug]) }}">
+                                                    Chương {{ $chap->number }}: {{ $chap->title }}
+                                                </a>
+                                            @endforeach
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            @if ($nextChapter)
-                                <a href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $nextChapter->slug]) }}"
-                                    class="btn bg-7 text-dark btn-next rounded-1 d-flex align-items-center justify-content-center fw-bold py-2"
-                                    style="flex: 2;">
-                                    <span class="d-none d-sm-inline">Sau</span> <i class="fas fa-arrow-right ms-1"></i>
-                                </a>
-                            @else
-                                <button disabled
-                                    class="btn btn-outline-secondary btn-next rounded-1 d-flex align-items-center justify-content-center fw-bold py-2"
-                                    style="flex: 2;">
-                                    <span class="d-none d-sm-inline">Sau</span> <i class="fas fa-arrow-right ms-1"></i>
-                                </button>
-                            @endif
+                                @if ($nextChapter)
+                                    <a href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $nextChapter->slug]) }}"
+                                        class="btn bg-7 text-dark btn-next rounded-1 d-flex align-items-center justify-content-center fw-bold py-2"
+                                        style="flex: 2;">
+                                        <span class="d-none d-sm-inline">Sau</span> <i class="fas fa-arrow-right ms-1"></i>
+                                    </a>
+                                @else
+                                    <button disabled
+                                        class="btn btn-outline-secondary btn-next rounded-1 d-flex align-items-center justify-content-center fw-bold py-2"
+                                        style="flex: 2;">
+                                        <span class="d-none d-sm-inline">Sau</span> <i class="fas fa-arrow-right ms-1"></i>
+                                    </button>
+                                @endif
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Chapter Content -->
-                    <div id="chapter-content" class="rounded-4 chapter-content mb-4">
-                        @if (isset($hasAccess) && $hasAccess)
-                            <div style="line-height: 2;">
-                                {!! nl2br(e($chapter->content)) !!}
-                            </div>
-                        @else
-                            <div class="chapter-preview">
-                                <!-- Hiển thị thông báo mua chương -->
-                                <div class="purchase-notice p-4 rounded-3 text-center my-4">
-                                    <div class="mb-3">
-                                        <p class="fw-semibold mb-0">Bạn cần ủng hộ {{ $story->price }} Cám để đọc chương
-                                            này</p>
-                                        @auth
-                                            <p class="mb-0 fw-semibold">
-                                                Hiện bạn đang có {{ auth()->user()->coins }} Cám
-                                            </p>
-                                        @endauth
+                        <!-- Chapter Content -->
+                        <div id="chapter-content" class="rounded-4 chapter-content mb-4 p-2">
+                            @if (isset($hasAccess) && $hasAccess)
+                                <div style="line-height: 2;">
+                                    {!! nl2br(e($chapter->content)) !!}
+                                </div>
+                            @else
+                                <div class="chapter-preview">
+                                    <!-- Hiển thị thông báo mua chương -->
+                                    <div class="purchase-notice p-4 rounded-3 text-center my-4">
+                                        <div class="mb-3">
+                                            <p class="fw-semibold mb-0">Bạn cần ủng hộ {{ $story->price }} Cám để đọc
+                                                chương
+                                                này</p>
+                                            @auth
+                                                <p class="mb-0 fw-semibold">
+                                                    Hiện bạn đang có {{ auth()->user()->coins }} Cám
+                                                </p>
+                                            @endauth
 
-                                        @guest
-                                            <p class="mb-0 fw-semibold">
-                                                Bạn cần <a href="{{ route('login') }}" class="color-7">Đăng nhập</a> để đọc
-                                                truyện
-                                            </p>
-                                        @endguest
+                                            @guest
+                                                <p class="mb-0 fw-semibold">
+                                                    Bạn cần <a href="{{ route('login') }}" class="color-7">Đăng nhập</a> để
+                                                    đọc
+                                                    truyện
+                                                </p>
+                                            @endguest
 
-                                        <div class="dots">
-                                            <span></span>
-                                            <span></span>
-                                            <span></span>
+                                            <div class="dots">
+                                                <span></span>
+                                                <span></span>
+                                                <span></span>
+                                            </div>
+
+                                            <div class="d-flex justify-content-center">
+                                                <ul class="text-start fw-semibold">
+                                                    <li>
+                                                        Sau khi mua, bạn có thể [Đọc chương] này không giới hạn số lần.
+                                                    </li>
+                                                    <li>
+                                                        Bạn chỉ bị trừ Cám khi [Đọc chương] này lần đầu tiên.
+                                                    </li>
+                                                    <li>
+                                                        Chọn [Tự động mở chương] để tự động hiển thị nội dung chương khóa
+                                                        khi
+                                                        chuyển chương mới.
+                                                    </li>
+                                                    <li>
+                                                        Kiểm tra Cám hiện tại <a href="{{ route('user.profile') }}"
+                                                            class="color-7">Tài khoản</a>. Nạp thêm Cám tại <a
+                                                            href="{{ route('user.deposit') }}" class="color-7">Nạp
+                                                            Cám</a>.
+                                                    </li>
+                                                    <li>
+                                                        Nếu có thắc mắc hoặc cần hỗ trợ nạp liên hệ <a
+                                                            href="https://www.facebook.com/profile.php?id=61572454674711"
+                                                            class="color-7">Facebook</a>.
+                                                    </li>
+                                                </ul>
+                                            </div>
                                         </div>
 
-                                        <div class="d-flex justify-content-center">
-                                            <ul class="text-start fw-semibold">
-                                                <li>
-                                                    Sau khi mua, bạn có thể [Đọc chương] này không giới hạn số lần.
-                                                </li>
-                                                <li>
-                                                    Bạn chỉ bị trừ Cám khi [Đọc chương] này lần đầu tiên.
-                                                </li>
-                                                <li>
-                                                    Chọn [Tự động mở chương] để tự động hiển thị nội dung chương khóa khi
-                                                    chuyển chương mới.
-                                                </li>
-                                                <li>
-                                                    Kiểm tra Cám hiện tại <a href="{{ route('user.profile') }}"
-                                                        class="color-7">Tài khoản</a>. Nạp thêm Cám tại <a
-                                                        href="{{ route('user.deposit') }}" class="color-7">Nạp Cám</a>.
-                                                </li>
-                                                <li>
-                                                    Nếu có thắc mắc hoặc cần hỗ trợ nạp liên hệ <a
-                                                        href="https://www.facebook.com/profile.php?id=61572454674711"
-                                                        class="color-7">Facebook</a>.
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
 
 
+                                        @if ($chapter->price > 0)
+                                            @guest
+                                                <a href="{{ route('login') }}"
+                                                    class="btn bg-7 fw-bold rounded-1 px-2 py-3">ĐĂNG NHẬP</a>
+                                            @else
+                                                <form action="{{ route('purchase.chapter') }}" method="POST"
+                                                    class="purchase-form" id="purchase-chapter-form">
+                                                    @csrf
+                                                    <input type="hidden" name="chapter_id" value="{{ $chapter->id }}">
+                                                    <button type="button"
+                                                        class="btn bg-7 purchase-chapter-btn fw-bold rounded-1 px-2 py-3"
+                                                        onclick="showPurchaseModal('chapter', {{ $chapter->id }}, 'Chương {{ $chapter->number }}: {{ $chapter->title }}', {{ $chapter->price }})">
+                                                        <i class="fas fa-shopping-cart me-1"></i> ĐỌC CHƯƠNG
+                                                    </button>
+                                                </form>
+                                            @endguest
+                                        @endif
 
-                                    @if ($chapter->price > 0)
-                                        @guest
-                                            <a href="{{ route('login') }}" class="btn bg-7 fw-bold rounded-1 px-2 py-3">ĐĂNG NHẬP</a>
-                                        @else
-                                            <form action="{{ route('purchase.chapter') }}" method="POST"
-                                                class="purchase-form" id="purchase-chapter-form">
-                                                @csrf
-                                                <input type="hidden" name="chapter_id" value="{{ $chapter->id }}">
-                                                <button type="button" class="btn bg-7 purchase-chapter-btn fw-bold rounded-1 px-2 py-3"
-                                                    onclick="showPurchaseModal('chapter', {{ $chapter->id }}, 'Chương {{ $chapter->number }}: {{ $chapter->title }}', {{ $chapter->price }})">
-                                                    <i class="fas fa-shopping-cart me-1"></i> ĐỌC CHƯƠNG
-                                                </button>
-                                            </form>
-                                        @endguest
-                                    @endif
-
-                                    {{-- @if ($story->combo_price > 0)
+                                        {{-- @if ($story->combo_price > 0)
                                         <div class="story-purchase-option p-3 border rounded bg-light">
                                             <h5 class="fw-bold">Mua trọn bộ truyện</h5>
                                             <p class="price mb-2"><i class="fas fa-coins text-warning"></i>
@@ -217,77 +225,84 @@
                                             @endguest
                                         </div>
                                     @endif --}}
-                                </div>
-                            </div>
-                        @endif
-                    </div>
-
-                    <!-- Chapter Navigation Bottom -->
-                    <div class="chapter-nav my-4 animate__animated animate__fadeIn animate__delay-1s">
-                        <div class="d-flex w-100 gap-2">
-                            @if ($prevChapter)
-                                <a href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $prevChapter->slug]) }}"
-                                    class="btn bg-7 rounded-1 btn-prev text-dark d-flex align-items-center justify-content-center fw-bold py-2"
-                                    style="flex: 2;">
-                                    <i class="fas fa-arrow-left me-1"></i> <span class="d-none d-sm-inline">Trước</span>
-                                </a>
-                            @else
-                                <button disabled
-                                    class="btn btn-outline-secondary rounded-1 btn-prev d-flex align-items-center justify-content-center fw-bold py-2"
-                                    style="flex: 2;">
-                                    <i class="fas fa-arrow-left me-1"></i> <span class="d-none d-sm-inline">Trước</span>
-                                </button>
-                            @endif
-
-                            <div class="dropdown chapter-list-dropdown" style="flex: 1;">
-                                <button
-                                    class="btn dropdown-toggle rounded-1 bg-7 text-dark fw-bold py-2 w-100 d-flex align-items-center justify-content-center h-100"
-                                    type="button" id="chapterListDropdown" data-bs-toggle="dropdown"
-                                    aria-expanded="false">
-                                    <i class="fa-solid fa-file-lines"></i>
-                                </button>
-                                <div class="dropdown-menu chapter-dropdown-menu" aria-labelledby="chapterListDropdown">
-                                    <div class="chapter-dropdown-header">
-                                        <h6>Danh sách chương</h6>
-                                    </div>
-                                    <div class="dropdown-divider"></div>
-                                    <div class="chapter-dropdown-body">
-                                        @foreach ($story->chapters->sortBy('number') as $chap)
-                                            <a class="dropdown-item {{ $chap->id === $chapter->id ? 'active' : '' }}"
-                                                href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $chap->slug]) }}">
-                                                Chương {{ $chap->number }}: {{ $chap->title }}
-                                            </a>
-                                        @endforeach
                                     </div>
                                 </div>
-                            </div>
-
-                            @if ($nextChapter)
-                                <a href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $nextChapter->slug]) }}"
-                                    class="btn bg-7 text-dark btn-next rounded-1 d-flex align-items-center justify-content-center fw-bold py-2"
-                                    style="flex: 2;">
-                                    <span class="d-none d-sm-inline">Sau</span> <i class="fas fa-arrow-right ms-1"></i>
-                                </a>
-                            @else
-                                <button disabled
-                                    class="btn btn-outline-secondary btn-next rounded-1 d-flex align-items-center justify-content-center fw-bold py-2"
-                                    style="flex: 2;">
-                                    <span class="d-none d-sm-inline">Sau</span> <i class="fas fa-arrow-right ms-1"></i>
-                                </button>
                             @endif
                         </div>
-                    </div>
 
-                    <div class="text-center">
-                        @auth
-                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#reportChapterModal">
-                                <i class="fas fa-exclamation-triangle me-1"></i> Báo lỗi chương
-                            </button>
-                        @else
-                            <a href="{{ route('login') }}" class="btn btn-danger">
-                                <i class="fas fa-exclamation-triangle me-1"></i> Báo lỗi chương
-                            </a>
-                        @endauth
+                        <!-- Chapter Navigation Bottom -->
+                        <div class="chapter-nav my-4 animate__animated animate__fadeIn animate__delay-1s">
+                            <div class="d-flex w-100 gap-2">
+                                @if ($prevChapter)
+                                    <a href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $prevChapter->slug]) }}"
+                                        class="btn bg-7 rounded-1 btn-prev text-dark d-flex align-items-center justify-content-center fw-bold py-2"
+                                        style="flex: 2;">
+                                        <i class="fas fa-arrow-left me-1"></i> <span
+                                            class="d-none d-sm-inline">Trước</span>
+                                    </a>
+                                @else
+                                    <button disabled
+                                        class="btn btn-outline-secondary rounded-1 btn-prev d-flex align-items-center justify-content-center fw-bold py-2"
+                                        style="flex: 2;">
+                                        <i class="fas fa-arrow-left me-1"></i> <span
+                                            class="d-none d-sm-inline">Trước</span>
+                                    </button>
+                                @endif
+
+                                <div class="dropdown chapter-list-dropdown" style="flex: 1;">
+                                    <button
+                                        class="btn dropdown-toggle rounded-1 bg-7 text-dark fw-bold py-2 w-100 d-flex align-items-center justify-content-center h-100"
+                                        type="button" id="chapterListDropdown" data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                        <i class="fa-solid fa-file-lines"></i>
+                                    </button>
+                                    <div class="dropdown-menu chapter-dropdown-menu"
+                                        aria-labelledby="chapterListDropdown">
+                                        <div class="chapter-dropdown-header">
+                                            <h6>Danh sách chương</h6>
+                                        </div>
+                                        <div class="dropdown-divider"></div>
+                                        <div class="chapter-dropdown-body">
+                                            @foreach ($story->chapters->sortBy('number') as $chap)
+                                                <a class="dropdown-item {{ $chap->id === $chapter->id ? 'active' : '' }}"
+                                                    href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $chap->slug]) }}">
+                                                    Chương {{ $chap->number }}: {{ $chap->title }}
+                                                </a>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @if ($nextChapter)
+                                    <a href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $nextChapter->slug]) }}"
+                                        class="btn bg-7 text-dark btn-next rounded-1 d-flex align-items-center justify-content-center fw-bold py-2"
+                                        style="flex: 2;">
+                                        <span class="d-none d-sm-inline">Sau</span> <i
+                                            class="fas fa-arrow-right ms-1"></i>
+                                    </a>
+                                @else
+                                    <button disabled
+                                        class="btn btn-outline-secondary btn-next rounded-1 d-flex align-items-center justify-content-center fw-bold py-2"
+                                        style="flex: 2;">
+                                        <span class="d-none d-sm-inline">Sau</span> <i
+                                            class="fas fa-arrow-right ms-1"></i>
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            @auth
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                                    data-bs-target="#reportChapterModal">
+                                    <i class="fas fa-exclamation-triangle me-1"></i> Báo lỗi chương
+                                </button>
+                            @else
+                                <a href="{{ route('login') }}" class="btn btn-danger">
+                                    <i class="fas fa-exclamation-triangle me-1"></i> Báo lỗi chương
+                                </a>
+                            @endauth
+                        </div>
                     </div>
                 </div>
             </div>

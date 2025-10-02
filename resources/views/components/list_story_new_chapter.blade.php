@@ -1,6 +1,6 @@
 <section class="bg-list rounded-4 px-md-4 px-2 border-5 border border-color-4">
     <div class="p-3 pb-5 px-md-0 rounded-top-custom text-center">
-        <h2 class="m-0 text-dark fw-bold title-dark fs-2 text-center"> TRUYỆN MỚI CẬP NHẬT</h2>
+        <h2 class="m-0 text-dark fw-bold title-dark fs-2 text-center font-svn-apple"> TRUYỆN MỚI CẬP NHẬT</h2>
     </div>
     @foreach ($latestUpdatedStories as $index => $story)
         @include('components.story_new', ['story' => $story])

@@ -19,7 +19,7 @@
 
 <div class="d-flex">
     @foreach ($displayCategories as $category)
-        <span class="badge border border-1 border-color-3 color-3 fs-6 rounded-pill d-flex align-items-center me-2">
+        <span class="badge border border-1 border-color-3 color-3 rounded-pill d-flex align-items-center me-2">
             {{ $category->name }}
         </span>
     @endforeach

@@ -16,13 +16,13 @@
                         @endforeach
                     </div>
                     <div class="footer-links">
-                        <a href="{{ route('home') }}" class="text-decoration-none">Trang Chủ</a>
-                        <a href="" class="text-decoration-none">Điều Khoản</a>
-                        <a href="{{ route('guide.show') }}" class="text-decoration-none">Hướng Dẫn</a>
+                        <a href="{{ route('home') }}" class="text-decoration-none fw-semibold fs-4 font-svn-apple">Trang Chủ</a>
+                        <a href="" class="text-decoration-none fw-semibold fs-4 font-svn-apple">Điều Khoản</a>
+                        <a href="{{ route('guide.show') }}" class="text-decoration-none fw-semibold fs-4 font-svn-apple">Hướng Dẫn</a>
                     </div>
 
                     <div class="py-3">
-                        <span class="copyright text-dark text-sm text-gray-600">
+                        <span class="copyright text-dark text-sm text-gray-600 fw-semibold fs-4 font-svn-apple">
                             © {{ date('Y') }} - {{ config('app.name') }} Bảo Lưu Mọi Quyền
                         </span>
                     </div>

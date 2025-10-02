@@ -176,7 +176,7 @@
     </div>
 
     <div class="description-container">
-        <div class="description-content text-muted mt-4 mb-0 text-justify"
+        <div class="description-content fw-semibold text-dark mt-4 mb-0 text-justify"
             id="description-content-{{ $story->id }}">
             {!! $story->description !!}
         </div>

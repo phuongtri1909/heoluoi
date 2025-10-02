@@ -1,7 +1,7 @@
 <div class="tab-pane fade {{ $isActive ? 'show active' : '' }}" id="{{ $tabId }}" role="tabpanel">
     <div class="hot-stories-list">
         @foreach ($stories as $index => $story)
-            <div class="d-flex align-items-center">
+            <div class="d-flex align-items-center mb-2">
                 <div class="d-flex align-items-center mt-2">
                     <span class="story-rank">
                         @if ($index + 1 == 1)
@@ -16,7 +16,7 @@
                     </span>
                 </div>
 
-                <div class="hot-story-item d-flex {{ $index < 9 ? 'border-bottom' : '' }}">
+                <div class="hot-story-item d-flex">
                     <div class="story-cover me-3">
                         <a class="text-decoration-none" href="{{ route('show.page.story', $story->slug) }}">
                             <img src="{{ asset('storage/' . $story->cover) }}" alt="{{ $story->title }}"
@@ -25,13 +25,13 @@
                     </div>
                     <div class="story-info w-100 d-flex flex-column justify-content-center">
                         <h4 class="hot-story-title">
-                            <a class="text-decoration-none text-dark fs-4"
+                            <a class="text-decoration-none text-dark fs-5"
                                 href="{{ route('show.page.story', $story->slug) }}">{{ $story->title }}</a>
                         </h4>
 
                         <div class="d-flex align-items-center flex-wrap">
                             @if ($story->author_name)
-                                <p class="mb-0 fs-6">{{ $story->author_name }}</p>
+                                <p class="mb-0 fs-6 fw-semibold">{{ $story->author_name }}</p>
 
                                 <span class="chapter-separator fs-6">|</span>
                             @endif
@@ -44,7 +44,7 @@
                             </div>
                         </div>
 
-                        <div>
+                        <div class="fs-6 fw-semibold">
                             <img src="{{ asset('images/svg/views.svg') }}" alt="Eye" class="eye-icon">
                             {{ number_format($story->total_views) }} lượt xem
                         </div>

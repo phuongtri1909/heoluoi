@@ -2,7 +2,7 @@
 <div class="sidebar-widget recent-reads rounded-4 border-5 border border-color-7 shadow-sm mt-4">
     <div class="widget-header border-bottom-0">
         <div class="text-center">
-            <h2 class="fs-3 text-center m-0 text-dark fw-bold title-dark">ĐANG ĐỌC</h2>
+            <h2 class="fs-3 text-center m-0 text-dark fw-bold title-dark font-svn-apple">ĐANG ĐỌC</h2>
         </div>
     </div>
     <div class="widget-content px-md-4 px-2">
@@ -15,13 +15,13 @@
                     <div class="reading-content flex-grow-1 d-flex justify-content-between ">
                         <h6 class="reading-title mb-1">
                             <a href="{{ route('show.page.story', $reading->story->slug) }}" 
-                               class="text-decoration-none text-dark fs-5">
+                               class="text-decoration-none text-dark fs-6 fw-semibold">
                                 {{ $reading->story->title }}
                             </a>
                         </h6>
                         <div class="reading-chapter">
                             <a href="{{ route('chapter', ['storySlug' => $reading->story->slug, 'chapterSlug' => $reading->chapter->slug]) }}" 
-                               class="text-decoration-none text-primary fs-5">
+                               class="text-decoration-none text-primary fs-6">
                                 Đọc tiếp C {{ $reading->chapter->number }}
                             </a>
                         </div>

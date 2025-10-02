@@ -92,7 +92,7 @@ class StoryController extends Controller
 
        
         $query->orderBy('is_featured', 'desc')
-            ->orderBy('featured_order', 'asc')
+            ->orderBy('featured_order', 'desc')
             ->orderBy('created_at', 'desc');
 
         $stories = $query->paginate(15);

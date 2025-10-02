@@ -198,6 +198,10 @@
 
     </section>
 
+    @auth
+        @include('components.modals.chapter-purchase-modal')
+    @endauth
+
 @endsection
 
 @push('scripts')

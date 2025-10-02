@@ -1,17 +1,17 @@
 @if($relatedStories && $relatedStories->count() > 0)
 <div class="related-stories-section">
-    <h3 class="related-stories-title fs-3">TRUYỆN CÙNG THỂ LOẠI</h3>
+    <h3 class="related-stories-title fs-5 font-svn-apple">TRUYỆN CÙNG THỂ LOẠI</h3>
     <div class="related-stories-list">
         @foreach($relatedStories as $relatedStory)
-        <div class="related-story-item">
+        <a href="{{ route('show.page.story', $relatedStory->slug) }}" class="related-story-item text-decoration-none">
             <div class="story-cover">
                 <img src="{{ Storage::url($relatedStory->cover) }}" alt="{{ $relatedStory->title }}" class="cover-image">
             </div>
             <div class="story-info">
-                <h6 class="story-title">{{ $relatedStory->title }}</h6>
+                <h6 class="story-title fs-5">{{ $relatedStory->title }}</h6>
                 <p class="story-chapters">{{ $relatedStory->chapters_count }} chương</p>
             </div>
-        </div>
+        </a>
         @endforeach
     </div>
 </div>

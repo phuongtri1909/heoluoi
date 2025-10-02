@@ -160,11 +160,17 @@
         }
 
         .story-thumb {
-            width: 60px;
-            height: 90px;
+            width: 45px;
+            height: 60px;
             object-fit: cover;
             border-radius: 6px;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Smaller thumbs specifically for combo stories */
+        #stories-content .story-thumb {
+            width: 80px;
+            height: 120px;
         }
 
         .story-title {
@@ -273,8 +279,14 @@
         /* Responsive */
         @media (max-width: 767px) {
             .story-thumb {
-                width: 50px;
-                height: 75px;
+                width: 40px;
+                height: 50px;
+            }
+
+            /* Even smaller for combo stories on mobile */
+            #stories-content .story-thumb {
+                width: 30px;
+                height: 35px;
             }
 
             .story-title {
