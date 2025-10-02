@@ -36,8 +36,7 @@ class HomeController extends Controller
             ->published()
             ->where(function ($q) use ($query) {
                 $q->where('title', 'LIKE', "%{$query}%")
-                    ->orWhere('author_name', 'LIKE', "%{$query}%")
-                    ->orWhere('translator_name', 'LIKE', "%{$query}%");
+                    ->orWhere('author_name', 'LIKE', "%{$query}%");
             })
             ->whereHas('chapters', function ($query) {
                 $query->where('status', 'published');
@@ -127,8 +126,7 @@ class HomeController extends Controller
             ->where(function ($outer) use ($query) {
                 $outer->whereHas('user', function ($q) use ($query) {
                     $q->where('name', 'LIKE', "%{$query}%");
-                })
-                    ->orWhere('translator_name', 'LIKE', "%{$query}%");
+                });
             })
             ->whereHas('chapters', function ($query) {
                 $query->where('status', 'published');
@@ -1658,8 +1656,7 @@ class HomeController extends Controller
             $searchQuery = trim((string) $request->input('query'));
             $query->where(function ($q) use ($searchQuery) {
                 $q->where('title', 'LIKE', "%{$searchQuery}%")
-                    ->orWhere('author_name', 'LIKE', "%{$searchQuery}%")
-                    ->orWhere('translator_name', 'LIKE', "%{$searchQuery}%");
+                    ->orWhere('author_name', 'LIKE', "%{$searchQuery}%");
             });
         }
 

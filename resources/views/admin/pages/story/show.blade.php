@@ -60,10 +60,6 @@
                                     <h6 class="text-uppercase text-xs font-weight-bolder opacity-6">Tác giả:</h6>
                                     <p>{{ $story->author_name ?: 'Chưa cập nhật' }}</p>
                                 </div>
-                                <div class="col-md-6">
-                                    <h6 class="text-uppercase text-xs font-weight-bolder opacity-6">Dịch giả:</h6>
-                                    <p>{{ $story->translator_name ?: 'Chưa cập nhật' }}</p>
-                                </div>
                             </div>
                             
                             <div class="row mb-3">
