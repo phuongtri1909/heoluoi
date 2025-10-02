@@ -104,7 +104,7 @@ class PurchaseController extends Controller
             if ($user->coins < $chapter->price) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Bạn không đủ xu để mua chương này. Vui lòng nạp thêm.',
+                    'message' => 'Bạn không đủ cám để mua chương này. Vui lòng nạp thêm.',
                     'redirect' => route('user.deposit')
                 ], 400);
             }
@@ -250,7 +250,7 @@ class PurchaseController extends Controller
             if ($user->coins < $story->combo_price) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Bạn không đủ xu để mua combo này. Vui lòng nạp thêm.',
+                    'message' => 'Bạn không đủ cám để mua combo này. Vui lòng nạp thêm.',
                     'redirect' => route('user.deposit')
                 ], 400);
             }

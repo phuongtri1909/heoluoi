@@ -8,7 +8,7 @@
             </a>
         </td>
         <td>Chương {{ $earning->chapter->number }}: {{ Str::limit($earning->chapter->title, 30) }}</td>
-        <td class="text-success fw-bold">+{{ number_format($earning->amount_received) }} xu</td>
+        <td class="text-success fw-bold">+{{ number_format($earning->amount_received) }} cám</td>
         <td>{{ $earning->created_at->format('d/m/Y H:i') }}</td>
     </tr>
 @empty

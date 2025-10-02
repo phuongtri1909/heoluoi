@@ -1,281 +1,18 @@
 @extends('layouts.information')
 
-@section('info_title', 'Nạp xu bằng thẻ cào')
-@section('info_description', 'Nạp xu bằng thẻ cào điện thoại trên ' . request()->getHost())
-@section('info_keyword', 'nạp xu, thẻ cào, ' . request()->getHost())
-@section('info_section_title', 'Nạp xu bằng thẻ cào')
-@section('info_section_desc', 'Nạp xu bằng thẻ cào điện thoại Viettel, Mobifone, Vinaphone')
+@section('info_title', 'Nạp cám bằng thẻ cào')
+@section('info_description', 'Nạp cám bằng thẻ cào điện thoại trên ' . request()->getHost())
+@section('info_keyword', 'nạp cám, thẻ cào, ' . request()->getHost())
+@section('info_section_title', 'Nạp cám bằng thẻ cào')
+@section('info_section_desc', 'Nạp cám bằng thẻ cào điện thoại Viettel, Mobifone, Vinaphone')
 
 @push('styles')
     <style>
-        /* Loại bỏ các CSS không cần thiết cho card-type-option */
-        /* Giữ lại chỉ những styles cần thiết */
-
-        .amount-option {
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            margin-bottom: 10px;
-            min-height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .amount-option:hover {
-            border-color: var(--primary-color-3);
-            background-color: rgba(13, 110, 253, 0.05);
-        }
-
-        .amount-option.selected {
-            border-color: var(--primary-color-3);
-            background-color: rgba(13, 110, 253, 0.1);
-        }
-
-        .card-input {
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            padding: 12px 15px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .card-input:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-        }
-
-        .form-select.card-input {
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            padding: 12px 15px;
-            font-size: 16px;
-            background-color: #fff;
-            transition: all 0.3s ease;
-        }
-
-        .form-select.card-input:focus {
-            border-color: #0d6efd;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-        }
-
-        .form-select.is-invalid {
-            border-color: #dc3545;
-        }
-
+        /* Card deposit specific styles */
         .coins-preview {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
             padding: 20px;
-        }
-
-        .submit-card-btn {
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            border: none;
-            border-radius: 10px;
-            padding: 15px 30px;
-            color: white;
-            font-weight: 600;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .submit-card-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
-            color: white;
-        }
-
-        .submit-card-btn:disabled {
-            opacity: 0.7;
-            transform: none;
-            cursor: not-allowed;
-        }
-
-        .deposit-tabs {
-            border-bottom: 2px solid #e9ecef;
-            margin-bottom: 30px;
-        }
-
-        .deposit-tab {
-            padding: 15px 25px;
-            background: transparent;
-            border: none;
-            color: #6c757d;
-            font-weight: 500;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            border-bottom: 3px solid transparent;
-        }
-
-        .deposit-tab:hover {
-            color: var(--primary-color-3);
-            background-color: rgba(13, 110, 253, 0.05);
-            text-decoration: none;
-        }
-
-        .deposit-tab.active {
-            color: var(--primary-color-3);
-            border-bottom-color: var(--primary-color-3);
-            background-color: rgba(13, 110, 253, 0.05);
-        }
-
-        .history-card {
-            border: 1px solid #e9ecef;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .history-card:hover {
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .coins-panel {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 15px;
-            padding: 30px;
-            color: white;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .coins-balance {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .coins-icon {
-            color: #ffd700;
-            margin-right: 10px;
-        }
-
-        .coins-label {
-            opacity: 0.8;
-            margin-bottom: 20px;
-        }
-
-        .coins-info {
-            text-align: left;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 20px;
-        }
-
-        .invalid-feedback {
-            display: none;
-            width: 100%;
-            margin-top: 0.25rem;
-            font-size: 0.875em;
-            color: #dc3545;
-        }
-
-        .invalid-feedback.show {
-            display: block;
-        }
-
-        .form-control.is-invalid {
-            border-color: #dc3545;
-        }
-
-        .status-badge {
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-
-        .modal-content {
-            border-radius: 15px;
-            border: none;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-        }
-
-        .modal-header {
-            border-bottom: 1px solid #e9ecef;
-            border-radius: 15px 15px 0 0;
-        }
-
-        .table-responsive {
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .table th {
-            background-color: #f8f9fa;
-            border-top: none;
-            font-weight: 600;
-            padding: 1rem;
-        }
-
-        .table td {
-            padding: 1rem;
-            vertical-align: middle;
-        }
-
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-
-        .loading-spinner {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-        }
-
-        @media (max-width: 768px) {
-            .card-type-option {
-                min-height: 120px;
-                padding: 15px;
-            }
-
-            .card-type-logo {
-                width: 50px;
-                height: 50px;
-            }
-
-            .deposit-tab {
-                padding: 10px 15px;
-                font-size: 0.9rem;
-            }
-
-            .coins-balance {
-                font-size: 2rem;
-            }
-        }
-
-        .amount-option.selected::before {
-            content: '✓';
-            position: absolute;
-            top: 0px;
-            right: 4px;
-            color: white;
-            font-size: 14px;
-            z-index: 1;
-        }
-
-        .amount-option.selected::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0px;
-            width: 20px;
-            height: 20px;
-            border-radius: 0 6px 0 12px;
-            background-color: var(--primary-color-3);
         }
     </style>
 @endpush
@@ -286,6 +23,9 @@
     <div class="deposit-tabs d-flex mb-4">
         <a href="{{ route('user.deposit') }}" class="deposit-tab ">
             <i class="fas fa-university me-2"></i>Bank
+        </a>
+        <a href="" class="deposit-tab">
+            <i class="fas fa-university me-2"></i>Bank auto
         </a>
         <a href="{{ route('user.card.deposit') }}" class="deposit-tab active">
             <i class="fas fa-credit-card me-2"></i>Card
@@ -300,7 +40,7 @@
             <!-- Card Info Section -->
             <div class="card-info-section mb-3">
                 <div class="deposit-card-header">
-                    <h5 class="mb-0">Nạp xu bằng thẻ cào</h5>
+                    <h5 class="mb-0">Nạp cám bằng thẻ cào</h5>
                 </div>
             </div>
 
@@ -346,10 +86,10 @@
                         <div class="deposit-coin-preview mb-3">
                             <div class="row align-items-center">
                                 <div class="col">
-                                    <div class="small opacity-75">Xu nhận được:</div>
+                                    <div class="small opacity-75">Cám nhận được:</div>
                                     <div class="h4 mb-0">
                                         <i class="fas fa-coins me-2"></i>
-                                        <span id="coinsPreview">0</span> xu
+                                        <span id="coinsPreview">0</span> cám
                                     </div>
                                 </div>
                             </div>
@@ -409,7 +149,7 @@
                                     phí phạt trên mệnh giá thực của thẻ.
                                 </li>
                                 <li class="text-warning">
-                                    <strong>Ví dụ:</strong> Thẻ 100k nhưng thực tế chỉ có 50k → Nhận được xu tương ứng với
+                                    <strong>Ví dụ:</strong> Thẻ 100k nhưng thực tế chỉ có 50k → Nhận được cám tương ứng với
                                     25k (50k - 50% phạt - phí hệ thống)
                                 </li>
                             </ul>
@@ -431,7 +171,7 @@
                 <div class="coins-balance">
                     <i class="fas fa-coins coins-icon"></i>{{ number_format(Auth::user()->coins ?? 0) }}
                 </div>
-                <div class="coins-label">Số xu hiện có trong tài khoản</div>
+                <div class="coins-label">Số cám hiện có trong tài khoản</div>
 
                 <div class="coins-info">
                     <h6 class="text-white mb-3">
@@ -479,7 +219,7 @@
                                             <i class="fas fa-money-bill me-1"></i>Mệnh giá
                                         </th>
                                         <th>
-                                            <i class="fas fa-coins me-1"></i>Xu nhận được
+                                            <i class="fas fa-coins me-1"></i>Cám nhận được
                                         </th>
                                         <th>
                                             <i class="fas fa-clock me-1"></i>Thời gian
@@ -500,9 +240,9 @@
                                             <td>{{ $deposit->card_type_text }}</td>
                                             <td>{{ $deposit->amount_formatted }}</td>
 
-                                            {{-- Cột xu nhận được với thông tin penalty --}}
+                                            {{-- Cột cám nhận được với thông tin penalty --}}
                                             <td>
-                                                <strong>{{ number_format($deposit->coins) }} xu</strong>
+                                                <strong>{{ number_format($deposit->coins) }} cám</strong>
 
                                                 @if ($deposit->status === 'success')
                                                     <br>
@@ -621,7 +361,7 @@
                 updateCoinsPreview();
             });
 
-            // Cập nhật preview xu
+            // Cập nhật preview cám
             function updateCoinsPreview() {
                 const amount = parseInt($('#cardAmount').val()) || 0;
                 if (amount > 0) {
@@ -729,8 +469,8 @@
                                 <div class="col-8">${feeAmount.toLocaleString()} VNĐ (${coinCardPercent}%)</div>
                             </div>
                             <div class="row mb-2">
-                                <div class="col-4"><strong>Xu nhận được:</strong></div>
-                                <div class="col-8 text-primary"><strong>${coins.toLocaleString()} xu</strong></div>
+                                <div class="col-4"><strong>Cám nhận được:</strong></div>
+                                <div class="col-8 text-primary"><strong>${coins.toLocaleString()} cám</strong></div>
                             </div>
                         </div>
                         <div class="alert alert-warning mt-3 mb-0">
@@ -774,10 +514,10 @@
 
                             if (response.status == 1) {
                                 title = 'Nạp thẻ thành công!';
-                                text = 'Thẻ hợp lệ và xu đã được cộng vào tài khoản.';
+                                text = 'Thẻ hợp lệ và cám đã được cộng vào tài khoản.';
                             } else if (response.status == 2) {
                                 title = 'Thẻ đúng nhưng sai mệnh giá!';
-                                text = 'Xu sẽ được cộng theo mệnh giá thực của thẻ.';
+                                text = 'Cám sẽ được cộng theo mệnh giá thực của thẻ.';
                             } else if (response.status == 99) {
                                 icon = 'info';
                                 title = 'Thẻ đang xử lý!';
@@ -912,7 +652,7 @@
                             <div class="col-8">${deposit.amount}</div>
                         </div>
                         <div class="row">
-                            <div class="col-4"><strong>Xu nhận:</strong></div>
+                            <div class="col-4"><strong>Cám nhận:</strong></div>
                             <div class="col-8">${deposit.coins}</div>
                         </div>
                         <div class="row">

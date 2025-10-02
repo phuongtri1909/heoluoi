@@ -8,7 +8,7 @@
                     <div class="d-flex flex-row justify-content-between">
                         <div>
                             <h5 class="mb-0">Quản lý nạp thẻ cào</h5>
-                            <p class="text-sm mb-0">Quản lý các giao dịch nạp xu bằng thẻ cào</p>
+                            <p class="text-sm mb-0">Quản lý các giao dịch nạp cám bằng thẻ cào</p>
                         </div>
                         <div>
                             <a href="{{ route('admin.paypal-deposits.index') }}" class="btn bg-gradient-info btn-sm">
@@ -63,7 +63,7 @@
                                     <th class="text-uppercase  text-xxs font-weight-bolder ">Loại thẻ</th>
                                     <th class="text-uppercase  text-xxs font-weight-bolder ">Serial</th>
                                     <th class="text-uppercase  text-xxs font-weight-bolder ">Mệnh giá</th>
-                                    <th class="text-uppercase  text-xxs font-weight-bolder ">Xu nhận</th>
+                                    <th class="text-uppercase  text-xxs font-weight-bolder ">Cám nhận</th>
                                     <th class="text-uppercase  text-xxs font-weight-bolder ">Trạng thái</th>
                                     <th class="text-uppercase  text-xxs font-weight-bolder ">Thời gian</th>
                                 </tr>

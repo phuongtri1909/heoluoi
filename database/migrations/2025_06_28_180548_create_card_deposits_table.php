@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('serial')->comment('Số serial thẻ');
             $table->string('pin')->comment('Mã pin thẻ');
             $table->integer('amount')->comment('Mệnh giá thẻ');
-            $table->integer('coins')->comment('Số xu nhận được');
+            $table->integer('coins')->comment('Số cám nhận được');
             $table->decimal('fee_percent', 5, 2)->comment('Phí giao dịch (%)');
             $table->integer('fee_amount')->comment('Số tiền phí');
             $table->decimal('penalty_amount', 15, 2)->nullable()->comment('Số tiền phạt khi sai mệnh giá');

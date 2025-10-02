@@ -284,7 +284,7 @@
                                         </span>
                                     @else
                                         <span class="price-badge">
-                                            <i class="fas fa-lock me-1"></i>{{ number_format($chapter->price) }} xu
+                                            <i class="fas fa-lock me-1"></i>{{ number_format($chapter->price) }} cám
                                         </span>
                                     @endif
                                 </div>

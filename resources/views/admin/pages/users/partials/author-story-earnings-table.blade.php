@@ -7,7 +7,7 @@
                 {{ $earning->story->title ?? 'Không xác định' }}
             </a>
         </td>
-        <td class="text-success fw-bold">+{{ number_format($earning->amount_received) }} xu</td>
+        <td class="text-success fw-bold">+{{ number_format($earning->amount_received) }} cám</td>
         <td>{{ $earning->created_at->format('d/m/Y H:i') }}</td>
     </tr>
 @empty

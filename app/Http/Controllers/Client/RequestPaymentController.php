@@ -29,9 +29,9 @@ class RequestPaymentController extends Controller
 
     public function __construct()
     {
-        $this->coinBankPercent = Config::getConfig('coin_bank_percent', 15);
-        $this->coinPayPalPercent = Config::getConfig('coin_paypal_percent', 0);
-        $this->coinCardPercent = Config::getConfig('coin_card_percent', 30);
+        $this->coinBankPercent = Config::getConfig('coin_bank_percentage', 15);
+        $this->coinPayPalPercent = Config::getConfig('coin_paypal_percentage', 0);
+        $this->coinCardPercent = Config::getConfig('coin_card_percentage', 30);
 
         $this->coinExchangeRate = Config::getConfig('coin_exchange_rate', 100);
         $this->coinPayPalRate = Config::getConfig('coin_paypal_rate', 20000);
@@ -203,7 +203,7 @@ class RequestPaymentController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Yêu cầu nạp xu đã được gửi. Chúng tôi sẽ kiểm tra và xử lý trong thời gian sớm nhất.',
+                'message' => 'Yêu cầu nạp cám đã được gửi. Chúng tôi sẽ kiểm tra và xử lý trong thời gian sớm nhất.',
                 'deposit_id' => $deposit->id
             ]);
         } catch (\Exception $e) {
@@ -217,7 +217,7 @@ class RequestPaymentController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Có lỗi xảy ra khi xác nhận yêu cầu nạp xu. Vui lòng thử lại sau.'
+                'message' => 'Có lỗi xảy ra khi xác nhận yêu cầu nạp cám. Vui lòng thử lại sau.'
             ], 500);
         }
     }

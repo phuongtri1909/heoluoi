@@ -14,26 +14,44 @@ class ConfigSeeder extends Seeder
     {
 
         Config::setConfig(
-            'coin_bank_percentage',
-            15,
-            'Phí chuyển khoản ngân hàng (15%)'
+            'coin_exchange_rate',
+            10,
+            'quy đổi tiền sang cám 100 VND = 1 cám'
         );
 
+        Config::setConfig('bonus_base_amount', 100000, 'Mốc số tiền đầu tiên để tính thưởng');
+        Config::setConfig('bonus_base_cam',    300,    'Cám tặng tại mốc base_amount');
+
+        Config::setConfig('bonus_double_amount', 200000, 'Mốc số tiền thứ 2');
+        Config::setConfig('bonus_double_cam',    1000,   'Cám tặng tại mốc double_amount');
+
         Config::setConfig(
-            'coin_exchange_rate',
-            100,
-            'quy đổi tiền sang xu 100 VND = 1 xu'
+            'coin_bank_percentage',
+            0,
+            'Phí chuyển khoản ngân hàng thủ công (15%)'
         );
 
         Config::setConfig(
             'coin_bank_auto_percentage',
             0,
-            'Phí nạp ngân hàng (0%) nếu có nhập thì mới tính'
+            'Phí nạp ngân hàng tự động (0%) nếu có nhập thì mới tính'
+        );
+
+        Config::setConfig(
+            'coin_paypal_rate',
+            20000,
+            'quy đổi 1 đô sang bao nhiêu tiền việt'
+        );
+
+        Config::setConfig(
+            'coin_paypal_percentage',
+            0,
+            'Phí nạp paypal (0%) nếu có nhập thì mới tính'
         );
 
         Config::setConfig(
             'coin_card_percentage',
-            30,
+            20,
             'Phí nạp thẻ (%)'
         );
 
@@ -46,25 +64,19 @@ class ConfigSeeder extends Seeder
         Config::setConfig(
             'daily_task_login_reward',
             1,
-            'Số xu thưởng khi hoàn thành nhiệm vụ đăng nhập hàng ngày'
+            'Số cám thưởng khi hoàn thành nhiệm vụ đăng nhập hàng ngày'
         );
 
         Config::setConfig(
             'daily_task_comment_reward',
             1,
-            'Số xu thưởng khi hoàn thành nhiệm vụ bình luận truyện'
+            'Số cám thưởng khi hoàn thành nhiệm vụ bình luận truyện'
         );
 
         Config::setConfig(
             'daily_task_bookmark_reward',
             1,
-            'Số xu thưởng khi hoàn thành nhiệm vụ theo dõi truyện'
-        );
-
-        Config::setConfig(
-            'daily_task_share_reward',
-            1,
-            'Số xu thưởng khi hoàn thành nhiệm vụ chia sẻ truyện'
+            'Số cám thưởng khi hoàn thành nhiệm vụ theo dõi truyện'
         );
     }
-} 
+}

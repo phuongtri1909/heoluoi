@@ -104,7 +104,7 @@ class CardDeposit extends Model
 
     public function getCoinsFormattedAttribute()
     {
-        return number_format($this->coins) . ' xu';
+        return number_format($this->coins) . ' cám';
     }
 
     // Đánh dấu giao dịch thành công

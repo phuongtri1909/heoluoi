@@ -68,7 +68,7 @@
                                     </th>
 
                                     <th class="text-uppercase  text-xxs font-weight-bolder ">
-                                        Số xu
+                                        Số cám
                                     </th>
 
                                     <th class="text-uppercase  text-xxs font-weight-bolder ">
@@ -113,7 +113,7 @@
                                             @if($chapter->is_free)
                                                 <span class="badge bg-gradient-success">Miễn phí</span>
                                             @else
-                                                <span class="badge bg-gradient-danger">{{ $chapter->price ?? 0 }} xu</span>
+                                                <span class="badge bg-gradient-danger">{{ $chapter->price ?? 0 }} cám</span>
                                             @endif
                                         </td>
                                         <td>

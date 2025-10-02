@@ -7,7 +7,7 @@
             <div class="card mb-4">
                 <div class="card-header pb-0">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h6>Quản lý xu người dùng</h6>
+                        <h6>Quản lý cám người dùng</h6>
                         <div class="input-group w-50">
                             <form action="{{ route('admin.coins.index') }}" method="GET" class="d-flex w-100">
                                 <input type="text" class="form-control" name="search" placeholder="Tìm kiếm theo tên hoặc email..." value="{{ request('search') }}">
@@ -25,7 +25,7 @@
                                 <tr>
                                     <th class="text-uppercase  text-xxs font-weight-bolder ">Người dùng</th>
                                     <th class="text-uppercase  text-xxs font-weight-bolder  ps-2">Email</th>
-                                    <th class="text-uppercase  text-xxs font-weight-bolder  ps-2">Số xu hiện tại</th>
+                                    <th class="text-uppercase  text-xxs font-weight-bolder  ps-2">Số cám hiện tại</th>
                                     <th class="text-uppercase  text-xxs font-weight-bolder  ps-2">Vai trò</th>
                                     <th class="text-uppercase  text-xxs font-weight-bolder  ps-2">Thao tác</th>
                                 </tr>
@@ -57,7 +57,7 @@
                                     <td class="text-center">
                                         <div class="d-flex flex-wrap justify-content-center">
                                             <div class="d-flex flex-column align-items-center mb-2 me-2">
-                                                <a href="{{ route('admin.coins.create', $user->id) }}" class="btn btn-link p-1 mb-0 action-icon view-icon" title="Cộng/Trừ xu">
+                                                <a href="{{ route('admin.coins.create', $user->id) }}" class="btn btn-link p-1 mb-0 action-icon view-icon" title="Cộng/Trừ cám">
                                                     <i class="fas fa-plus text-white"></i>
                                                 </a>
                                             </div>

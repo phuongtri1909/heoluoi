@@ -53,10 +53,10 @@
 
                             <div class="col-md-12" id="price-container" style="display: none;">
                                 <div class="form-group">
-                                    <label for="price">Giá (xu)</label>
+                                    <label for="price">Giá (cám)</label>
                                     <input type="number" name="price" id="price" class="form-control"
                                         value="{{ old('price', 0) }}" min="0">
-                                    <small class="text-muted">Số xu cần để đọc chương này</small>
+                                    <small class="text-muted">Số cám cần để đọc chương này</small>
                                     @error('price')
                                         <div class="text-danger">{{ $message }}</div>
                                     @enderror

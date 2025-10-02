@@ -23,7 +23,7 @@ class CoinService
     public function subtractCoins(User $user, int $amount, string $transactionType, string $description = null, $reference = null, $adminId = null)
     {
         if ($user->coins < $amount) {
-            throw new \Exception('Không đủ xu để thực hiện giao dịch này');
+            throw new \Exception('Không đủ cám để thực hiện giao dịch này');
         }
 
         return $this->processTransaction($user, -$amount, 'subtract', $transactionType, $description, $reference, $adminId);

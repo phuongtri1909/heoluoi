@@ -8,7 +8,7 @@
                     <div class="d-flex flex-row justify-content-between">
                         <div>
                             <h5 class="mb-0">Quản lý nạp PayPal</h5>
-                            <p class="text-sm mb-0">Quản lý các giao dịch nạp xu bằng PayPal</p>
+                            <p class="text-sm mb-0">Quản lý các giao dịch nạp cám bằng PayPal</p>
                         </div>
                         <div>
                             <a href="{{ route('admin.request-payment-paypal.index') }}" class="btn bg-gradient-warning btn-sm">
@@ -59,7 +59,7 @@
                                     <th class="text-uppercase  text-xxs font-weight-bolder ">Mã GD</th>
                                     <th class="text-uppercase  text-xxs font-weight-bolder ">Email PayPal</th>
                                     <th class="text-uppercase  text-xxs font-weight-bolder ">Số tiền</th>
-                                    <th class="text-uppercase  text-xxs font-weight-bolder ">Xu</th>
+                                    <th class="text-uppercase  text-xxs font-weight-bolder ">Cám</th>
                                     <th class="text-uppercase  text-xxs font-weight-bolder ">Trạng thái</th>
                                     <th class="text-uppercase  text-xxs font-weight-bolder ">Thời gian</th>
                                     <th class="text-center text-uppercase  text-xxs font-weight-bolder ">Hành động</th>
@@ -94,7 +94,7 @@
                                             <p class="text-xs  mb-0">{{ $deposit->vnd_amount_formatted }}</p>
                                         </td>
                                         <td>
-                                            <p class="text-xs font-weight-bold mb-0">{{ $deposit->coins_formatted }} xu</p>
+                                            <p class="text-xs font-weight-bold mb-0">{{ $deposit->coins_formatted }} cám</p>
                                         </td>
                                         <td>
                                             <span class="badge badge-sm {{ $deposit->status_badge }}">
@@ -193,12 +193,12 @@
                                     <h6 class="text-sm">Mã giao dịch: <span class="text-dark">{{ $deposit->transaction_code }}</span></h6>
                                     <h6 class="text-sm">Người dùng: <span class="text-dark">{{ $deposit->user->name }}</span></h6>
                                     <h6 class="text-sm">Số tiền: <span class="text-dark">{{ $deposit->usd_amount_formatted }}</span></h6>
-                                    <h6 class="text-sm">Số xu: <span class="text-dark">{{ $deposit->coins_formatted }} xu</span></h6>
+                                    <h6 class="text-sm">Số cám: <span class="text-dark">{{ $deposit->coins_formatted }} cám</span></h6>
                                     <h6 class="text-sm">Email PayPal: <span class="text-dark">{{ $deposit->paypal_email }}</span></h6>
                                 </div>
                             </div>
                             <div class="alert alert-info text-white text-sm">
-                                Bạn có chắc chắn muốn duyệt giao dịch này? Người dùng sẽ được cộng {{ $deposit->coins_formatted }} xu vào tài khoản.
+                                Bạn có chắc chắn muốn duyệt giao dịch này? Người dùng sẽ được cộng {{ $deposit->coins_formatted }} cám vào tài khoản.
                             </div>
                         </div>
                         <div class="modal-footer">

@@ -17,7 +17,7 @@
                                 <i class="fas fa-trash me-2"></i> Xóa yêu cầu hết hạn
                             </button>
                             <a href="{{ route('admin.deposits.index') }}" class="btn bg-gradient-primary btn-sm ms-2">
-                                <i class="fas fa-list me-2"></i> Quản lý nạp xu
+                                <i class="fas fa-list me-2"></i> Quản lý nạp cám
                             </a>
                         </div>
                     </div>
@@ -68,7 +68,7 @@
                                         Số tiền
                                     </th>
                                     <th class="text-uppercase  text-xxs font-weight-bolder ">
-                                        Xu
+                                        Cám
                                     </th>
                                     <th class="text-uppercase  text-xxs font-weight-bolder ">
                                         Trạng thái
@@ -110,7 +110,7 @@
                                             <p class="text-xs font-weight-bold mb-0">{{ number_format($payment->amount, 0, ',', '.') }} VNĐ</p>
                                         </td>
                                         <td>
-                                            <p class="text-xs font-weight-bold mb-0">{{ number_format($payment->total_coins, 0, ',', '.') }} xu</p>
+                                            <p class="text-xs font-weight-bold mb-0">{{ number_format($payment->total_coins, 0, ',', '.') }} cám</p>
                                         </td>
                                         <td>
                                             @if($payment->is_completed)

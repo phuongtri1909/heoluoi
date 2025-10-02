@@ -28,7 +28,7 @@
                                     <th class="text-uppercase text-xxs font-weight-bolder">ID</th>
                                     <th class="text-uppercase text-xxs font-weight-bolder ps-2">Tên nhiệm vụ</th>
                                     <th class="text-uppercase text-xxs font-weight-bolder">Loại</th>
-                                    <th class="text-uppercase text-xxs font-weight-bolder">Thưởng xu</th>
+                                    <th class="text-uppercase text-xxs font-weight-bolder">Thưởng cám</th>
                                     <th class="text-uppercase text-xxs font-weight-bolder">Max/ngày</th>
                                     <th class="text-center text-uppercase text-xxs font-weight-bolder">Trạng thái</th>
                                     <th class="text-center text-uppercase text-xxs font-weight-bolder">Thứ tự</th>
@@ -65,7 +65,7 @@
                                         </td>
                                         <td>
                                             <span class="text-xs font-weight-bold text-warning">
-                                                <i class="fas fa-coins me-1"></i>{{ $task->coin_reward }} xu
+                                                <i class="fas fa-coins me-1"></i>{{ $task->coin_reward }} cám
                                             </span>
                                         </td>
                                         <td>

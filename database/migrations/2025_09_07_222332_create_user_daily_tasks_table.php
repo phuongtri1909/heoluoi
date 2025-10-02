@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('daily_task_id')->constrained()->onDelete('cascade');
             $table->date('task_date');
             $table->integer('completed_count')->default(0);
-            $table->integer('coin_reward')->default(0)->comment('Số xu thưởng tại thời điểm hoàn thành nhiệm vụ');
+            $table->integer('coin_reward')->default(0)->comment('Số cám thưởng tại thời điểm hoàn thành nhiệm vụ');
             $table->timestamp('last_completed_at')->nullable();
             $table->string('ip_address')->nullable();
             $table->string('user_agent')->nullable();

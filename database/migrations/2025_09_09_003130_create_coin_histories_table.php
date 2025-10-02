@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('coin_histories', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->integer('amount')->comment('Số xu (dương = cộng, âm = trừ)');
+            $table->integer('amount')->comment('Số cám (dương = cộng, âm = trừ)');
             $table->enum('type', ['add', 'subtract'])->comment('Loại giao dịch');
             $table->string('transaction_type')->comment('Loại giao dịch chi tiết');
             $table->text('description')->nullable()->comment('Mô tả chi tiết');

@@ -55,7 +55,7 @@
                                     <th class="text-uppercase  text-xxs font-weight-bolder ">Mã GD</th>
                                     <th class="text-uppercase  text-xxs font-weight-bolder ">Email PayPal</th>
                                     <th class="text-uppercase  text-xxs font-weight-bolder ">Số tiền</th>
-                                    <th class="text-uppercase  text-xxs font-weight-bolder ">Xu</th>
+                                    <th class="text-uppercase  text-xxs font-weight-bolder ">Cám</th>
                                     <th class="text-uppercase  text-xxs font-weight-bolder ">Trạng thái</th>
                                     <th class="text-uppercase  text-xxs font-weight-bolder ">Hết hạn</th>
                                     <th class="text-uppercase  text-xxs font-weight-bolder ">Ngày tạo</th>
@@ -91,7 +91,7 @@
                                             <p class="text-xs  mb-0">{{ $payment->vnd_amount_formatted }}</p>
                                         </td>
                                         <td>
-                                            <p class="text-xs font-weight-bold mb-0">{{ number_format($payment->coins) }} xu</p>
+                                            <p class="text-xs font-weight-bold mb-0">{{ number_format($payment->coins) }} cám</p>
                                         </td>
                                         <td>
                                             @if($payment->status === 'confirmed')

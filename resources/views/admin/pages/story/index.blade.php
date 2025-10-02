@@ -125,7 +125,7 @@
                                 <td>{{ $story->chapters_count }}</td>
                                 <td>
                                     @if($story->has_combo)
-                                        <span class="badge bg-gradient-danger">{{ $story->combo_price }} xu</span>
+                                        <span class="badge bg-gradient-danger">{{ $story->combo_price }} cám</span>
                                     @else
                                        -
                                     @endif

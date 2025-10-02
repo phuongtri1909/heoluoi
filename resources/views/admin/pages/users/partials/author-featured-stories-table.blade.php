@@ -32,7 +32,7 @@
                         <span class="badge bg-info">{{ ucfirst($featured->type) }}</span>
                     </td>
                     <td>
-                        <span class="text-success fw-bold">{{ number_format($featured->price_paid) }} xu</span>
+                        <span class="text-success fw-bold">{{ number_format($featured->price_paid) }} cám</span>
                     </td>
                     <td>
                         <small>{{ $featured->featured_at->format('d/m/Y H:i') }}</small>

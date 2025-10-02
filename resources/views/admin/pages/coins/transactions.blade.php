@@ -10,7 +10,7 @@
                     <div class="row">
                         <div class="col-8">
                             <div class="numbers">
-                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Tổng xu đã cộng</p>
+                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Tổng cám đã cộng</p>
                                 <h5 class="font-weight-bolder mb-0 text-success">
                                     {{ number_format($stats['total_add']) }}
                                 </h5>
@@ -32,7 +32,7 @@
                     <div class="row">
                         <div class="col-8">
                             <div class="numbers">
-                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Tổng xu đã trừ</p>
+                                <p class="text-sm mb-0 text-capitalize font-weight-bold">Tổng cám đã trừ</p>
                                 <h5 class="font-weight-bolder mb-0 text-danger">
                                     {{ number_format($stats['total_subtract']) }}
                                 </h5>
@@ -99,7 +99,7 @@
             <div class="card mb-4">
                 <div class="card-header pb-0">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6>Lịch sử kiểm soát xu thủ công</h6>
+                        <h6>Lịch sử kiểm soát cám thủ công</h6>
                         <a href="{{ route('admin.coins.index') }}" class="btn btn-primary btn-sm">
                             <i class="fas fa-plus me-1"></i> Thêm giao dịch
                         </a>
@@ -115,8 +115,8 @@
                             <div class="col-md-2">
                                 <select name="type" class="form-select form-select-sm">
                                     <option value="">Tất cả loại</option>
-                                    <option value="add" {{ request('type') == 'add' ? 'selected' : '' }}>Cộng xu</option>
-                                    <option value="subtract" {{ request('type') == 'subtract' ? 'selected' : '' }}>Trừ xu</option>
+                                    <option value="add" {{ request('type') == 'add' ? 'selected' : '' }}>Cộng cám</option>
+                                    <option value="subtract" {{ request('type') == 'subtract' ? 'selected' : '' }}>Trừ cám</option>
                                 </select>
                             </div>
                             <div class="col-md-2">
@@ -147,7 +147,7 @@
                                     <th class="text-uppercase text-xxs font-weight-bolder">ID</th>
                                     <th class="text-uppercase text-xxs font-weight-bolder ps-2">Người dùng</th>
                                     <th class="text-uppercase text-xxs font-weight-bolder ps-2">Loại giao dịch</th>
-                                    <th class="text-uppercase text-xxs font-weight-bolder ps-2">Số xu</th>
+                                    <th class="text-uppercase text-xxs font-weight-bolder ps-2">Số cám</th>
                                     <th class="text-uppercase text-xxs font-weight-bolder ps-2">Quản trị viên</th>
                                     <th class="text-uppercase text-xxs font-weight-bolder ps-2">Ghi chú</th>
                                     <th class="text-uppercase text-xxs font-weight-bolder ps-2">Thời gian</th>
@@ -174,7 +174,7 @@
                                     <td>
                                         <span class="badge bg-{{ $transaction->type === 'add' ? 'success' : 'danger' }}">
                                             <i class="fas fa-{{ $transaction->type === 'add' ? 'plus' : 'minus' }} me-1"></i>
-                                            {{ $transaction->type === 'add' ? 'Cộng xu' : 'Trừ xu' }}
+                                            {{ $transaction->type === 'add' ? 'Cộng cám' : 'Trừ cám' }}
                                         </span>
                                     </td>
                                     <td>

@@ -1,358 +1,22 @@
 {{-- filepath: resources/views/pages/information/deposit/paypal_deposit.blade.php --}}
 @extends('layouts.information')
 
-@section('info_title', 'Nạp xu bằng PayPal')
-@section('info_description', 'Nạp xu bằng PayPal trên ' . request()->getHost())
-@section('info_keyword', 'nạp xu, paypal, ' . request()->getHost())
-@section('info_section_title', 'Nạp xu bằng PayPal')
-@section('info_section_desc', 'Nạp xu bằng PayPal một cách nhanh chóng và an toàn')
+@section('info_title', 'Nạp cám bằng PayPal')
+@section('info_description', 'Nạp cám bằng PayPal trên ' . request()->getHost())
+@section('info_keyword', 'nạp cám, paypal, ' . request()->getHost())
+@section('info_section_title', 'Nạp cám bằng PayPal')
+@section('info_section_desc', 'Nạp cám bằng PayPal một cách nhanh chóng và an toàn')
 
 @push('styles')
     <style>
-        .deposit-tabs {
-            border-bottom: 2px solid #e9ecef;
-            margin-bottom: 30px;
-        }
 
-        .deposit-tab {
-            padding: 15px 25px;
-            background: transparent;
-            border: none;
-            color: #6c757d;
-            font-weight: 500;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            border-bottom: 3px solid transparent;
-        }
-
-        .deposit-tab:hover {
-            color: var(--primary-color-3);
-            background-color: rgba(13, 110, 253, 0.05);
-            text-decoration: none;
-        }
-
-        .deposit-tab.active {
-            color: var(--primary-color-3);
-            border-bottom-color: var(--primary-color-3);
-            background-color: rgba(13, 110, 253, 0.05);
-        }
-
-        .paypal-form {
-            background: linear-gradient(135deg, #0070ba 0%, #003087 100%);
-            border-radius: 15px;
-            padding: 30px;
-            color: white;
-        }
-
-        .paypal-input {
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            padding: 12px 15px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .paypal-input:focus {
-            border-color: #0070ba;
-            box-shadow: 0 0 0 0.2rem rgba(0, 112, 186, 0.25);
-        }
-
-        .paypal-btn {
-            background: linear-gradient(135deg, #ffc439 0%, #ffb800 100%);
-            border: none;
-            border-radius: 10px;
-            padding: 15px 30px;
-            color: #003087;
-            font-weight: 600;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .paypal-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 196, 57, 0.3);
-            color: #003087;
-        }
-
-        .paypal-btn:disabled {
-            opacity: 0.7;
-            transform: none;
-            cursor: not-allowed;
-        }
-
-        .coins-panel {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 15px;
-            padding: 30px;
-            color: white;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .coins-balance {
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .coins-icon {
-            color: #ffd700;
-            margin-right: 10px;
-        }
-
-        .coins-label {
-            opacity: 0.8;
-            margin-bottom: 20px;
-        }
-
-        .coins-info {
-            text-align: left;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 20px;
-        }
-
-        .preview-box {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-
-        .preview-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .preview-item:last-child {
-            border-bottom: none;
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-
-        .confirm-modal .modal-content {
-            border-radius: 15px;
-            border: none;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-        }
-
-        .upload-modal .modal-content {
-            border-radius: 15px;
-            border: none;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-        }
-
-        .upload-area {
-            border: 2px dashed #ccc;
-            border-radius: 10px;
-            padding: 40px 20px;
-            text-align: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .upload-area:hover {
-            border-color: #0070ba;
-            background-color: rgba(0, 112, 186, 0.05);
-        }
-
-        .evidence-preview {
-            max-width: 100%;
-            max-height: 300px;
-            border-radius: 10px;
-            margin-top: 15px;
-        }
-
-        .payment-content-box {
-            background: linear-gradient(135deg, #e8f5e8 0%, #d4edda 100%);
-            border: 2px solid #28a745;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .payment-content-text {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #155724;
-            font-family: 'Courier New', monospace;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
-            user-select: all;
-            cursor: text;
-        }
-
-        .pending-request-item {
-            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-            border: 2px solid #ffc107;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .pending-request-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.4);
-        }
-
-        .status-badge {
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-
-        /* Copy button styles */
-        .copy-button {
-            border: none;
-            background-color: transparent;
-            color: #28a745;
-            padding: 0.25rem 0.5rem;
-            margin-left: 0.5rem;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .copy-button:hover {
-            background-color: rgba(40, 167, 69, 0.1);
-            color: #1e7e34;
-        }
-
-        .copy-button:focus {
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.25);
-        }
-
-        .copy-button i {
-            font-size: 0.875rem;
-        }
-
-        /* Copy success animation */
-        .copy-success {
-            animation: flashSuccess 0.5s;
-        }
-
-        @keyframes flashSuccess {
-
-            0%,
-            100% {
-                background-color: transparent;
-            }
-
-            50% {
-                background-color: rgba(25, 135, 84, 0.1);
-            }
-        }
-
-        /* Toast styles */
-        .copy-toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 8px 15px;
-            border-radius: 4px;
-            font-size: 14px;
-            z-index: 9999;
-            opacity: 0.9;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            animation: fadeInUp 0.3s ease;
-        }
-
-        .copy-toast.success {
-            background-color: #198754;
-            color: white;
-        }
-
-        .copy-toast.error {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 0.9;
-                transform: translateY(0);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .deposit-tab {
-                padding: 10px 15px;
-                font-size: 0.9rem;
-            }
-
-            .coins-balance {
-                font-size: 2rem;
-            }
-
-            .paypal-form {
-                padding: 20px;
-            }
-
-            .pending-request-item {
-                padding: 20px;
-            }
-        }
-
-        .payment-method-option {
-            margin-bottom: 15px;
-        }
-
-        .payment-method-card {
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            height: 100%;
-        }
-
-        .payment-method-option .form-check-input:checked+.form-check-label .payment-method-card {
-            border-color: #ffc439;
-            background: rgba(255, 196, 57, 0.2);
-            box-shadow: 0 0 15px rgba(255, 196, 57, 0.3);
-        }
-
-        .payment-method-card:hover {
-            border-color: rgba(255, 196, 57, 0.7);
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .payment-method-option .form-check-input {
-            margin-top: 0.5rem;
-        }
-
-        .payment-method-option .form-check-label {
-            cursor: pointer;
-            width: 100%;
-        }
-
+        /* PayPal specific unique styles */
         #paymentMethodFeeRow {
             display: none;
         }
 
         #paymentMethodFeeRow.show {
             display: flex;
-        }
-
-        .preview-item.highlight {
-            background: rgba(255, 196, 57, 0.2);
-            border-radius: 5px;
-            padding: 10px;
-            margin: 5px 0;
         }
     </style>
 @endpush
@@ -362,6 +26,9 @@
     <div class="deposit-tabs d-flex">
         <a href="{{ route('user.deposit') }}" class="deposit-tab">
             <i class="fas fa-university me-2"></i>Bank
+        </a>
+        <a href="" class="deposit-tab">
+            <i class="fas fa-university me-2"></i>Bank auto
         </a>
         <a href="{{ route('user.card.deposit') }}" class="deposit-tab">
             <i class="fas fa-credit-card me-2"></i>Card
@@ -377,7 +44,7 @@
             <div class="paypal-form">
                 <div class="text-center mb-4">
                     <i class="fab fa-paypal fa-4x mb-3"></i>
-                    <h4 class="mb-0">Nạp xu bằng PayPal</h4>
+                    <h4 class="mb-0">Nạp cám bằng PayPal</h4>
                     <p class="mb-0 opacity-75">Thanh toán nhanh chóng và an toàn</p>
                 </div>
 
@@ -478,8 +145,8 @@
                             <span id="previewTotalUSD">$5.00</span>
                         </div>
                         <div class="preview-item">
-                            <span>Xu nhận được:</span>
-                            <span id="previewCoins">1,000 xu</span>
+                            <span>Cám nhận được:</span>
+                            <span id="previewCoins">1,000 cám</span>
                         </div>
                         <div class="preview-item">
                             <span>Loại thanh toán:</span>
@@ -501,7 +168,7 @@
                 <div class="coins-balance">
                     <i class="fas fa-coins coins-icon"></i>{{ number_format(Auth::user()->coins ?? 0) }}
                 </div>
-                <div class="coins-label">Số xu hiện có trong tài khoản</div>
+                <div class="coins-label">Số cám hiện có trong tài khoản</div>
 
                 <div class="coins-info">
                     <h6 class="text-white mb-3">
@@ -551,7 +218,7 @@
                         <div class="col-md-4 text-center">
                             <div class="fw-bold text-success fs-5">
                                 ${{ number_format($latestPendingRequest->usd_amount, 2) }}</div>
-                            <div class="text-muted">{{ number_format($latestPendingRequest->coins) }} xu</div>
+                            <div class="text-muted">{{ number_format($latestPendingRequest->coins) }} cám</div>
                             <small class="text-muted">{{ $latestPendingRequest->created_at->format('d/m/Y H:i') }}</small>
                         </div>
                         <div class="col-md-4 text-center">
@@ -601,7 +268,7 @@
                                     <tr>
                                         <th>Mã giao dịch</th>
                                         <th>Số tiền USD</th>
-                                        <th>Xu nhận được</th>
+                                        <th>Cám nhận được</th>
                                         <th>Thời gian</th>
                                         <th>Trạng thái</th>
                                         <th>Thao tác</th>
@@ -682,7 +349,7 @@
                         <div class="text-center py-5">
                             <i class="fab fa-paypal fa-3x text-muted mb-3"></i>
                             <h5>Chưa có giao dịch PayPal nào</h5>
-                            <p class="text-muted">Hãy thực hiện giao dịch đầu tiên để nạp xu vào tài khoản</p>
+                            <p class="text-muted">Hãy thực hiện giao dịch đầu tiên để nạp cám vào tài khoản</p>
                         </div>
                     @endif
                 </div>
@@ -727,8 +394,8 @@
                             <div class="fw-bold text-primary" id="confirmAmount">$5.00</div>
                         </div>
                         <div class="col-6">
-                            <small class="text-muted">Xu nhận được:</small>
-                            <div class="fw-bold text-success" id="confirmCoins">1,000 xu</div>
+                            <small class="text-muted">Cám nhận được:</small>
+                            <div class="fw-bold text-success" id="confirmCoins">1,000 cám</div>
                         </div>
                     </div>
 
@@ -890,7 +557,7 @@
                 $('#previewBaseUSD').text('$' + baseUsdAmount.toFixed(2));
                 $('#previewMethodFee').text('$' + methodFee.toFixed(2));
                 $('#previewTotalUSD').text('$' + totalUsdAmount.toFixed(2));
-                $('#previewCoins').text(coins.toLocaleString('vi-VN') + ' xu');
+                $('#previewCoins').text(coins.toLocaleString('vi-VN') + ' cám');
                 $('#previewPaymentMethod').text(paymentMethodText);
 
                 // Highlight total amount if there's a method fee
@@ -996,7 +663,7 @@
             function showConfirmModal(data) {
                 $('#confirmPaymentContent').text(data.payment_content);
                 $('#confirmAmount').text(data.usd_amount_formatted);
-                $('#confirmCoins').text(data.coins.toLocaleString() + ' xu');
+                $('#confirmCoins').text(data.coins.toLocaleString() + ' cám');
 
                 // Add payment method info to modal
                 const paymentMethodBadge = data.payment_method === 'goods_services' ?

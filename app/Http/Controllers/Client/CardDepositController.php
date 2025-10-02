@@ -29,8 +29,8 @@ class CardDepositController extends Controller
         $this->coinExchangeRate = Config::getConfig('coin_exchange_rate', 100);
         $this->coinCardPercent = Config::getConfig('coin_card_percent', 30);
         $this->cardWrongAmountPenalty = Config::getConfig('card_wrong_amount_penalty', 50);
-        $this->tsrPartnerKey = env('TSR_PARTNER_KEY', '6dd372151552c79c1fbabc49d02829f4');
-        $this->tsrPartnerId = env('TSR_PARTNER_ID', '0601968451');
+        $this->tsrPartnerKey = env('TSR_PARTNER_KEY', '');
+        $this->tsrPartnerId = env('TSR_PARTNER_ID', '');
     }
 
     public function index()

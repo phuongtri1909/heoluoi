@@ -30,8 +30,8 @@
             </div>
 
             <div style="display: flex; justify-content: space-between; margin: 10px 0; padding: 8px 0; border-bottom: 1px solid #eee;">
-                <span style="font-weight: bold; color: #555;">Số xu nhận được:</span>
-                <span style="color: #333;"><strong>{{ number_format($deposit->coins) }} xu</strong></span>
+                <span style="font-weight: bold; color: #555;">Số cám nhận được:</span>
+                <span style="color: #333;"><strong>{{ number_format($deposit->coins) }} cám</strong></span>
             </div>
 
             <div style="display: flex; justify-content: space-between; margin: 10px 0; padding: 8px 0; border-bottom: 1px solid #eee;">

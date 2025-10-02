@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('bank_id')->constrained();
             $table->string('transaction_code')->unique();
             $table->unsignedBigInteger('amount');
-            $table->unsignedInteger('coins')->comment('số lượng xu sau khi trừ phí');
+            $table->unsignedInteger('coins')->comment('số lượng cám sau khi trừ phí');
             $table->unsignedInteger('fee')->comment('phí giao dịch');
             $table->boolean('is_completed')->default(false);
             $table->unsignedBigInteger('deposit_id')->nullable();

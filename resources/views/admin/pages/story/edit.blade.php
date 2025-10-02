@@ -172,7 +172,7 @@
 
                                 <div id="combo-pricing-container" class="mt-3" style="{{ $story->has_combo ? '' : 'display: none;' }}">
                                     <div class="form-group">
-                                        <label for="combo_price">Giá combo (xu) <span class="text-danger">*</span></label>
+                                        <label for="combo_price">Giá combo (cám) <span class="text-danger">*</span></label>
                                         <input type="number" name="combo_price" id="combo_price" 
                                                class="form-control @error('combo_price') is-invalid @enderror"
                                                value="{{ old('combo_price', $story->combo_price) }}" min="0">
@@ -193,8 +193,8 @@
                                         <h6>Thông tin combo:</h6>
                                         <p class="mb-1">- Tổng số chương: <span id="total-chapters">{{ $totalChapters }}</span></p>
                                         <p class="mb-1">- Số chương trả phí: <span id="paid-chapters">{{ $paidChapters }}</span></p>
-                                        <p class="mb-1">- Tổng giá nếu mua lẻ: <span id="total-regular-price">{{ $totalRegularPrice }}</span> xu</p>
-                                        <p class="mb-1">- Tiết kiệm: <span id="savings">{{ $savings }}</span> xu (<span id="savings-percent">{{ $savingsPercent }}</span>%)</p>
+                                        <p class="mb-1">- Tổng giá nếu mua lẻ: <span id="total-regular-price">{{ $totalRegularPrice }}</span> cám</p>
+                                        <p class="mb-1">- Tiết kiệm: <span id="savings">{{ $savings }}</span> cám (<span id="savings-percent">{{ $savingsPercent }}</span>%)</p>
                                     </div>
                                 </div>
 

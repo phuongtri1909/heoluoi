@@ -79,7 +79,7 @@
                                     </th>
                                     <th
                                         class="text-center text-uppercase  text-xxs font-weight-bolder ">
-                                        Số xu
+                                        Số cám
                                     </th>
                                     <th
                                         class="text-center text-uppercase  text-xxs font-weight-bolder ">

@@ -7,9 +7,9 @@
                 <div class="card-header pb-0">
                     <div class="d-flex flex-row justify-content-between">
                         <div>
-                            <h5 class="mb-0">Quản lý nạp xu</h5>
+                            <h5 class="mb-0">Quản lý nạp cám</h5>
                             <p class="text-sm mb-0">
-                                Quản lý các giao dịch nạp xu của người dùng
+                                Quản lý các giao dịch nạp cám của người dùng
                             </p>
                         </div>
                         <div>
@@ -65,7 +65,7 @@
                                         Số tiền
                                     </th>
                                     <th class="text-uppercase  text-xxs font-weight-bolder ">
-                                        Xu
+                                        Cám
                                     </th>
                                     <th class="text-uppercase  text-xxs font-weight-bolder ">
                                         Trạng thái
@@ -110,7 +110,7 @@
                                             <p class="text-xs font-weight-bold mb-0">{{ number_format($deposit->amount, 0, ',', '.') }} VNĐ</p>
                                         </td>
                                         <td>
-                                            <p class="text-xs font-weight-bold mb-0">{{ number_format($deposit->coins, 0, ',', '.') }} xu</p>
+                                            <p class="text-xs font-weight-bold mb-0">{{ number_format($deposit->coins, 0, ',', '.') }} cám</p>
                                         </td>
                                         <td>
                                             @php
@@ -235,11 +235,11 @@
                                     <h6 class="text-sm">Mã giao dịch: <span class="text-dark">{{ $deposit->transaction_code }}</span></h6>
                                     <h6 class="text-sm">Người dùng: <span class="text-dark">{{ $deposit->user->name }}</span></h6>
                                     <h6 class="text-sm">Số tiền: <span class="text-dark">{{ number_format($deposit->amount, 0, ',', '.') }} VNĐ</span></h6>
-                                    <h6 class="text-sm">Số xu: <span class="text-dark">{{ number_format($deposit->coins, 0, ',', '.') }} xu</span></h6>
+                                    <h6 class="text-sm">Số cám: <span class="text-dark">{{ number_format($deposit->coins, 0, ',', '.') }} cám</span></h6>
                                 </div>
                             </div>
                             <div class="alert alert-info text-white text-sm">
-                                Bạn có chắc chắn muốn duyệt giao dịch này? Người dùng sẽ được cộng {{ number_format($deposit->coins, 0, ',', '.') }} xu vào tài khoản.
+                                Bạn có chắc chắn muốn duyệt giao dịch này? Người dùng sẽ được cộng {{ number_format($deposit->coins, 0, ',', '.') }} cám vào tài khoản.
                             </div>
                         </div>
                         <div class="modal-footer">

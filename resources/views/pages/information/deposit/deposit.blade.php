@@ -1,32 +1,14 @@
 @extends('layouts.information')
 
-@section('info_title', 'Nạp xu')
-@section('info_description', 'Nạp xu vào tài khoản của bạn trên ' . request()->getHost())
-@section('info_keyword', 'nạp xu, thanh toán, ' . request()->getHost())
-@section('info_section_title', 'Nạp xu')
-@section('info_section_desc', 'Nạp xu vào tài khoản để sử dụng các dịch vụ cao cấp')
+@section('info_title', 'Nạp cám')
+@section('info_description', 'Nạp cám vào tài khoản của bạn trên ' . request()->getHost())
+@section('info_keyword', 'nạp cám, thanh toán, ' . request()->getHost())
+@section('info_section_title', 'Nạp cám')
+@section('info_section_desc', 'Nạp cám vào tài khoản để sử dụng các dịch vụ cao cấp')
 
 @push('styles')
     <style>
-        .bank-card {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .bank-card:hover {
-            border-color: #ced4da;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .bank-card.selected {
-            border-color: var(--primary-color-3);
-            background-color: rgba(var(--primary-rgb), 0.05);
-        }
-
+        /* Bank specific styles */
         .bank-logo {
             width: 80px;
             height: 40px;
@@ -38,18 +20,7 @@
             color: #555;
         }
 
-        .transaction-item {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            transition: all 0.3s;
-        }
-
-        .transaction-item:hover {
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-        }
-
+        /* Bank deposit specific styles */
         .transaction-image {
             max-width: 100%;
             height: auto;
@@ -75,75 +46,7 @@
             border-radius: 5px;
         }
 
-        /* Cải thiện hiệu ứng nút copy */
-        .copy-button {
-            border: none;
-            background-color: transparent;
-            color: var(--primary-color-3);
-            padding: 0.25rem 0.5rem;
-            margin-left: 0.5rem;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .copy-button:hover {
-            background-color: rgba(var(--primary-rgb), 0.1);
-            color: var(--primary-color-2);
-        }
-
-        .copy-button:focus {
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.25);
-        }
-
-        .copy-button i {
-            font-size: 0.875rem;
-        }
-
-        /* Đảm bảo phần nội dung có thể sao chép có thể chọn được */
-        .payment-info-value {
-            user-select: all;
-            cursor: text;
-        }
-
-        /* Thiết kế cho thông báo copy */
-        .copy-toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 8px 15px;
-            border-radius: 4px;
-            font-size: 14px;
-            z-index: 9999;
-            opacity: 0.9;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-            animation: fadeInUp 0.3s ease;
-        }
-
-        .copy-toast.success {
-            background-color: #198754;
-            color: white;
-        }
-
-        .copy-toast.error {
-            background-color: #dc3545;
-            color: white;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 0.9;
-                transform: translateY(0);
-            }
-        }
-
-        /* Cải thiện khả năng tương tác cho thông tin thanh toán */
+        /* Payment info value interactions */
         .payment-info-value {
             position: relative;
             user-select: all;
@@ -162,24 +65,7 @@
             outline: none;
         }
 
-        /* Hiệu ứng khi sao chép thành công */
-        .copy-success {
-            animation: flashSuccess 0.5s;
-        }
-
-        @keyframes flashSuccess {
-
-            0%,
-            100% {
-                background-color: transparent;
-            }
-
-            50% {
-                background-color: rgba(25, 135, 84, 0.1);
-            }
-        }
-
-        /* Kiểu dáng cho modal lý do */
+        /* Bank specific reason modal */
         .reason-content {
             background-color: #f8f9fa;
             border-radius: 8px;
@@ -199,34 +85,6 @@
         .show-reason-btn:hover {
             text-decoration: underline;
         }
-
-        .deposit-tabs {
-            border-bottom: 2px solid #e9ecef;
-            margin-bottom: 30px;
-        }
-
-        .deposit-tab {
-            padding: 15px 25px;
-            background: transparent;
-            border: none;
-            color: #6c757d;
-            font-weight: 500;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            border-bottom: 3px solid transparent;
-        }
-
-        .deposit-tab:hover {
-            color: var(--primary-color-3);
-            background-color: rgba(13, 110, 253, 0.05);
-            text-decoration: none;
-        }
-
-        .deposit-tab.active {
-            color: var(--primary-color-3);
-            border-bottom-color: var(--primary-color-3);
-            background-color: rgba(13, 110, 253, 0.05);
-        }
     </style>
 @endpush
 
@@ -235,6 +93,9 @@
     <div class="deposit-tabs d-flex mb-4">
         <a href="{{ route('user.deposit') }}" class="deposit-tab active">
             <i class="fas fa-university me-2"></i>Bank
+        </a>
+        <a href="" class="deposit-tab">
+            <i class="fas fa-university me-2"></i>Bank auto
         </a>
         <a href="{{ route('user.card.deposit') }}" class="deposit-tab">
             <i class="fas fa-credit-card me-2"></i>Card
@@ -249,12 +110,12 @@
             <div class="col-lg-8">
                 <div class="">
                     <div class="deposit-card-header">
-                        <h5 class="mb-0">Nạp xu qua chuyển khoản ngân hàng</h5>
+                        <h5 class="mb-0">Nạp cám qua chuyển khoản ngân hàng</h5>
                     </div>
                     <div class="deposit-card-body">
                         <!-- Debug info (remove in production) -->
                         <div class="alert alert-info d-none">
-                            <p>Tỷ giá hiện tại: 1 xu = {{ number_format($coinExchangeRate) }} VNĐ</p>
+                            <p>Tỷ giá hiện tại: 1 cám = {{ number_format($coinExchangeRate) }} VNĐ</p>
                             <p>Phí giao dịch: {{ $coinBankPercent }}%</p>
                         </div>
 
@@ -306,7 +167,7 @@
                                 <div class="deposit-coin-preview mt-4">
                                     <div class="row align-items-center">
                                         <div class="col">
-                                            <div class="small text-white opacity-75">Xu nhận được:</div>
+                                            <div class="small text-white opacity-75">Cám nhận được:</div>
                                             <div class="coin-preview-value">
                                                 <i class="fas fa-coins me-2"></i> <span id="coinsPreview">50</span>
                                             </div>
@@ -315,7 +176,7 @@
                                     </div>
                                     {{-- <div class="small text-white opacity-75 mt-2">
                                         <i class="fas fa-info-circle me-1"></i> Tỷ giá:
-                                        {{ number_format($coinExchangeRate) }} VNĐ = 1 xu
+                                        {{ number_format($coinExchangeRate) }} VNĐ = 1 cám
                                     </div> --}}
                                     {{-- <div class="small text-white opacity-75 mt-1">
                                         <i class="fas fa-percentage me-1"></i> Phí giao dịch:
@@ -337,13 +198,13 @@
                     <div class="coins-balance">
                         <i class="fas fa-coins coins-icon"></i> {{ number_format(Auth::user()->coins ?? 0) }}
                     </div>
-                    <div class="coins-label">Số xu hiện có trong tài khoản</div>
+                    <div class="coins-label">Số cám hiện có trong tài khoản</div>
 
                     <div class="coins-info">
-                        <p class="mb-2"><i class="fas fa-chevron-right me-2"></i> Dùng xu để đọc truyện trả phí</p>
-                        <p class="mb-2"><i class="fas fa-chevron-right me-2"></i> Dùng xu để mở khóa các tính năng cao cấp
+                        <p class="mb-2"><i class="fas fa-chevron-right me-2"></i> Dùng cám để đọc truyện trả phí</p>
+                        <p class="mb-2"><i class="fas fa-chevron-right me-2"></i> Dùng cám để mở khóa các tính năng cao cấp
                         </p>
-                        <p class="mb-0"><i class="fas fa-chevron-right me-2"></i> Thời gian xử lý nạp xu: 24h sau khi
+                        <p class="mb-0"><i class="fas fa-chevron-right me-2"></i> Thời gian xử lý nạp cám: 24h sau khi
                             thanh toán</p>
                     </div>
                 </div>
@@ -364,7 +225,7 @@
                                         <th style="width: 15%">Mã giao dịch</th>
                                         <th style="width: 15%">Ngân hàng</th>
                                         <th style="width: 15%">Số tiền</th>
-                                        <th style="width: 15%">Xu</th>
+                                        <th style="width: 15%">Cám</th>
                                         <th style="width: 15%">Ngày tạo</th>
                                         <th style="width: 10%">Trạng thái</th>
                                         <th style="width: 15%">Biên lai</th>
@@ -443,7 +304,7 @@
                                 <i class="fas fa-exchange-alt empty-transactions-icon"></i>
                             </div>
                             <h5>Chưa có giao dịch nào</h5>
-                            <p class="empty-transactions-text">Bạn chưa thực hiện giao dịch nạp xu nào. Hãy nạp xu để sử
+                            <p class="empty-transactions-text">Bạn chưa thực hiện giao dịch nạp cám nào. Hãy nạp cám để sử
                                 dụng các tính năng trả phí.</p>
                         </div>
                     @endif
@@ -586,13 +447,13 @@
                         </div>
 
                         <div class="alert alert-info mt-4">
-                            <i class="fas fa-info-circle me-2"></i> Sau khi gửi chứng từ thanh toán, yêu cầu nạp xu của bạn
+                            <i class="fas fa-info-circle me-2"></i> Sau khi gửi chứng từ thanh toán, yêu cầu nạp cám của bạn
                             sẽ được xử lý trong vòng 24 giờ làm việc.
                         </div>
 
                         <div class="d-grid gap-2 mt-4">
                             <button type="submit" class="btn payment-btn" id="evidenceSubmitBtn">
-                                <i class="fas fa-paper-plane me-2"></i> Gửi yêu cầu nạp xu
+                                <i class="fas fa-paper-plane me-2"></i> Gửi yêu cầu nạp cám
                             </button>
                         </div>
                     </form>
@@ -680,7 +541,7 @@
                 }, 100);
             });
 
-            // Cập nhật preview số xu
+            // Cập nhật preview số cám
             $('#amount').on('input', function() {
                 updateCoinPreview();
             });
@@ -1024,7 +885,7 @@
                     complete: function() {
                         // Khôi phục trạng thái nút
                         $('#evidenceSubmitBtn').prop('disabled', false).html(
-                            '<i class="fas fa-paper-plane me-2"></i> Gửi yêu cầu nạp xu');
+                            '<i class="fas fa-paper-plane me-2"></i> Gửi yêu cầu nạp cám');
                     }
                 });
             });
@@ -1396,7 +1257,7 @@
                     }
                 });
 
-                // Gọi tính toán xu ngay khi trang tải xong để hiển thị số xu tính từ 50.000
+                // Gọi tính toán cám ngay khi trang tải xong để hiển thị số cám tính từ 50.000
                 updateCoinPreview();
             });
         </script>

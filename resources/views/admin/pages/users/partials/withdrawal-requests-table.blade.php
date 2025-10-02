@@ -1,9 +1,9 @@
 @forelse($data as $request)
     <tr>
         <td>{{ $request->id }}</td>
-        <td>{{ number_format($request->coins) }} xu</td>
-        <td>{{ number_format($request->fee) }} xu</td>
-        <td>{{ number_format($request->net_amount) }} xu</td>
+        <td>{{ number_format($request->coins) }} cám</td>
+        <td>{{ number_format($request->fee) }} cám</td>
+        <td>{{ number_format($request->net_amount) }} cám</td>
         <td>
             @if($request->status === 'pending')
                 <span class="badge bg-warning">Chờ duyệt</span>

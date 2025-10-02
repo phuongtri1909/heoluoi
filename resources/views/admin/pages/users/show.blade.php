@@ -140,7 +140,7 @@
                                     <div class="d-flex justify-content-between">
                                         <div>
                                             <h5 class="text-white mb-0">{{ number_format($stats['balance']) }}</h5>
-                                            <p class="mb-0 text-sm">Số xu hiện tại</p>
+                                            <p class="mb-0 text-sm">Số cám hiện tại</p>
                                         </div>
                                         <div class="icon-shape bg-white text-center rounded-circle shadow">
                                             <i class="fas fa-coins text-primary"></i>
@@ -155,7 +155,7 @@
                                     <div class="d-flex justify-content-between">
                                         <div>
                                             <h5 class="text-white mb-0">{{ number_format($stats['total_deposits']) }}</h5>
-                                            <p class="mb-0 text-sm">Tổng xu đã nạp</p>
+                                            <p class="mb-0 text-sm">Tổng cám đã nạp</p>
                                         </div>
                                         <div class="icon-shape bg-white text-center rounded-circle shadow">
                                             <i class="fas fa-wallet text-success"></i>
@@ -170,7 +170,7 @@
                                     <div class="d-flex justify-content-between">
                                         <div>
                                             <h5 class="text-white mb-0">{{ number_format($stats['total_spent']) }}</h5>
-                                            <p class="mb-0 text-sm">Tổng xu đã chi</p>
+                                            <p class="mb-0 text-sm">Tổng cám đã chi</p>
                                         </div>
                                         <div class="icon-shape bg-white text-center rounded-circle shadow">
                                             <i class="fas fa-shopping-cart text-danger"></i>
@@ -208,7 +208,7 @@
                     <ul class="nav nav-tabs mt-4" role="tablist">
                         <li class="nav-item">
                             <a class="nav-link active" data-bs-toggle="tab" href="#deposits" role="tab">
-                                <i class="fas fa-wallet me-1"></i> Nạp xu (Bank)
+                                <i class="fas fa-wallet me-1"></i> Nạp cám (Bank)
                                 <span class="badge bg-primary rounded-pill">{{ $counts['deposits'] }}</span>
                             </a>
                         </li>
@@ -270,13 +270,13 @@
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" data-bs-toggle="tab" href="#coin-transactions" role="tab">
-                                <i class="fas fa-coins me-1"></i> Cộng/Trừ xu
+                                <i class="fas fa-coins me-1"></i> Cộng/Trừ cám
                                 <span class="badge bg-primary rounded-pill">{{ $counts['coin_transactions'] }}</span>
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" data-bs-toggle="tab" href="#coin-history" role="tab">
-                                <i class="fas fa-history me-1"></i> Lịch sử xu
+                                <i class="fas fa-history me-1"></i> Lịch sử cám
                                 <span class="badge bg-info rounded-pill">{{ $counts['coin_histories'] ?? 0 }}</span>
                             </a>
                         </li>
@@ -294,7 +294,7 @@
                                             <th>Ngân hàng</th>
                                             <th>Mã giao dịch</th>
                                             <th>Số tiền</th>
-                                            <th>Số xu</th>
+                                            <th>Số cám</th>
                                             <th>Trạng thái</th>
                                             <th>Ngày nạp</th>
                                             <th>Ngày duyệt</th>
@@ -322,7 +322,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="8" class="text-center">Chưa có giao dịch nạp xu</td>
+                                                <td colspan="8" class="text-center">Chưa có giao dịch nạp cám</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
@@ -349,7 +349,7 @@
                                             <th>ID</th>
                                             <th>Mã giao dịch</th>
                                             <th>Số tiền USD</th>
-                                            <th>Số xu</th>
+                                            <th>Số cám</th>
                                             <th>Trạng thái</th>
                                             <th>Ngày nạp</th>
                                             <th>Ngày duyệt</th>
@@ -398,7 +398,7 @@
                                             <th>Loại thẻ</th>
                                             <th>Serial</th>
                                             <th>Mệnh giá</th>
-                                            <th>Số xu</th>
+                                            <th>Số cám</th>
                                             <th>Trạng thái</th>
                                             <th>Ngày nạp</th>
                                         </tr>
@@ -444,7 +444,7 @@
                                         <tr>
                                             <th>ID</th>
                                             <th>Truyện</th>
-                                            <th>Số xu</th>
+                                            <th>Số cám</th>
                                             <th>Ngày mua</th>
                                         </tr>
                                     </thead>
@@ -489,7 +489,7 @@
                                             <th>ID</th>
                                             <th>Truyện</th>
                                             <th>Chương</th>
-                                            <th>Số xu</th>
+                                            <th>Số cám</th>
                                             <th>Ngày mua</th>
                                         </tr>
                                     </thead>
@@ -537,7 +537,7 @@
                                             <th>Người mua</th>
                                             <th>Truyện</th>
                                             <th>Chương</th>
-                                            <th>Số xu nhận</th>
+                                            <th>Số cám nhận</th>
                                             <th>Ngày mua</th>
                                         </tr>
                                     </thead>
@@ -552,7 +552,7 @@
                                                     </a>
                                                 </td>
                                                 <td>Chương {{ $earning->chapter->number }}: {{ Str::limit($earning->chapter->title, 30) }}</td>
-                                                <td class="text-success fw-bold">+{{ number_format($earning->amount_received) }} xu</td>
+                                                <td class="text-success fw-bold">+{{ number_format($earning->amount_received) }} cám</td>
                                                 <td>{{ $earning->created_at->format('d/m/Y H:i') }}</td>
                                             </tr>
                                         @empty
@@ -584,7 +584,7 @@
                                             <th>ID</th>
                                             <th>Người mua</th>
                                             <th>Truyện</th>
-                                            <th>Số xu nhận</th>
+                                            <th>Số cám nhận</th>
                                             <th>Ngày mua</th>
                                         </tr>
                                     </thead>
@@ -598,7 +598,7 @@
                                                         {{ $earning->story->title ?? 'Không xác định' }}
                                                     </a>
                                                 </td>
-                                                <td class="text-success fw-bold">+{{ number_format($earning->amount_received) }} xu</td>
+                                                <td class="text-success fw-bold">+{{ number_format($earning->amount_received) }} cám</td>
                                                 <td>{{ $earning->created_at->format('d/m/Y H:i') }}</td>
                                             </tr>
                                         @empty
@@ -744,7 +744,7 @@
                         <div class="tab-pane" id="coin-transactions" role="tabpanel">
                             <div class="d-flex justify-content-end mt-3">
                                 <a href="{{ route('admin.coins.create', $user->id) }}" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-plus me-1"></i> Cộng/Trừ xu
+                                    <i class="fas fa-plus me-1"></i> Cộng/Trừ cám
                                 </a>
                             </div>
                             <div class="table-responsive mt-3">
@@ -753,7 +753,7 @@
                                         <tr>
                                             <th>ID</th>
                                             <th>Loại giao dịch</th>
-                                            <th>Số xu</th>
+                                            <th>Số cám</th>
                                             <th>Admin thực hiện</th>
                                             <th>Ghi chú</th>
                                             <th>Thời gian</th>
@@ -765,9 +765,9 @@
                                                 <td>{{ $transaction->id }}</td>
                                                 <td>
                                                     @if($transaction->type === 'add')
-                                                        <span class="badge bg-success">Cộng xu</span>
+                                                        <span class="badge bg-success">Cộng cám</span>
                                                     @else
-                                                        <span class="badge bg-danger">Trừ xu</span>
+                                                        <span class="badge bg-danger">Trừ cám</span>
                                                     @endif
                                                 </td>
                                                 <td>{{ number_format($transaction->amount) }}</td>
@@ -777,7 +777,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="6" class="text-center">Chưa có giao dịch xu nào</td>
+                                                <td colspan="6" class="text-center">Chưa có giao dịch cám nào</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
@@ -804,7 +804,7 @@
                                             <th>Thời gian</th>
                                             <th>Loại giao dịch</th>
                                             <th>Mô tả</th>
-                                            <th>Số xu</th>
+                                            <th>Số cám</th>
                                             <th>Số dư trước</th>
                                             <th>Số dư sau</th>
                                             <th>IP</th>
@@ -836,14 +836,14 @@
                                                 </td>
                                                 <td>
                                                     <span class="fw-bold text-{{ $history->type == 'add' ? 'success' : 'danger' }}">
-                                                        {{ $history->formatted_amount }} xu
+                                                        {{ $history->formatted_amount }} cám
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <span class="fw-bold">{{ number_format($history->balance_before) }} xu</span>
+                                                    <span class="fw-bold">{{ number_format($history->balance_before) }} cám</span>
                                                 </td>
                                                 <td>
-                                                    <span class="fw-bold">{{ number_format($history->balance_after) }} xu</span>
+                                                    <span class="fw-bold">{{ number_format($history->balance_after) }} cám</span>
                                                 </td>
                                                 <td>
                                                     <small class="text-muted">{{ $history->ip_address }}</small>
@@ -854,7 +854,7 @@
                                                 <td colspan="7" class="text-center py-4">
                                                     <div class="text-muted">
                                                         <i class="fas fa-inbox fa-3x mb-3"></i>
-                                                        <p>Chưa có lịch sử xu nào</p>
+                                                        <p>Chưa có lịch sử cám nào</p>
                                                     </div>
                                                 </td>
                                             </tr>

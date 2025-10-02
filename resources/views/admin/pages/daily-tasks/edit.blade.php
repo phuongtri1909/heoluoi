@@ -53,7 +53,7 @@
 
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="coin_reward" class="form-control-label">Thưởng xu</label>
+                                <label for="coin_reward" class="form-control-label">Thưởng cám</label>
                                 <input type="number" name="coin_reward" id="coin_reward" class="form-control @error('coin_reward') is-invalid @enderror"
                                     value="{{ old('coin_reward', $dailyTask->coin_reward) }}" min="0" required>
                                 @error('coin_reward')

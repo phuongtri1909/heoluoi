@@ -105,7 +105,7 @@
                         class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
                         <i class="fa-solid fa-university text-dark icon-sidebar"></i>
                     </div>
-                    <span class="nav-link-text ms-1">Nạp xu - Bank</span>
+                    <span class="nav-link-text ms-1">Nạp cám - Bank</span>
                     @php
                         $pendingDepositsCount = \App\Models\Deposit::where('status', 'pending')->count();
                     @endphp
@@ -122,7 +122,7 @@
                         class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
                         <i class="fab fa-paypal text-dark icon-sidebar"></i>
                     </div>
-                    <span class="nav-link-text ms-1">Nạp xu - PayPal
+                    <span class="nav-link-text ms-1">Nạp cám - PayPal
                         @php
                             $pendingPaypalCount = \App\Models\PaypalDeposit::where('status', 'processing')->count();
                         @endphp
@@ -140,7 +140,7 @@
                         class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
                         <i class="fa-solid fa-credit-card text-dark icon-sidebar"></i>
                     </div>
-                    <span class="nav-link-text ms-1">Nạp xu - Thẻ cào</span>
+                    <span class="nav-link-text ms-1">Nạp cám - Thẻ cào</span>
                 </a>
             </li>
 
@@ -187,7 +187,7 @@
                         class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
                         <i class="fa-solid fa-coins text-dark icon-sidebar"></i>
                     </div>
-                    <span class="nav-link-text ms-1">Quản lý xu</span>
+                    <span class="nav-link-text ms-1">Quản lý cám</span>
                 </a>
             </li>
 
@@ -198,7 +198,7 @@
                         class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
                         <i class="fa-solid fa-history text-dark icon-sidebar"></i>
                     </div>
-                    <span class="nav-link-text ms-1">Kiểm soát xu thủ công</span>
+                    <span class="nav-link-text ms-1">Kiểm soát cám thủ công</span>
                 </a>
             </li>
 
@@ -209,7 +209,7 @@
                         class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
                         <i class="fa-solid fa-history text-dark icon-sidebar"></i>
                     </div>
-                    <span class="nav-link-text ms-1">Lịch sử xu</span>
+                    <span class="nav-link-text ms-1">Lịch sử cám</span>
                 </a>
             </li>
 

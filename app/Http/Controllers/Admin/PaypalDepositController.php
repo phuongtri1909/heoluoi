@@ -58,7 +58,7 @@ class PaypalDepositController extends Controller
 
             DB::commit();
 
-            return back()->with('success', 'Đã duyệt giao dịch PayPal thành công. Xu đã được cộng vào tài khoản người dùng.');
+            return back()->with('success', 'Đã duyệt giao dịch PayPal thành công. Cám đã được cộng vào tài khoản người dùng.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());

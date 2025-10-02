@@ -7,7 +7,7 @@
             <div class="card mb-4">
                 <div class="card-header pb-0">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h6>Cộng/Trừ xu cho người dùng</h6>
+                        <h6>Cộng/Trừ cám cho người dùng</h6>
                         <a href="{{ route('admin.coins.index') }}" class="btn btn-secondary btn-sm">Quay lại</a>
                     </div>
                 </div>
@@ -25,7 +25,7 @@
                         </div>
                         <div class="col-md-6 text-end">
                             <div class="bg-gradient-primary text-white p-3 rounded">
-                                <h6 class="mb-0">Số xu hiện tại</h6>
+                                <h6 class="mb-0">Số cám hiện tại</h6>
                                 <h3 class="mb-0">{{ number_format($user->coins) }}</h3>
                             </div>
                         </div>
@@ -42,7 +42,7 @@
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="amount" class="form-control-label">Số xu</label>
+                                    <label for="amount" class="form-control-label">Số cám</label>
                                     <input type="number" class="form-control @error('amount') is-invalid @enderror" 
                                            id="amount" name="amount" min="1" value="{{ old('amount', 1) }}" required>
                                     @error('amount')
@@ -54,8 +54,8 @@
                                 <div class="form-group">
                                     <label for="type" class="form-control-label">Loại giao dịch</label>
                                     <select class="form-control @error('type') is-invalid @enderror" id="type" name="type" required>
-                                        <option value="add" {{ old('type') === 'add' ? 'selected' : '' }}>Cộng xu</option>
-                                        <option value="subtract" {{ old('type') === 'subtract' ? 'selected' : '' }}>Trừ xu</option>
+                                        <option value="add" {{ old('type') === 'add' ? 'selected' : '' }}>Cộng cám</option>
+                                        <option value="subtract" {{ old('type') === 'subtract' ? 'selected' : '' }}>Trừ cám</option>
                                     </select>
                                     @error('type')
                                     <div class="invalid-feedback">{{ $message }}</div>

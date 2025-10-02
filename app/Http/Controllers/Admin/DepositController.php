@@ -26,9 +26,9 @@ class DepositController extends Controller
 
     public function __construct()
     {
-        $this->coinBankPercent = Config::getConfig('coin_bank_percent', 15);
-        $this->coinPayPalPercent = Config::getConfig('coin_paypal_percent', 0);
-        $this->coinCardPercent = Config::getConfig('coin_card_percent', 30);
+        $this->coinBankPercent = Config::getConfig('coin_bank_percentage', 15);
+        $this->coinPayPalPercent = Config::getConfig('coin_paypal_percentage', 0);
+        $this->coinCardPercent = Config::getConfig('coin_card_percentage', 30);
 
         $this->coinExchangeRate = Config::getConfig('coin_exchange_rate', 100);
         $this->coinPayPalRate = Config::getConfig('coin_paypal_rate', 20000);
@@ -68,7 +68,7 @@ class DepositController extends Controller
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'Đã phê duyệt giao dịch và cộng ' . $deposit->coins . ' xu vào tài khoản người dùng.');
+            return redirect()->back()->with('success', 'Đã phê duyệt giao dịch và cộng ' . $deposit->coins . ' cám vào tài khoản người dùng.');
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Error approving deposit: ' . $e->getMessage());

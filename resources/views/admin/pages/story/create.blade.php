@@ -130,7 +130,7 @@
 
                                 <div id="combo-pricing-container" class="mt-3" style="display: none;">
                                     <div class="form-group">
-                                        <label for="combo_price">Giá combo (xu) <span class="text-danger">*</span></label>
+                                        <label for="combo_price">Giá combo (cám) <span class="text-danger">*</span></label>
                                         <input type="number" name="combo_price" id="combo_price" 
                                                class="form-control @error('combo_price') is-invalid @enderror"
                                                value="{{ old('combo_price', 0) }}" min="0">

@@ -26,8 +26,8 @@
                 <div class="user-sidebar">
                     <div class="user-header rounded-4 mb-3 py-2">
                         <div class="user-header-bg"></div>
-                        <div class="user-header-content ">
-                            <div class="d-flex align-items-center justify-content-center">
+                        <div class="user-header-content text-center">
+                            <div class="d-flex flex-column align-items-center justify-content-center">
                                 <div class="user-avatar-wrapper">
                                     @if (!empty(Auth::user()->avatar))
                                         <img class="user-avatar" src="{{ Storage::url(Auth::user()->avatar) }}"
@@ -39,13 +39,13 @@
                                     @endif
                                 </div>
                                 <div class="ms-3">
-                                    <h5 class="user-info-name">{{ Auth::user()->name }}</h5>
-                                    <div class="user-info-email">{{ Auth::user()->email }}</div>
+                                    <h5 class="user-info-name color-1">{{ Auth::user()->name }}</h5>
+                                    <div class="user-info-email color-text fw-semibold">{{ Auth::user()->email }}</div>
                                 </div>
                             </div>
                             <div class="text-white text-shadow-custom px-4 mt-3 fs-24 fw-bold">
                                 <i class="fa-solid fa-sack-dollar"></i>
-                                <span>{{ number_format(Auth::user()->coins) }} <span class="fs-15"> Xu</span> </span>
+                                <span>{{ number_format(Auth::user()->coins) }} Cám </span>
                             </div>
                         </div>
                     </div>
@@ -53,7 +53,7 @@
                     <div class="user-nav box-shadow-custom rounded-4">
                         <div class="user-nav-item">
                             <a href="{{ route('user.profile') }}"
-                                class="user-nav-link text-decoration-none hover-color-3 {{ request()->routeIs('user.profile') ? 'active' : '' }}">
+                                class="user-nav-link text-decoration-none hover-color-7 {{ request()->routeIs('user.profile') ? 'active' : '' }}">
                                 <i class="fa-solid fa-user user-nav-icon"></i>
                                 <span class="user-nav-text">Thông tin cá nhân</span>
                             </a>
@@ -61,7 +61,7 @@
 
                         <div class="user-nav-item">
                             <a href="{{ route('user.reading.history') }}"
-                                class="user-nav-link text-decoration-none hover-color-3 {{ request()->routeIs('user.reading.history') ? 'active' : '' }}">
+                                class="user-nav-link text-decoration-none hover-color-7 {{ request()->routeIs('user.reading.history') ? 'active' : '' }}">
                                 <i class="fa-solid fa-book-open user-nav-icon"></i>
                                 <span class="user-nav-text">Lịch sử đọc truyện</span>
                             </a>
@@ -69,7 +69,7 @@
 
                         <div class="user-nav-item">
                             <a href="{{ route('user.purchases') }}"
-                                class="user-nav-link text-decoration-none hover-color-3 {{ request()->routeIs('user.purchases*') ? 'active' : '' }}">
+                                class="user-nav-link text-decoration-none hover-color-7 {{ request()->routeIs('user.purchases*') ? 'active' : '' }}">
                                 <i class="fa-solid fa-shopping-cart user-nav-icon"></i>
                                 <span class="user-nav-text">Truyện đã mua</span>
                             </a>
@@ -77,7 +77,7 @@
 
                         <div class="user-nav-item">
                             <a href="{{ route('user.bookmarks') }}"
-                                class="user-nav-link text-decoration-none hover-color-3 {{ request()->routeIs('user.bookmarks') ? 'active' : '' }}">
+                                class="user-nav-link text-decoration-none hover-color-7 {{ request()->routeIs('user.bookmarks') ? 'active' : '' }}">
                                 <i class="fa-solid fa-bookmark user-nav-icon"></i>
                                 <span class="user-nav-text">Truyện đã lưu</span>
                             </a>
@@ -85,7 +85,7 @@
 
                         <div class="user-nav-item">
                             <a href="{{ route('user.daily-tasks') }}"
-                                class="user-nav-link text-decoration-none hover-color-3 {{ request()->routeIs('user.daily-tasks') ? 'active' : '' }}">
+                                class="user-nav-link text-decoration-none hover-color-7 {{ request()->routeIs('user.daily-tasks') ? 'active' : '' }}">
                                 <i class="fa-solid fa-tasks user-nav-icon"></i>
                                 <span class="user-nav-text">Nhiệm vụ hàng ngày</span>
                                 @php
@@ -107,17 +107,17 @@
 
                         <div class="user-nav-item">
                             <a href="{{ route('user.deposit') }}"
-                                class="user-nav-link text-decoration-none hover-color-3 {{ request()->routeIs('user.deposit*') ? 'active' : '' }}">
+                                class="user-nav-link text-decoration-none hover-color-7 {{ request()->routeIs('user.deposit*') ? 'active' : '' }}">
                                 <i class="fa-solid fa-coins user-nav-icon"></i>
-                                <span class="user-nav-text">Nạp xu</span>
+                                <span class="user-nav-text">Nạp cám</span>
                             </a>
                         </div>
 
                         <div class="user-nav-item">
                             <a href="{{ route('user.coin-history') }}"
-                                class="user-nav-link text-decoration-none hover-color-3 {{ request()->routeIs('user.coin-history') ? 'active' : '' }}">
+                                class="user-nav-link text-decoration-none hover-color-7 {{ request()->routeIs('user.coin-history') ? 'active' : '' }}">
                                 <i class="fa-solid fa-history user-nav-icon"></i>
-                                <span class="user-nav-text">Lịch sử xu</span>
+                                <span class="user-nav-text">Lịch sử cám</span>
                             </a>
                         </div>
 

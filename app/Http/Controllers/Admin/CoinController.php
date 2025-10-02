@@ -50,9 +50,9 @@ class CoinController extends Controller
             'type' => 'required|in:add,subtract',
             'note' => 'nullable|string|max:500',
         ], [
-            'amount.required' => 'Vui lòng nhập số xu',
-            'amount.integer' => 'Số xu phải là số nguyên',
-            'amount.min' => 'Số xu phải lớn hơn 0',
+            'amount.required' => 'Vui lòng nhập số cám',
+            'amount.integer' => 'Số cám phải là số nguyên',
+            'amount.min' => 'Số cám phải lớn hơn 0',
             'type.required' => 'Vui lòng chọn loại giao dịch',
             'type.in' => 'Loại giao dịch không hợp lệ',
             'note.max' => 'Ghi chú không được vượt quá 500 ký tự',
@@ -76,7 +76,7 @@ class CoinController extends Controller
                 $user->coins += $request->amount;
             } else {
                 if ($user->coins < $request->amount) {
-                    return redirect()->back()->with('error', 'Người dùng không đủ xu để trừ');
+                    return redirect()->back()->with('error', 'Người dùng không đủ cám để trừ');
                 }
 
                 $user->coins -= $request->amount;
@@ -87,13 +87,13 @@ class CoinController extends Controller
             DB::commit();
 
             return redirect()->route('admin.coins.index')
-                ->with('success', 'Giao dịch xu thành công');
+                ->with('success', 'Giao dịch cám thành công');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error processing coin transaction: ' . $e->getMessage());
 
             return redirect()->back()
-                ->with('error', 'Có lỗi xảy ra khi xử lý giao dịch xu');
+                ->with('error', 'Có lỗi xảy ra khi xử lý giao dịch cám');
         }
     }
 

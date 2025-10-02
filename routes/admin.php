@@ -79,7 +79,7 @@ Route::group(['as' => 'admin.'], function () {
         Route::delete('logo-site/delete-logo', [LogoSiteController::class, 'deleteLogo'])->name('logo-site.delete-logo');
         Route::delete('logo-site/delete-favicon', [LogoSiteController::class, 'deleteFavicon'])->name('logo-site.delete-favicon');
 
-        // Quản lý giao dịch nạp xu
+        // Quản lý giao dịch nạp cám
         Route::get('/deposits', [DepositController::class, 'adminIndex'])->name('deposits.index');
         Route::post('/deposits/{deposit}/approve', [DepositController::class, 'approve'])->name('deposits.approve');
         Route::post('/deposits/{deposit}/reject', [DepositController::class, 'reject'])->name('deposits.reject');

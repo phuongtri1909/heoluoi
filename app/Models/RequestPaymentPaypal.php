@@ -134,7 +134,7 @@ class RequestPaymentPaypal extends Model
      */
     public function generatePaymentContent()
     {
-        return "NAP XU {$this->transaction_code} {$this->usd_amount_formatted}";
+        return "NAP CAM {$this->transaction_code} {$this->usd_amount_formatted}";
     }
 
     /**

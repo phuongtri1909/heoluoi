@@ -17,7 +17,7 @@ return new class extends Migration
             $table->enum('payment_type', ['paypal', 'bank'])->default('paypal');
             $table->decimal('usd_amount', 10, 2)->nullable(); // Cho PayPal
             $table->decimal('vnd_amount', 15, 0); // Số tiền VNĐ
-            $table->integer('coins'); // Số xu sẽ nhận được
+            $table->integer('coins'); // Số cám sẽ nhận được
             $table->decimal('exchange_rate', 10, 2)->nullable(); // Tỷ giá USD -> VNĐ
             $table->decimal('fee_percent', 5, 2)->default(0); // Phí %
             $table->decimal('fee_amount', 15, 0)->default(0); // Phí VNĐ

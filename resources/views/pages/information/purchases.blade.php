@@ -50,7 +50,7 @@
                                     <div class="d-flex justify-content-between align-items-center mt-2">
                                         <span class="purchase-details">
                                             <i class="fas fa-coins text-warning"></i>
-                                            <span>{{ number_format($purchase->price) }} xu</span>
+                                            <span>{{ number_format($purchase->price) }} cám</span>
                                         </span>
                                         <a href="{{ route('chapter', [$purchase->chapter->story->slug, $purchase->chapter->slug]) }}"
                                            class="btn btn-sm action-btn-primary">
@@ -104,7 +104,7 @@
                                     <div class="d-flex justify-content-between align-items-center">
                                         <span class="purchase-details">
                                             <i class="fas fa-coins text-warning"></i>
-                                            <span>{{ number_format($purchase->price) }} xu</span>
+                                            <span>{{ number_format($purchase->price) }} cám</span>
                                         </span>
                                         <a href="{{ route('show.page.story', $purchase->story->slug) }}"
                                            class="btn btn-sm action-btn-primary">

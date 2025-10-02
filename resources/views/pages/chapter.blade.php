@@ -195,7 +195,7 @@
                                         <div class="story-purchase-option p-3 border rounded bg-light">
                                             <h5 class="fw-bold">Mua trọn bộ truyện</h5>
                                             <p class="price mb-2"><i class="fas fa-coins text-warning"></i>
-                                                {{ number_format($story->combo_price) }} xu</p>
+                                                {{ number_format($story->combo_price) }} cám</p>
                                             <p class="text-success small">
 
                                                 <i class="fas fa-check-circle"></i> Truy cập tất cả
