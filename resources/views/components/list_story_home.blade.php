@@ -49,24 +49,24 @@
             .slider-item {
                 flex: 0 0 auto;
                 width: calc(50% - 0.5rem);
-                min-width: 150px;
+                min-width: 120px;
             }
 
             @media (min-width: 576px) {
-                .slider-item {
-                    width: calc(33.333% - 0.67rem);
-                }
-            }
-
-            @media (min-width: 768px) {
                 .slider-item {
                     width: calc(25% - 0.75rem);
                 }
             }
 
+            @media (min-width: 768px) {
+                .slider-item {
+                    width: calc(20% - 0.8rem);
+                }
+            }
+
             @media (min-width: 992px) {
                 .slider-item {
-                    width: calc(16.666% - 0.83rem);
+                    width: calc(14.28% - 0.86rem);
                 }
             }
 
@@ -166,9 +166,9 @@
 
                 function getItemsPerView() {
                     const width = window.innerWidth;
-                    if (width >= 992) return 6; // lg
-                    if (width >= 768) return 4; // md
-                    if (width >= 576) return 3; // sm
+                    if (width >= 992) return 7;
+                    if (width >= 768) return 5;
+                    if (width >= 576) return 4;
                     return 2;
                 }
 

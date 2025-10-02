@@ -24,7 +24,7 @@
     <div class="story-info px-2 text-sm text-gray-600 fw-semibold">
         <div>
             <h5 class="story-title mb-0 text-sm fw-semibold lh-base">
-                <a href="{{ route('show.page.story', $story->slug) }}" class="text-decoration-none text-dark">
+                <a href="{{ route('show.page.story', $story->slug) }}" class="text-decoration-none text-dark fw-bold fs-6">
                     {{ $story->title }}
                 </a>
             </h5>
@@ -56,7 +56,7 @@
         <style>
             .story-thumbnail {
                 position: relative;
-                padding-top: 150%;
+                padding-top: 140%;
                 overflow: hidden;
                 border-top-left-radius: inherit;
                 border-top-right-radius: inherit;
