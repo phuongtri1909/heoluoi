@@ -37,13 +37,6 @@ class DailyTaskSeeder extends Seeder
                 'max_per_day' => 1,
                 'order' => 3,
             ],
-            [
-                'name' => 'Chia sẻ truyện',
-                'type' => DailyTask::TYPE_SHARE,
-                'description' => 'Chia sẻ truyện lên mạng xã hội để nhận thưởng',
-                'max_per_day' => 1,
-                'order' => 4,
-            ],
         ];
 
         foreach ($defaultTasks as $task) {

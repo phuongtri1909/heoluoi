@@ -63,19 +63,19 @@ class ConfigSeeder extends Seeder
 
         Config::setConfig(
             'daily_task_login_reward',
-            1,
+            10,
             'Số cám thưởng khi hoàn thành nhiệm vụ đăng nhập hàng ngày'
         );
 
         Config::setConfig(
             'daily_task_comment_reward',
-            1,
+            10,
             'Số cám thưởng khi hoàn thành nhiệm vụ bình luận truyện'
         );
 
         Config::setConfig(
             'daily_task_bookmark_reward',
-            1,
+            10,
             'Số cám thưởng khi hoàn thành nhiệm vụ theo dõi truyện'
         );
     }

@@ -25,12 +25,12 @@
 
 body {
     font-family: 'Segoe UI', 'Segoe UI Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-    letter-spacing: 0.5px;
     background-color: var(--primary-bg-3);
 }
 
 .font-svn-apple{
     font-family: 'SVN-Apple', sans-serif !important;
+    letter-spacing: 2px;
 }
 
 .color-hover{

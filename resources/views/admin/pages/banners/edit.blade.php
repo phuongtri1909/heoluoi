@@ -91,7 +91,7 @@
     </div>
 </div>
 
-@push('scripts')
+@push('scripts-admin')
 <script>
     function toggleLinkField() {
         const storyIdSelect = document.getElementById('story_id');

@@ -63,6 +63,11 @@ Route::middleware(['ban:login'])->group(function () {
             ->name('reading.save-progress');
     });
 
+    // Chapter Report Routes
+    Route::middleware(['auth'])->group(function () {
+        Route::post('/chapter-report', [App\Http\Controllers\Client\ChapterReportController::class, 'store'])->name('chapter.report.store');
+    });
+
     Route::post('/comments/{comment}/react', [CommentController::class, 'react'])->name('comments.react');
     Route::get('/stories/{storyId}/comments', [CommentController::class, 'loadComments'])->name('comments.load');
 
@@ -78,6 +83,7 @@ Route::middleware(['ban:login'])->group(function () {
         Route::post('/reading-history/clear', [UserController::class, 'clearReadingHistory'])->name('reading.history.clear');
         Route::get('purchases', [UserController::class, 'userPurchases'])->name('purchases');
         Route::get('/coin-history', [CoinHistoryController::class, 'index'])->name('coin-history');
+        Route::get('/chapter-reports', [App\Http\Controllers\Client\ChapterReportController::class, 'userReports'])->name('chapter.reports');
 
         Route::get('/bookmarks', [BookmarkController::class, 'getUserBookmarks'])->name('bookmarks');
         Route::post('/bookmark/toggle', [BookmarkController::class, 'toggle'])->name('bookmark.toggle');

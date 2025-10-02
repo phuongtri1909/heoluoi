@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\CardDepositController;
 use App\Http\Controllers\Admin\CoinHistoryController;
 use App\Http\Controllers\Admin\RequestPaymentController;
 use App\Http\Controllers\Admin\PaypalDepositController;
+use App\Http\Controllers\Admin\ChapterReportController;
 
 
 Route::group(['as' => 'admin.'], function () {
@@ -121,5 +122,12 @@ Route::group(['as' => 'admin.'], function () {
         Route::post('daily-tasks/{dailyTask}/toggle-active', [DailyTaskController::class, 'toggleActive'])->name('daily-tasks.toggle-active');
         Route::get('daily-tasks/dt/user-progress', [DailyTaskController::class, 'userProgress'])->name('daily-tasks.user-progress');
         Route::get('daily-tasks/dt/statistics', [DailyTaskController::class, 'statistics'])->name('daily-tasks.statistics');
+
+        // Chapter Reports Management
+        Route::get('chapter-reports', [ChapterReportController::class, 'index'])->name('chapter-reports.index');
+        Route::get('chapter-reports/{report}', [ChapterReportController::class, 'show'])->name('chapter-reports.show');
+        Route::put('chapter-reports/{report}/status', [ChapterReportController::class, 'updateStatus'])->name('chapter-reports.update.status');
+        Route::post('chapter-reports/bulk-update', [ChapterReportController::class, 'bulkUpdate'])->name('chapter-reports.bulk-update');
+        Route::get('chapter-reports/stats/api', [ChapterReportController::class, 'statsApi'])->name('chapter-reports.stats.api');
     });
 });

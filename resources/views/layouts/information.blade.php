@@ -121,6 +121,14 @@
                             </a>
                         </div>
 
+                        <div class="user-nav-item">
+                            <a href="{{ route('user.chapter.reports') }}"
+                                class="user-nav-link text-decoration-none hover-color-7 {{ request()->routeIs('user.chapter.reports') ? 'active' : '' }}">
+                                <i class="fa-solid fa-flag user-nav-icon"></i>
+                                <span class="user-nav-text">Báo cáo của tôi</span>
+                            </a>
+                        </div>
+
                         <div class="user-nav-item user-nav-logout">
                             <a href="{{ route('logout') }}" class="user-nav-link text-danger text-decoration-none">
                                 <i class="fa-solid fa-arrow-right-from-bracket user-nav-icon"></i>

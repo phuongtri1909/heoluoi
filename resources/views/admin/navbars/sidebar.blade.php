@@ -170,6 +170,24 @@
             </li>
 
             <li class="nav-item">
+                <a class="nav-link {{ Route::currentRouteNamed('admin.chapter-reports.*') ? 'active' : '' }}"
+                    href="{{ route('admin.chapter-reports.index') }}">
+                    <div
+                        class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="fa-solid fa-flag text-dark icon-sidebar"></i>
+                    </div>
+                    <span class="nav-link-text ms-1">Báo cáo lỗi chương
+                        @php
+                            $pendingReportCount = \App\Models\ChapterReport::where('status', 'pending')->count();
+                        @endphp
+                        @if ($pendingReportCount > 0)
+                            <span class="badge bg-danger ms-2">{{ $pendingReportCount }}</span>
+                        @endif
+                    </span>
+                </a>
+            </li>
+
+            <li class="nav-item">
                 <a class="nav-link {{ Route::currentRouteNamed('admin.users.*') ? 'active' : '' }}"
                     href="{{ route('admin.users.index') }}">
                     <div

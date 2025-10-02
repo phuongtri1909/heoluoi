@@ -279,9 +279,15 @@
                     </div>
 
                     <div class="text-center">
-                        <a href="" class="btn btn-danger">
-                            <i class="fas fa-exclamation-triangle me-1"></i> Báo lỗi chương
-                        </a>
+                        @auth
+                            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#reportChapterModal">
+                                <i class="fas fa-exclamation-triangle me-1"></i> Báo lỗi chương
+                            </button>
+                        @else
+                            <a href="{{ route('login') }}" class="btn btn-danger">
+                                <i class="fas fa-exclamation-triangle me-1"></i> Báo lỗi chương
+                            </a>
+                        @endauth
                     </div>
                 </div>
             </div>
@@ -309,6 +315,7 @@
 
     @auth
         @include('components.modals.chapter-purchase-modal')
+        @include('components.modals.chapter-report-modal')
     @endauth
 @endsection
 

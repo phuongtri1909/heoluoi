@@ -108,7 +108,7 @@
 </div>
 @endsection
 
-@push('scripts')
+@push('scripts-admin')
 <script>
     $(document).ready(function() {
         // Preview for logo

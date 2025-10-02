@@ -38,7 +38,7 @@
                 .slider {
                     position: relative;
                     width: 100%;
-                    height: 500px;
+                    height: 350px;
                     perspective: 1500px;
                     overflow: hidden;
                     user-select: none;
@@ -55,8 +55,8 @@
                     background: #ddd;
                     transform: translate(-50%, -50%);
                     transition: transform .45s cubic-bezier(.2, .8, .2, 1),
-                               opacity .45s cubic-bezier(.2, .8, .2, 1),
-                               z-index .45s;
+                        opacity .45s cubic-bezier(.2, .8, .2, 1),
+                        z-index .45s;
                     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
                     max-width: 100%;
                 }
@@ -247,7 +247,7 @@
                     function update() {
                         const isMobile = window.innerWidth <= 768;
                         const isSmallMobile = window.innerWidth <= 480;
-                        const gap = isSmallMobile ? 100 : isMobile ? 120 : 160;
+                        const gap = isSmallMobile ? 80 : isMobile ? 100 : 110; // giảm gap để đủ hiển thị 7 slides
                         const n = slides.length;
 
                         slides.forEach((slide, i) => {
@@ -257,18 +257,23 @@
 
                             const abs = Math.abs(offset);
                             let scale, opacity, zIndex;
+
                             if (abs === 0) {
                                 scale = 1;
                                 opacity = 1;
                                 zIndex = 10;
                             } else if (abs === 1) {
-                                scale = 0.85;
+                                scale = 0.9;
                                 opacity = 0.9;
                                 zIndex = 9;
                             } else if (abs === 2) {
+                                scale = 0.8;
+                                opacity = 0.75;
+                                zIndex = 8;
+                            } else if (abs === 3) {
                                 scale = 0.7;
                                 opacity = 0.6;
-                                zIndex = 8;
+                                zIndex = 7;
                             } else {
                                 scale = 0.5;
                                 opacity = 0;
@@ -281,6 +286,7 @@
                                 `translate(-50%,-50%) translateX(${offset * gap}px) scale(${scale})`;
                         });
                     }
+
 
                     function prev() {
                         active = (active - 1 + slides.length) % slides.length;
@@ -323,6 +329,13 @@
 
                     // Responsive update
                     window.addEventListener('resize', update);
+
+                    // Autoplay 5s
+                    let autoplay = setInterval(next, 5000);
+
+                    // Dừng khi hover để user điều khiển
+                    slider.addEventListener('mouseenter', () => clearInterval(autoplay));
+                    slider.addEventListener('mouseleave', () => autoplay = setInterval(next, 5000));
 
                     update();
                 });
