@@ -322,7 +322,7 @@ class CommentController extends Controller
 
         try {
             $approvalStatus = 'pending';
-            if ($user->role === 'admin') {
+            if ($user->role === 'admin_main' || $user->role === 'admin_sub') {
                 $approvalStatus = 'approved';
             } elseif ($story->user_id === $user->id) {
                 $approvalStatus = 'approved';
@@ -340,17 +340,6 @@ class CommentController extends Controller
             ]);
 
             $comment->load(['user', 'reactions']);
-
-            \App\Models\UserDailyTask::completeTask(
-                $user->id,
-                \App\Models\DailyTask::TYPE_COMMENT,
-                [
-                    'story_id' => $validated['story_id'],
-                    'comment_id' => $comment->id,
-                    'comment_time' => now()->toISOString(),
-                ],
-                $request
-            );
 
         $pinnedComments = Comment::with(['user', 'replies.user', 'reactions'])
             ->where('story_id', $validated['story_id'])

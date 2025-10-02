@@ -37,7 +37,7 @@
                             <hr class="flex-grow-1 border-top border-secondary">
                         </div>
 
-                        <form action="{{ route('login') }}" method="post">
+                        <form action="{{ route('login.post') }}" method="post">
                             @csrf
                             <div class="mb-4">
                                 <div class="form-floating">

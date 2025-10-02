@@ -56,7 +56,7 @@ Route::middleware(['ban:login'])->group(function () {
     Route::get('/banner/{banner}', [BannerController::class, 'click'])->name('banner.click');
 
     Route::middleware(['ban:read'])->group(function () {
-        Route::get('/story/{storySlug}/{chapterSlug}', [HomeController::class, 'chapterByStory'])->name('chapter');
+        Route::get('/story/{storySlug}/chapter/{chapterSlug}', [HomeController::class, 'chapterByStory'])->name('chapter');
         Route::post('/story/{storySlug}/{chapterSlug}/check-password', [HomeController::class, 'checkChapterPassword'])->name('chapter.check-password');
         Route::get('/search-chapters', [HomeController::class, 'searchChapters'])->name('chapters.search');
         Route::post('/reading/save-progress', [ReadingController::class, 'saveProgress'])
@@ -140,12 +140,12 @@ Route::middleware(['ban:login'])->group(function () {
         Route::get('/login', function () {
             return view('pages.auth.login');
         })->name('login');
-        Route::post('/login', [AuthController::class, 'login'])->name('login');
+        Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
         Route::get('/register', function () {
             return view('pages.auth.register');
         })->name('register');
-        Route::post('/register', [AuthController::class, 'register'])->name('register');
+        Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 
         Route::get('/forgot-password', function () {
             return view('pages.auth.forgot-password');

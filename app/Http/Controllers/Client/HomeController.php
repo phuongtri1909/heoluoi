@@ -1399,30 +1399,38 @@ class HomeController extends Controller
         return redirect()->route('show.page.story', $story->slug);
     }
 
+
     public function chapterByStory($storySlug, $chapterSlug)
     {
-        // First find the story by slug
+        
         $story = Story::where('slug', $storySlug)->firstOrFail();
 
-        // Then find the chapter that belongs to this story
-        $query = Chapter::where('slug', $chapterSlug)
-            ->where('story_id', $story->id);
+        $isNumber = is_numeric($chapterSlug);
+        
+        if ($isNumber) {
+            $query = Chapter::where(function($q) use ($chapterSlug) {
+                $q->where('number', $chapterSlug)
+                  ->orWhere('id', $chapterSlug);
+            })->where('story_id', $story->id);
+        } else {
+            $query = Chapter::where('slug', $chapterSlug)
+                ->where('story_id', $story->id);
+        }
 
-        // Apply permissions
         if (Auth::check()) {
-            if (in_array(Auth::user()->role, ['admin', 'mod', 'author'])) {
-                // Admin, mod, and author can see all chapters
+            if (in_array(Auth::user()->role, ['admin_main', 'admin_sub'])) {
                 $chapter = $query->firstOrFail();
             } else {
-                // Regular users can only see published chapters
                 $chapter = $query->where('status', 'published')->firstOrFail();
             }
         } else {
-            // Guests can only see published chapters
             $chapter = $query->where('status', 'published')->firstOrFail();
         }
 
-        // Get client IP for view count
+        if ($isNumber && $chapter->slug !== $chapterSlug) {
+            return redirect()->route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug], 301);
+        }
+
         $ip = request()->ip();
         $sessionKey = "chapter_view_{$chapter->id}_{$ip}";
 
@@ -1446,8 +1454,7 @@ class HomeController extends Controller
             ->where('number', '<', $chapter->number)
             ->orderBy('number', 'desc');
 
-        // Apply published filter for non-admin/mod users
-        if (!Auth::check() || !in_array(Auth::user()->role, ['admin', 'mod', 'author'])) {
+        if (!Auth::check() || !in_array(Auth::user()->role, ['admin_main', 'admin_sub'])) {
             $nextChapterQuery->where('status', 'published');
             $prevChapterQuery->where('status', 'published');
         }
@@ -1455,13 +1462,12 @@ class HomeController extends Controller
         $nextChapter = $nextChapterQuery->first();
         $prevChapter = $prevChapterQuery->first();
 
-        // Get recent chapters from this story
         $recentChaptersQuery = Chapter::where('story_id', $story->id)
             ->where('id', '!=', $chapter->id)
             ->orderBy('number', 'desc')
             ->take(5);
 
-        if (!Auth::check() || !in_array(Auth::user()->role, ['admin', 'mod', 'author'])) {
+        if (!Auth::check() || !in_array(Auth::user()->role, ['admin_main', 'admin_sub'])) {
             $recentChaptersQuery->where('status', 'published');
         }
 
@@ -1618,7 +1624,7 @@ class HomeController extends Controller
         }
 
         // Visibility check
-        if (!Auth::check() || !in_array(Auth::user()->role, ['admin', 'mod'])) {
+        if (!Auth::check() || !in_array(Auth::user()->role, ['admin_main', 'admin_sub'])) {
             $query->where('status', 'published');
         }
 

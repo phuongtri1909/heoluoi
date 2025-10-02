@@ -121,7 +121,7 @@
                 submitButton.html('<span class="loading-spinner"></span> Đang xử lý...');
 
                 $.ajax({
-                    url: '{{ route('register') }}',
+                    url: '{{ route('register.post') }}',
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -238,7 +238,7 @@
 
 
                                 $.ajax({
-                                    url: '{{ route('register') }}',
+                                    url: '{{ route('register.post') }}',
                                     method: 'POST',
                                     data: formData,
                                     processData: false,

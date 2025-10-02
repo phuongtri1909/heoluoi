@@ -181,7 +181,7 @@ class CommentController extends Controller
      */
     public function approve($commentId)
     {
-        $comment = Comment::findOrFail($commentId);
+        $comment = Comment::with('user')->findOrFail($commentId);
         
         if (auth()->user()->role !== 'admin_main' && auth()->user()->role !== 'admin_sub') {
             return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
@@ -192,6 +192,21 @@ class CommentController extends Controller
             'approved_at' => now(),
             'approved_by' => auth()->id()
         ]);
+
+        // Complete daily task for comment when approved
+        $user = $comment->user;
+        if ($user && $user->role !== 'admin_main' && $user->role !== 'admin_sub') {
+            \App\Models\UserDailyTask::completeTask(
+                $comment->user_id,
+                \App\Models\DailyTask::TYPE_COMMENT,
+                [
+                    'story_id' => $comment->story_id,
+                    'comment_id' => $comment->id,
+                    'comment_time' => $comment->approved_at->toISOString(),
+                ],
+                request()
+            );
+        }
 
         return response()->json([
             'status' => 'success',

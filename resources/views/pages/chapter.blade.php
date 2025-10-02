@@ -124,7 +124,7 @@
                         @else
                             <div class="chapter-preview">
                                 <!-- Hiển thị thông báo mua chương -->
-                                <div class="purchase-notice bg-light p-4 rounded-3 text-center my-4">
+                                <div class="purchase-notice p-4 rounded-3 text-center my-4">
                                     <div class="mb-3">
                                         <p class="fw-semibold mb-0">Bạn cần ủng hộ {{ $story->price }} Cám để đọc chương
                                             này</p>
@@ -492,7 +492,6 @@
 
         /* Purchase notice styles */
         .purchase-notice {
-            background-color: #f8f9fa;
             border: 1px solid #e9ecef;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             transition: all 0.3s ease;
