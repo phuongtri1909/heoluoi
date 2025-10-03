@@ -20,40 +20,12 @@ $(document).on("click", "#togglePasswordConfirm", function () {
     $(this).toggleClass("fa-eye fa-eye-slash");
 });
 
-//toast
-function showToast(message, status) {
-    document.addEventListener("DOMContentLoaded", function () {
-        const toastElement = document.getElementById("liveToast");
-        if (!toastElement) return;
-
-        const toastBody = toastElement.querySelector(".toast-body");
-        if (!toastBody) return;
-
-        // Update message
-        toastBody.textContent = message;
-
-        // Remove existing classes
-        toastElement.classList.remove("bg-success", "bg-danger", "text-white");
-
-        // Add new classes based on status
-        if (status === "success") {
-            toastElement.classList.add("bg-success", "text-white");
-        } else if (status === "error") {
-            toastElement.classList.add("bg-danger", "text-white");
-        }
-
-        // Initialize and show toast
-        const bsToast = new bootstrap.Toast(toastElement);
-        bsToast.show();
-    });
-}
 
 //save toast
-
-function saveToast(message, status) {
+window.saveToast = function(message, status) {
     sessionStorage.setItem("toastMessage", message);
     sessionStorage.setItem("toastStatus", status);
-}
+};
 
 //show toast
 function showSavedToast() {
@@ -67,9 +39,12 @@ function showSavedToast() {
     }
 }
 
-//otp
+document.addEventListener("DOMContentLoaded", function () {
+    showSavedToast();
+});
 
-function handleInput(element) {
+//otp
+window.handleInput = function(element) {
     $(element).val(
         $(element)
             .val()
@@ -82,7 +57,7 @@ function handleInput(element) {
             nextInput.focus();
         }
     }
-}
+};
 
 $(document).on("keydown", ".otp-input", function (e) {
     if (e.key === "Backspace" || e.key === "Delete") {

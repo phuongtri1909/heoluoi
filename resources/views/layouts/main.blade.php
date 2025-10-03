@@ -36,6 +36,8 @@
 
     <div class="">
         @include('components.toast-main')
+        @include('components.sweetalert')
+        @include('components.toast')
         @yield('content-main')
     </div>
 
@@ -43,10 +45,6 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @vite('resources/assets/frontend/js/script.js')
-
-    <script>
-        showSavedToast();
-    </script>
 
     @stack('scripts-main')
 </body>
