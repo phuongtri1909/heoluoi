@@ -43,8 +43,8 @@
                                     <div class="user-info-email color-text fw-semibold">{{ Auth::user()->email }}</div>
                                 </div>
                             </div>
-                            <div class="text-white text-shadow-custom px-4 mt-3 fs-24 fw-bold">
-                                <i class="fa-solid fa-sack-dollar"></i>
+                            <div class="text-white text-shadow-custom px-4 mt-3 fs-24 fw-bold d-flex align-items-center justify-content-center">
+                                <img class="me-2" src="{{ asset('images/d/cam.png') }}" alt="Coin" style="width: 20px; height: 20px;">
                                 <span>{{ number_format(Auth::user()->coins) }} Cám </span>
                             </div>
                         </div>
