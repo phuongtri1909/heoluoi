@@ -40,11 +40,17 @@
                                         </h6>
                                         <small class="text-muted ms-2">{{ Carbon\Carbon::parse($purchase->created_at)->diffForHumans() }}</small>
                                     </div>
-                                    <div class="story-chapter">
-                                        <a href="{{ route('chapter', [$purchase->chapter->story->slug, $purchase->chapter->slug]) }}">
-                                            <i class="fas fa-bookmark me-1 text-primary"></i>
-                                            Chương {{ $purchase->chapter->number }}: {{ $purchase->chapter->title }}
-                                        </a>
+                                    <div class="story-details mb-2">
+                                        <span class="badge bg-primary me-2">
+                                            <i class="fas fa-bookmark me-1"></i> Chương VIP
+                                        </span>
+                                        <span class="text-muted">
+                                            <i class="fas fa-book-open me-1"></i>
+                                            <a href="{{ route('chapter', [$purchase->chapter->story->slug, $purchase->chapter->slug]) }}"
+                                               class="text-decoration-none">
+                                                Chương {{ $purchase->chapter->number }}: {{ $purchase->chapter->title }}
+                                            </a>
+                                        </span>
                                     </div>
 
                                     <div class="d-flex justify-content-between align-items-center mt-2">
@@ -160,17 +166,11 @@
         }
 
         .story-thumb {
-            width: 45px;
-            height: 60px;
+            width: 70px !important;
+            height: 120px !important;
             object-fit: cover;
             border-radius: 6px;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-        }
-        
-        /* Smaller thumbs specifically for combo stories */
-        #stories-content .story-thumb {
-            width: 80px;
-            height: 120px;
         }
 
         .story-title {
@@ -183,12 +183,19 @@
             text-decoration: none;
         }
 
-        .story-chapter a {
+        .story-details {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .story-details a {
             color: #666;
             text-decoration: none;
         }
 
-        .story-chapter a:hover {
+        .story-details a:hover {
             color: var(--primary-color);
         }
 
@@ -280,13 +287,7 @@
         @media (max-width: 767px) {
             .story-thumb {
                 width: 40px;
-                height: 50px;
-            }
-
-            /* Even smaller for combo stories on mobile */
-            #stories-content .story-thumb {
-                width: 30px;
-                height: 35px;
+                height: 55px;
             }
 
             .story-title {

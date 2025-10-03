@@ -14,6 +14,10 @@ class ChapterPurchase extends Model
         'chapter_id',
         'amount_paid',
         'amount_received',
+        'admin_id',
+        'reference_id',
+        'notes',
+        'added_by'
     ];
 
     /**
@@ -38,5 +42,13 @@ class ChapterPurchase extends Model
     public function getPriceAttribute()
     {
         return $this->amount_paid;
+    }
+
+    /**
+     * Get the admin who added this purchase
+     */
+    public function admin()
+    {
+        return $this->belongsTo(User::class, 'admin_id');
     }
 }

@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\CoinHistoryController;
 use App\Http\Controllers\Admin\RequestPaymentController;
 use App\Http\Controllers\Admin\PaypalDepositController;
 use App\Http\Controllers\Admin\ChapterReportController;
+use App\Http\Controllers\Admin\ManualPurchaseController;
 
 
 Route::group(['as' => 'admin.'], function () {
@@ -129,5 +130,17 @@ Route::group(['as' => 'admin.'], function () {
         Route::put('chapter-reports/{report}/status', [ChapterReportController::class, 'updateStatus'])->name('chapter-reports.update.status');
         Route::post('chapter-reports/bulk-update', [ChapterReportController::class, 'bulkUpdate'])->name('chapter-reports.bulk-update');
         Route::get('chapter-reports/stats/api', [ChapterReportController::class, 'statsApi'])->name('chapter-reports.stats.api');
+        
+        // Manual Purchases Management
+        Route::get('manual-purchases', [ManualPurchaseController::class, 'index'])->name('manual-purchases.index');
+        Route::get('manual-purchases/create', [ManualPurchaseController::class, 'create'])->name('manual-purchases.create');
+        Route::post('manual-purchases', [ManualPurchaseController::class, 'store'])->name('manual-purchases.store');
+        Route::delete('manual-purchases/story/{storyPurchase}', [ManualPurchaseController::class, 'destroyStoryPurchase'])->name('manual-purchases.destroy.story');
+        Route::delete('manual-purchases/chapter/{chapterPurchase}', [ManualPurchaseController::class, 'destroyChapterPurchase'])->name('manual-purchases.destroy.chapter');
+        
+        // AJAX endpoints
+        Route::get('manual-purchases/api/stories', [ManualPurchaseController::class, 'getStories'])->name('manual-purchases.api.stories');
+        Route::get('manual-purchases/api/chapters', [ManualPurchaseController::class, 'getChapters'])->name('manual-purchases.api.chapters');
+        Route::get('manual-purchases/api/users', [ManualPurchaseController::class, 'getUsers'])->name('manual-purchases.api.users');
     });
 });

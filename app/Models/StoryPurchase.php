@@ -13,7 +13,11 @@ class StoryPurchase extends Model
         'user_id',
         'story_id',
         'amount_paid',
-        'amount_received'
+        'amount_received',
+        'admin_id',
+        'reference_id',
+        'notes',
+        'added_by'
     ];
 
     /**
@@ -58,5 +62,13 @@ class StoryPurchase extends Model
         return self::where('user_id', $userId)
                    ->with('story')
                    ->get();
+    }
+
+    /**
+     * Get the admin who added this purchase
+     */
+    public function admin()
+    {
+        return $this->belongsTo(User::class, 'admin_id');
     }
 }
