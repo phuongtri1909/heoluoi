@@ -83,8 +83,8 @@
                                 </a>
                             </li>
                             <li class="nav-item dropdown">
-                                <a class="color-2 nav-link dropdown-toggle fw-bold fs-3 d-flex align-items-baseline" href="#"
-                                    role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <a class="color-2 nav-link dropdown-toggle fw-bold fs-3 d-flex align-items-baseline"
+                                    href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     Thể loại
                                 </a>
                                 <ul class="dropdown-menu category-menu">
@@ -119,8 +119,8 @@
                         </ul>
                     </div>
 
-                    <div class="d-flex align-items-center">
-                        <div class="search-container d-flex align-items-center me-2 d-none d-md-block d-lg-none">
+                    <div class="d-flex align-items-center d-none d-sm-block d-lg-none d-xl-block">
+                        <div class="search-container d-flex align-items-center me-2">
                             <div class="position-relative">
                                 <form action="{{ route('searchHeader') }}" method="GET">
                                     <input type="text" name="query" class="form-control search-input"
@@ -131,16 +131,20 @@
                                 </form>
                             </div>
                         </div>
-
-
                     </div>
 
-                    <div class="d-flex align-items-center">
+                    <div class="align-items-center d-none d-lg-flex">
+
+                        <button type="button" class="btn border rounded-pill bg-primary-1 d-none d-lg-block d-xl-none me-2"
+                            style="width: 40px; height: 40px;" id="mobileSearchToggle">
+                            <i class="fas fa-search"></i>
+                        </button>
+
                         @auth
-                            <a class="color-2 fw-bold nav-link d-none d-md-block" href="{{ route('login') }}">
+                            <a class="color-2 fw-bold nav-link " href="{{ route('login') }}">
                                 <div class="dropdown">
                                     <a href="#"
-                                        class="d-none d-md-block d-flex align-items-center text-decoration-none dropdown-toggle color-3 fs-3 fw-bold"
+                                        class="d-flex align-items-center text-decoration-none dropdown-toggle color-3 fs-3 fw-bold"
                                         data-bs-toggle="dropdown">
                                         <img src="{{ auth()->user()->avatar ? Storage::url(auth()->user()->avatar) : asset('images/defaults/avatar_default.jpg') }}"
                                             class="rounded-circle" width="40" height="40" alt="avatar"
@@ -160,7 +164,8 @@
                                         @endif
 
                                         <li>
-                                            <a class="dropdown-item fw-semibold color-2" href="{{ route('user.profile') }}">
+                                            <a class="dropdown-item fw-semibold color-2"
+                                                href="{{ route('user.profile') }}">
                                                 <i class="fa-regular fa-circle-user me-2 color-2"></i> Trang cá nhân
                                             </a>
                                         </li>
@@ -175,20 +180,20 @@
                             </a>
                         @else
                             <a href="{{ route('login') }}"
-                                class="btn d-none d-lg-flex align-items-center fw-bold color-3 fs-3 font-svn-apple"> <i
+                                class="btn align-items-center fw-bold color-3 fs-3 font-svn-apple"> <i
                                     class="fa-regular fa-circle-user fa-lg me-2 color-3"></i> Đăng nhập</a>
                         @endauth
                     </div>
 
-                    <div class="d-flex d-md-none">
-                        <button type="button" class="btn border rounded-pill bg-primary-1 d-md-none"
+                    <div class="d-flex d-lg-none">
+                        <button type="button" class="btn border rounded-pill bg-primary-1 d-sm-none"
                             style="width: 40px; height: 40px;" id="mobileSearchToggle">
                             <i class="fas fa-search"></i>
                         </button>
 
                         <!-- Mobile Menu Toggle Button - Visible on screens smaller than lg -->
-                        <button class="navbar-toggler border-0 d-md-none" type="button" data-bs-toggle="offcanvas"
-                            data-bs-target="#offcanvasExample">
+                        <button class="navbar-toggler border-0 d-block d-lg-none" type="button"
+                            data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample">
                             <i class="fa-solid fa-bars fa-xl"></i>
                         </button>
                     </div>
@@ -233,7 +238,8 @@
                         <div class="accordion" id="categoryAccordion">
                             <div class="accordion-item border-0">
                                 <h2 class="accordion-header" id="categoryHeading">
-                                    <button class="accordion-button collapsed mobile-menu-item p-0 fw-semibold fs-3 color-2"
+                                    <button
+                                        class="accordion-button collapsed mobile-menu-item p-0 fw-semibold fs-3 color-2"
                                         type="button" data-bs-toggle="collapse" data-bs-target="#categoryCollapse">
                                         Thể loại
                                     </button>
@@ -276,8 +282,8 @@
                             <div class="accordion" id="userAccordion">
                                 <div class="accordion-item border-0">
                                     <h2 class="accordion-header" id="userHeading">
-                                        <button class="accordion-button collapsed mobile-menu-item p-0 color-2 fs-3" type="button"
-                                            data-bs-toggle="collapse" data-bs-target="#userCollapse">
+                                        <button class="accordion-button collapsed mobile-menu-item p-0 color-2 fs-3"
+                                            type="button" data-bs-toggle="collapse" data-bs-target="#userCollapse">
                                             <img src="{{ auth()->user()->avatar ? Storage::url(auth()->user()->avatar) : asset('images/defaults/avatar_default.jpg') }}"
                                                 class="rounded-circle me-2" width="40" height="40" alt="avatar"
                                                 style="object-fit: cover;">
