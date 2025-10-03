@@ -56,7 +56,7 @@
                             <label class="form-check-label" for="is_published">Hiển thị</label>
                         </div>
 
-                        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                        <button type="submit" class="btn bg-gradient-primary">Lưu thay đổi</button>
                     </form>
                 </div>
             </div>

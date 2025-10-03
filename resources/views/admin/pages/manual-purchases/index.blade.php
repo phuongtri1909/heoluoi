@@ -8,7 +8,7 @@
                 <div class="card-header pb-0">
                     <div class="d-flex justify-content-between align-items-center">
                         <h6>Cộng/Trừ quyền truy cập cho người dùng</h6>
-                        <a href="{{ route('admin.manual-purchases.create') }}" class="btn btn-primary btn-sm">
+                        <a href="{{ route('admin.manual-purchases.create') }}" class="btn bg-gradient-primary btn-sm">
                             <i class="fas fa-plus me-2"></i>Thêm quyền truy cập
                         </a>
                     </div>

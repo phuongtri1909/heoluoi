@@ -123,7 +123,7 @@
                                 placeholder="Tìm kiếm..." value="{{ request('search') }}">
                         </div>
                         <div class="col-12">
-                            <button type="submit" class="btn btn-primary btn-sm me-2">
+                            <button type="submit" class="btn bg-gradient-primary btn-sm me-2">
                                 <i class="fas fa-search"></i> Lọc
                             </button>
                             <a href="{{ route('admin.chapter-reports.index') }}" class="btn btn-secondary btn-sm">

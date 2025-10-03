@@ -18,7 +18,7 @@ class CoinTransaction extends Model
     ];
 
     /**
-     * Get the user that received/lost the coins
+     * Get the user that received/lost the cám
      */
     public function user()
     {

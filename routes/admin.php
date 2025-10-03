@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\RequestPaymentController;
 use App\Http\Controllers\Admin\PaypalDepositController;
 use App\Http\Controllers\Admin\ChapterReportController;
 use App\Http\Controllers\Admin\ManualPurchaseController;
+use App\Http\Controllers\Admin\CoinTransferController;
 
 
 Route::group(['as' => 'admin.'], function () {
@@ -35,13 +36,13 @@ Route::group(['as' => 'admin.'], function () {
     })->name('clear.cache');
 
 
-    // Sử dụng middleware 'role' thay vì 'role.admin'
-    Route::group(['middleware' => 'role:admin_main'], function () {
+
+    Route::group(['middleware' => 'role:admin_main,admin_sub'], function () {
         Route::post('/users/{id}/banip', [UserController::class, 'banIp'])->name('users.banip');
     });
 
-    // Sử dụng middleware 'role' thay vì 'role.admin.mod'
-    Route::group(['middleware' => 'role:admin_main,mod'], function () {
+
+    Route::group(['middleware' => 'role:admin_main,admin_sub'], function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/dashboard/data', [DashboardController::class, 'getStatsData'])->name('dashboard.data');
 
@@ -50,20 +51,25 @@ Route::group(['as' => 'admin.'], function () {
         Route::PATCH('users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::get('/users/{id}/load-more', [UserController::class, 'loadMoreData'])->name('users.load-more');
 
-        // Coin management routes
-        Route::get('coins', [CoinController::class, 'index'])->name('coins.index');
-        Route::get('coin-history', [CoinHistoryController::class, 'index'])->name('coin-history.index');
-        Route::get('coin-history/user/{userId}', [CoinHistoryController::class, 'showUser'])->name('coin-history.user');
-        Route::get('coins/{user}/create', [CoinController::class, 'create'])->name('coins.create');
-        Route::post('coins/{user}', [CoinController::class, 'store'])->name('coins.store');
 
-        Route::get('coin-transactions', [CoinController::class, 'transactions'])->name('coin.transactions');
+        Route::middleware(['role:admin_main'])->group(function () {
+            Route::get('coins', [CoinController::class, 'index'])->name('coins.index');
+            Route::get('coin-history', [CoinHistoryController::class, 'index'])->name('coin-history.index');
+            Route::get('coin-history/user/{userId}', [CoinHistoryController::class, 'showUser'])->name('coin-history.user');
+            Route::get('coins/{user}/create', [CoinController::class, 'create'])->name('coins.create');
+            Route::post('coins/{user}', [CoinController::class, 'store'])->name('coins.store');
+            Route::get('coin-transactions', [CoinController::class, 'transactions'])->name('coin.transactions');
+        });
 
         Route::resource('categories', CategoryController::class);
         Route::resource('stories', StoryController::class);
         Route::patch('/stories/{story}/toggle-featured', [StoryController::class, 'toggleFeatured'])->name('stories.toggle-featured'); // NEW
         Route::post('/stories/bulk-featured', [StoryController::class, 'bulkUpdateFeatured'])->name('stories.bulk-featured');
 
+
+        Route::get('stories/{story}/chapters/bulk-create', [ChapterController::class, 'bulkCreate'])->name('stories.chapters.bulk-create');
+        Route::post('stories/{story}/chapters/bulk-store', [ChapterController::class, 'bulkStore'])->name('stories.chapters.bulk-store');
+        Route::post('stories/{story}/chapters/check-existing', [ChapterController::class, 'checkExisting'])->name('stories.chapters.check-existing');
 
         Route::resource('stories.chapters', ChapterController::class);
 
@@ -142,5 +148,13 @@ Route::group(['as' => 'admin.'], function () {
         Route::get('manual-purchases/api/stories', [ManualPurchaseController::class, 'getStories'])->name('manual-purchases.api.stories');
         Route::get('manual-purchases/api/chapters', [ManualPurchaseController::class, 'getChapters'])->name('manual-purchases.api.chapters');
         Route::get('manual-purchases/api/users', [ManualPurchaseController::class, 'getUsers'])->name('manual-purchases.api.users');
+        
+        // Coin Transfer Management (admin_sub can transfer, admin_main can monitor)
+        Route::get('coin-transfers', [CoinTransferController::class, 'index'])->name('coin-transfers.index');
+        Route::get('coin-transfers/create', [CoinTransferController::class, 'create'])->name('coin-transfers.create');
+        Route::post('coin-transfers', [CoinTransferController::class, 'store'])->name('coin-transfers.store');
+        Route::get('coin-transfers/{transfer}', [CoinTransferController::class, 'show'])->name('coin-transfers.show');
+        Route::get('coin-transfers/user-suggestions', [CoinTransferController::class, 'getUserSuggestions'])->name('coin-transfers.user-suggestions');
+        Route::get('coin-transfers/stats/api', [CoinTransferController::class, 'statsApi'])->name('coin-transfers.stats.api');
     });
 });

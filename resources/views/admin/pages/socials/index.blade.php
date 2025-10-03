@@ -144,7 +144,7 @@
                                         </div>
                                     </div>
                                     <div class="col-md-6 text-end">
-                                        <button type="submit" class="btn btn-primary">Thêm mới</button>
+                                        <button type="submit" class="btn bg-gradient-primary">Thêm mới</button>
                                     </div>
                                 </div>
                             </form>

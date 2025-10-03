@@ -7,7 +7,7 @@
             <div class="card mb-4">
                 <div class="card-header pb-0 d-flex justify-content-between align-items-center">
                     <h6>Danh sách cấu hình hệ thống</h6>
-                    <a href="{{ route('admin.configs.create') }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('admin.configs.create') }}" class="btn bg-gradient-primary btn-sm">
                         <i class="fas fa-plus"></i> Thêm cấu hình
                     </a>
                 </div>

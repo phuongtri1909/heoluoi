@@ -100,7 +100,7 @@
                 <div class="card-header pb-0">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6>Lịch sử kiểm soát cám thủ công</h6>
-                        <a href="{{ route('admin.coins.index') }}" class="btn btn-primary btn-sm">
+                        <a href="{{ route('admin.coins.index') }}" class="btn bg-gradient-primary btn-sm">
                             <i class="fas fa-plus me-1"></i> Thêm giao dịch
                         </a>
                     </div>
@@ -128,7 +128,7 @@
                                        value="{{ request('date_to') }}" placeholder="Đến ngày">
                             </div>
                             <div class="col-md-3">
-                                <button type="submit" class="btn btn-primary btn-sm me-2">
+                                <button type="submit" class="btn bg-gradient-primary btn-sm me-2">
                                     <i class="fas fa-search"></i> Tìm kiếm
                                 </button>
                                 <a href="{{ route('admin.coin.transactions') }}" class="btn btn-secondary btn-sm">

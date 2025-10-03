@@ -731,7 +731,7 @@
                                         <x-pagination :paginator="$userDailyTasks" />
                                     </div>
                                     <div class="text-center mt-3">
-                                        <button class="btn btn-sm btn-primary load-more" data-type="user-daily-tasks">
+                                        <button class="btn btn-sm bg-gradient-primary load-more" data-type="user-daily-tasks">
                                             Xem thêm <i class="fas fa-chevron-down ms-1"></i>
                                         </button>
                                     </div>
@@ -743,7 +743,7 @@
                         <!-- Coin Transactions Tab -->
                         <div class="tab-pane" id="coin-transactions" role="tabpanel">
                             <div class="d-flex justify-content-end mt-3">
-                                <a href="{{ route('admin.coins.create', $user->id) }}" class="btn btn-primary btn-sm">
+                                <a href="{{ route('admin.coins.create', $user->id) }}" class="btn bg-gradient-primary btn-sm">
                                     <i class="fas fa-plus me-1"></i> Cộng/Trừ cám
                                 </a>
                             </div>

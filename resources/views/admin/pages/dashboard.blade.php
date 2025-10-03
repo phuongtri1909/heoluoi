@@ -101,7 +101,7 @@
             @endfor
         </select>
         
-        <button id="refreshBtn" class="btn btn-primary btn-sm mb-0 px-3">
+        <button id="refreshBtn" class="btn bg-gradient-primary btn-sm mb-0 px-3">
             <i class="fas fa-sync-alt"></i> Làm mới
         </button>
     </div>

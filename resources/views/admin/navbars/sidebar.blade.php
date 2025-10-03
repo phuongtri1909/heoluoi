@@ -4,11 +4,9 @@
         <i class="fas fa-times p-3 cursor-pointer opacity-5 position-absolute end-0 top-0 d-none d-xl-none"
             aria-hidden="true" id="iconSidenav"></i>
         @php
-          
+
             $logoPath =
-                $logoSite && $logoSite->logo
-                    ? Storage::url($logoSite->logo)
-                    : asset('images/logo/logo-site.png');
+                $logoSite && $logoSite->logo ? Storage::url($logoSite->logo) : asset('images/logo/logo-site.png');
         @endphp
         <a class="d-flex m-0 justify-content-center text-wrap" href="{{ route('home') }}">
             <img height="70" class="logof_site" src="{{ $logoPath }}" alt="{{ config('app.name') }} logo">
@@ -154,10 +152,10 @@
                     <span class="nav-link-text ms-1">Quản lý Bình luận
                         @php
                             $pendingCommentsCount = \App\Models\Comment::where('approval_status', 'pending')
-                                ->whereHas('user', function($q) {
+                                ->whereHas('user', function ($q) {
                                     $q->where('role', '!=', 'admin');
                                 })
-                                ->whereDoesntHave('story', function($q) {
+                                ->whereDoesntHave('story', function ($q) {
                                     $q->whereColumn('stories.user_id', 'comments.user_id');
                                 })
                                 ->count();
@@ -209,27 +207,51 @@
                 </a>
             </li>
 
-            <li class="nav-item">
-                <a class="nav-link {{ Route::currentRouteNamed('admin.coins.*') ? 'active' : '' }}"
-                    href="{{ route('admin.coins.index') }}">
-                    <div
-                        class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-                        <i class="fa-solid fa-coins text-dark icon-sidebar"></i>
-                    </div>
-                    <span class="nav-link-text ms-1">Quản lý cám</span>
-                </a>
-            </li>
+            @if (Auth::user()->role === 'admin_main')
+                <li class="nav-item">
+                    <a class="nav-link {{ Route::currentRouteNamed('admin.coins.*') ? 'active' : '' }}"
+                        href="{{ route('admin.coins.index') }}">
+                        <div
+                            class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="fa-solid fa-coins text-dark icon-sidebar"></i>
+                        </div>
+                        <span class="nav-link-text ms-1">Quản lý cám
+                    </a>
+                </li>
 
-            <li class="nav-item">
-                <a class="nav-link {{ Route::currentRouteNamed('admin.coin.transactions') ? 'active' : '' }}"
-                    href="{{ route('admin.coin.transactions') }}">
-                    <div
-                        class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-                        <i class="fa-solid fa-history text-dark icon-sidebar"></i>
-                    </div>
-                    <span class="nav-link-text ms-1">Kiểm soát cám thủ công</span>
-                </a>
-            </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ Route::currentRouteNamed('admin.coin.transactions') ? 'active' : '' }}"
+                        href="{{ route('admin.coin.transactions') }}">
+                        <div
+                            class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="fa-solid fa-history text-dark icon-sidebar"></i>
+                        </div>
+                        <span class="nav-link-text ms-1">Kiểm soát cám thủ công</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {{ Route::currentRouteNamed('admin.coin-transfers.*') ? 'active' : '' }}"
+                        href="{{ route('admin.coin-transfers.index') }}">
+                        <div
+                            class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="fa-solid fa-exchange-alt text-dark icon-sidebar"></i>
+                        </div>
+                        <span class="nav-link-text ms-1">Giám sát chuyển cám</span>
+                    </a>
+                </li>
+            @elseif(Auth::user()->role === 'admin_sub')
+                <li class="nav-item">
+                    <a class="nav-link {{ Route::currentRouteNamed('admin.coin-transfers.*') ? 'active' : '' }}"
+                        href="{{ route('admin.coin-transfers.index') }}">
+                        <div
+                            class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="fa-solid fa-exchange-alt text-dark icon-sidebar"></i>
+                        </div>
+                        <span class="nav-link-text ms-1">Chuyển cám của tôi</span>
+                    </a>
+                </li>
+            @endif
 
             <li class="nav-item">
                 <a class="nav-link {{ Route::currentRouteNamed('admin.coin-history.index') ? 'active' : '' }}"

@@ -154,7 +154,7 @@
 
                         <!-- Submit Buttons -->
                         <div class="d-flex justify-content-end mt-4">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn bg-gradient-primary">
                                 <i class="fas fa-save me-2"></i>Lưu giao dịch
                             </button>
                         </div>

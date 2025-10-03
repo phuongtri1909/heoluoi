@@ -168,7 +168,7 @@
                 <div class="modal-body" id="actionModalBody"></div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('cancel') }}</button>
-                    <button type="button" class="btn btn-primary" id="confirmAction"></button>
+                    <button type="button" class="btn bg-gradient-primary" id="confirmAction"></button>
                 </div>
             </div>
         </div>

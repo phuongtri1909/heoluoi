@@ -170,7 +170,7 @@
                                 </div>
 
                                 <div class="d-flex justify-content-between">
-                                    <button type="submit" class="btn btn-primary">
+                                    <button type="submit" class="btn bg-gradient-primary">
                                         <i class="fas fa-cog me-1"></i> Cập nhật trạng thái
                                     </button>
                                     <a href="{{ route('admin.chapter-reports.index') }}" class="btn btn-secondary">

@@ -11,7 +11,7 @@
                         <div class="input-group w-50">
                             <form action="{{ route('admin.coins.index') }}" method="GET" class="d-flex w-100">
                                 <input type="text" class="form-control" name="search" placeholder="Tìm kiếm theo tên hoặc email..." value="{{ request('search') }}">
-                                <button class="btn btn-primary mb-0" type="submit">
+                                <button class="btn bg-gradient-primary mb-0" type="submit">
                                     <i class="fas fa-search"></i>
                                 </button>
                             </form>

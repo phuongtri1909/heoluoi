@@ -118,7 +118,7 @@
                                            value="{{ request('date_to') }}" placeholder="Đến ngày">
                                 </div>
                                 <div class="col-md-1">
-                                    <button type="submit" class="btn btn-primary">
+                                    <button type="submit" class="btn bg-gradient-primary">
                                         <i class="fas fa-search"></i>
                                     </button>
                                 </div>
