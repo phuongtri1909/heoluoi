@@ -33,6 +33,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\SecureFileUpload::class,
             \App\Http\Middleware\CheckActive::class,
         ]);
+
+        $middleware->validateCsrfTokens(except: [
+            'card-deposit/callback'
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
