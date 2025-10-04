@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\Admin\BankController;
+use App\Http\Controllers\Admin\BankAutoController;
 use App\Http\Controllers\Admin\CoinController;
 use App\Http\Controllers\Admin\GuideController;
 use App\Http\Controllers\Admin\StoryController;
@@ -98,8 +99,11 @@ Route::group(['as' => 'admin.'], function () {
         Route::get('/request-payments', [RequestPaymentController::class, 'adminIndex'])->name('request.payments.index');
         Route::post('/request-payments/delete-expired', [RequestPaymentController::class, 'deleteExpired'])->name('request.payments.delete-expired');
 
-        // Quản lý ngân hàng
+        // Quản lý ngân hàng thủ công
         Route::resource('banks', BankController::class);
+
+        // Quản lý ngân hàng tự động
+        Route::resource('bank-autos', BankAutoController::class);
 
         // Quản lý cấu hình hệ thống
         Route::resource('configs', ConfigController::class);

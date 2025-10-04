@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Client;
 
 use Carbon\Carbon;
-use App\Models\Bank;
+use App\Models\BankAuto;
 use App\Models\Config;
 use App\Models\User;
 use App\Models\BankAutoDeposit;
@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Controller;
 use App\Services\CoinService;
 
@@ -38,7 +39,7 @@ class BankAutoController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $banks = Bank::where('status', true)->get();
+        $banks = BankAuto::where('status', true)->get();
         
         $coinExchangeRate = $this->coinExchangeRate;
         $coinBankAutoPercent = $this->coinBankAutoPercent;
@@ -83,30 +84,33 @@ class BankAutoController extends Controller
     }
 
     /**
-     * Tính toán bonus dựa trên số tiền nạp
+     * Tính toán bonus theo công thức hàm mũ
+     * Công thức: bonus = a * (amount)^b
+     * Trong đó:
+     * - b = log(300000/100000)(1000/300) = log3(3.333...) ≈ 1.096
+     * - a = 300/(100000)^b
      */
     private function calculateBonus($amount)
     {
-        $bonus = 0;
-        
-        // Nếu nạp >= bonus_base_amount thì có bonus cơ bản
-        if ($amount >= $this->bonusBaseAmount) {
-            $bonus += $this->bonusBaseCam;
+        // Không có bonus dưới mốc cơ bản
+        if ($amount < $this->bonusBaseAmount) {
+            return 0;
         }
         
-        // Nếu nạp >= bonus_double_amount thì có bonus gấp đôi
-        if ($amount >= $this->bonusDoubleAmount) {
-            $bonus += $this->bonusDoubleCam;
-        }
+        // Tính số mũ b
+        // b = log(300000/100000)(1000/300) = log3(3.333...) ≈ 1.096
+        $ratioAmount = $this->bonusDoubleAmount / $this->bonusBaseAmount; // 300000/100000 = 3
+        $ratioBonus = $this->bonusDoubleCam / $this->bonusBaseCam; // 1000/300 = 3.333...
+        $b = log($ratioBonus) / log($ratioAmount); // ≈ 1.096
         
-        // Tính bonus theo tỷ lệ tăng dần
-        if ($amount > $this->bonusDoubleAmount) {
-            $excessAmount = $amount - $this->bonusDoubleAmount;
-            $excessBonus = floor($excessAmount / 100000) * 50; // Mỗi 100k thêm 50 cám
-            $bonus += $excessBonus;
-        }
+        // Tính hệ số a
+        // a = 300/(100000)^b
+        $a = $this->bonusBaseCam / pow($this->bonusBaseAmount, $b);
         
-        return $bonus;
+        // Tính bonus theo công thức: bonus = a * (amount)^b
+        $bonus = $a * pow($amount, $b);
+        
+        return floor($bonus);
     }
 
     /**
@@ -116,10 +120,10 @@ class BankAutoController extends Controller
     {
         $amount = $request->input('amount', 0);
         
-        if ($amount < 50000) {
+        if ($amount < 5000) {
             return response()->json([
                 'success' => false,
-                'message' => 'Số tiền tối thiểu là 50.000 VNĐ'
+                'message' => 'Số tiền tối thiểu là 5.000 VNĐ'
             ]);
         }
         
@@ -137,7 +141,7 @@ class BankAutoController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'amount' => 'required|integer|min:50000',
+            'amount' => 'required|integer|min:5000',
             'bank_id' => 'required|exists:banks,id'
         ]);
 
@@ -165,17 +169,16 @@ class BankAutoController extends Controller
                 'status' => BankAutoDeposit::STATUS_PENDING
             ]);
 
-            // Tạo URL thanh toán Casso
-            $paymentUrl = $this->createCassoPaymentUrl($amount, $transactionCode, $bankId);
-            
             DB::commit();
 
+            // Trả về thông tin chuyển khoản cho user
             return response()->json([
                 'success' => true,
-                'payment_url' => $paymentUrl,
                 'transaction_code' => $transactionCode,
                 'amount' => $amount,
-                'coins' => $calculation['total_coins']
+                'coins' => $calculation['total_coins'],
+                'bank_info' => $this->getBankInfo($bankId),
+                'message' => 'Vui lòng chuyển khoản theo thông tin bên dưới'
             ]);
 
         } catch (\Exception $e) {
@@ -190,105 +193,119 @@ class BankAutoController extends Controller
     }
 
     /**
-     * Tạo URL thanh toán Casso
+     * Lấy thông tin ngân hàng để hiển thị cho user
      */
-    private function createCassoPaymentUrl($amount, $transactionCode, $bankId)
+    private function getBankInfo($bankId)
     {
-        // TODO: Thay thế bằng API thực tế của Casso
-        // Casso API endpoint để tạo payment
-        $cassoApiUrl = 'https://api.casso.vn/v1/payments';
+        $bank = BankAuto::find($bankId);
         
-        $data = [
-            'amount' => $amount,
-            'description' => "Nạp cám tự động - {$transactionCode}",
-            'order_id' => $transactionCode,
-            'return_url' => route('user.bank.auto.success'),
-            'cancel_url' => route('user.bank.auto.cancel'),
-            'webhook_url' => route('user.bank.auto.deposit.callback'),
-        ];
-        
-        // Headers cho Casso API
-        $headers = [
-            'Authorization' => 'Bearer ' . config('services.casso.api_key'),
-            'Content-Type' => 'application/json',
-        ];
-        
-        try {
-            // Gọi API Casso để tạo payment URL
-            $response = Http::withHeaders($headers)
-                ->timeout(30)
-                ->post($cassoApiUrl, $data);
-                
-            if ($response->successful()) {
-                $responseData = $response->json();
-                return $responseData['payment_url'] ?? null;
-            } else {
-                Log::error('Casso API error: ' . $response->body());
-                return null;
-            }
-        } catch (\Exception $e) {
-            Log::error('Error calling Casso API: ' . $e->getMessage());
+        if (!$bank) {
             return null;
         }
+        
+        return [
+            'name' => $bank->name,
+            'code' => $bank->code,
+            'account_number' => $bank->account_number ?? 'Chưa cấu hình',
+            'account_name' => $bank->account_name ?? 'Chưa cấu hình',
+            'logo' => $bank->logo ? Storage::url($bank->logo) : null,
+            'qr_code' => $bank->qr_code ? Storage::url($bank->qr_code) : null,
+        ];
     }
 
     /**
-     * Callback từ Casso v2 khi thanh toán thành công
+     * Callback từ Casso Webhook v2 khi có giao dịch mới
+     * Reference: https://github.com/CassoHQ/casso-webhook-handler-sample/blob/main/webhook_handler.php
      */
     public function callback(Request $request)
     {
-        // Verify signature từ Casso để đảm bảo tính bảo mật
-        $signature = $request->header('X-Casso-Signature');
+        // Lấy raw payload để verify signature
         $payload = $request->getContent();
+        $signature = $request->header('X-Casso-Signature');
         
+        Log::info('Casso webhook received', [
+            'signature' => $signature,
+            'payload_length' => strlen($payload),
+            'headers' => $request->headers->all()
+        ]);
+        
+        // Verify signature từ Casso Webhook v2
         if (!$signature) {
             Log::warning('Missing Casso signature header');
             return response()->json(['success' => false, 'message' => 'Missing signature'], 401);
         }
         
         if (!$this->verifyCassoSignature($payload, $signature)) {
-            Log::warning('Invalid Casso signature', ['signature' => $signature]);
+            Log::warning('Invalid Casso signature', [
+                'signature' => $signature,
+                'payload_preview' => substr($payload, 0, 100)
+            ]);
             return response()->json(['success' => false, 'message' => 'Invalid signature'], 401);
         }
         
-        $data = $request->all();
+        // Parse JSON payload
+        $data = json_decode($payload, true);
         
-        // Casso v2 webhook format
-        $transactionCode = $data['order_id'] ?? null;
-        $status = $data['status'] ?? null;
-        $amount = $data['amount'] ?? 0;
-        
-        if (!$transactionCode) {
-            Log::warning('Missing order_id in Casso webhook', ['data' => $data]);
-            return response()->json(['success' => false, 'message' => 'Missing order_id']);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            Log::error('Invalid JSON payload', ['error' => json_last_error_msg()]);
+            return response()->json(['success' => false, 'message' => 'Invalid JSON payload'], 400);
         }
         
-        // Chỉ xử lý khi status là success
-        if ($status !== 'success') {
-            Log::info('Casso webhook received with non-success status', [
-                'transaction_code' => $transactionCode,
-                'status' => $status
-            ]);
-            return response()->json(['success' => true, 'message' => 'Status not success, ignoring']);
+        // Casso Webhook v2 format theo tài liệu chính thức
+        $transactionId = $data['data']['id'] ?? null;
+        $reference = $data['data']['reference'] ?? null;
+        $description = $data['data']['description'] ?? '';
+        $amount = $data['data']['amount'] ?? 0;
+        $accountNumber = $data['data']['accountNumber'] ?? '';
+        $bankName = $data['data']['bankName'] ?? '';
+        $transactionDateTime = $data['data']['transactionDateTime'] ?? null;
+        
+        Log::info('Casso webhook data parsed', [
+            'transaction_id' => $transactionId,
+            'reference' => $reference,
+            'amount' => $amount,
+            'account_number' => $accountNumber,
+            'bank_name' => $bankName
+        ]);
+        
+        if (!$transactionId) {
+            Log::warning('Missing transaction id in Casso webhook', ['data' => $data]);
+            return response()->json(['success' => false, 'message' => 'Missing transaction id']);
+        }
+        
+        // Kiểm tra xem giao dịch đã được xử lý chưa (chống trùng lặp)
+        $existingDeposit = BankAutoDeposit::where('casso_transaction_id', $transactionId)
+            ->where('status', BankAutoDeposit::STATUS_SUCCESS)
+            ->first();
+            
+        if ($existingDeposit) {
+            Log::info('Transaction already processed', ['transaction_id' => $transactionId]);
+            return response()->json(['success' => true, 'message' => 'Transaction already processed']);
         }
         
         DB::beginTransaction();
         try {
-            $deposit = BankAutoDeposit::where('transaction_code', $transactionCode)
+            // Tìm deposit bằng reference (transaction code)
+            $deposit = BankAutoDeposit::where('transaction_code', $reference)
                 ->where('status', BankAutoDeposit::STATUS_PENDING)
                 ->first();
                 
             if (!$deposit) {
-                Log::warning('Bank auto deposit not found', ['transaction_code' => $transactionCode]);
+                Log::warning('Bank auto deposit not found', [
+                    'reference' => $reference,
+                    'transaction_id' => $transactionId
+                ]);
                 return response()->json(['success' => false, 'message' => 'Giao dịch không tồn tại']);
             }
             
-            // Kiểm tra số tiền nhận được
-            if ($amount < $deposit->amount) {
+            // Kiểm tra số tiền nhận được (cho phép sai lệch nhỏ do phí chuyển khoản)
+            $toleranceAmount = $deposit->amount * 0.99; // Cho phép sai lệch 1%
+            if ($amount < $toleranceAmount) {
                 Log::warning('Insufficient amount received', [
                     'expected' => $deposit->amount,
+                    'tolerance' => $toleranceAmount,
                     'received' => $amount,
-                    'transaction_code' => $transactionCode
+                    'reference' => $reference
                 ]);
                 
                 $deposit->update([
@@ -305,6 +322,7 @@ class BankAutoController extends Controller
             $deposit->update([
                 'status' => BankAutoDeposit::STATUS_SUCCESS,
                 'processed_at' => now(),
+                'casso_transaction_id' => $transactionId,
                 'casso_response' => $data
             ]);
             
@@ -316,15 +334,17 @@ class BankAutoController extends Controller
                     $user,
                     $deposit->total_coins,
                     \App\Models\CoinHistory::TYPE_BANK_AUTO_DEPOSIT,
-                    "Nạp bank auto thành công - Số tiền: " . number_format($deposit->amount) . " VND",
+                    "Nạp bank auto thành công - Số tiền: " . number_format($deposit->amount) . " VND - Casso ID: {$transactionId}",
                     $deposit
                 );
                 
                 Log::info('Bank auto deposit successful', [
                     'user_id' => $user->id,
-                    'transaction_code' => $transactionCode,
+                    'transaction_code' => $reference,
+                    'casso_transaction_id' => $transactionId,
                     'coins_added' => $deposit->total_coins,
-                    'amount_received' => $amount
+                    'amount_received' => $amount,
+                    'bank_name' => $bankName
                 ]);
             }
             
@@ -335,15 +355,19 @@ class BankAutoController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('Error processing bank auto callback: ' . $e->getMessage(), [
-                'transaction_code' => $transactionCode,
-                'data' => $data
+                'transaction_id' => $transactionId,
+                'reference' => $reference,
+                'data' => $data,
+                'trace' => $e->getTraceAsString()
             ]);
             return response()->json(['success' => false, 'message' => 'Có lỗi xảy ra']);
         }
     }
 
+
     /**
-     * Verify signature từ Casso v2
+     * Verify signature từ Casso Webhook v2 theo tài liệu chính thức
+     * Reference: https://github.com/CassoHQ/casso-webhook-v2-verify-signature/blob/main/php.php
      */
     private function verifyCassoSignature($payload, $signature)
     {
@@ -354,7 +378,8 @@ class BankAutoController extends Controller
             return false;
         }
         
-        // Casso v2 sử dụng HMAC-SHA256
+        // Casso Webhook v2 sử dụng HMAC-SHA256
+        // Signature format: sha256=calculated_signature
         $expectedSignature = 'sha256=' . hash_hmac('sha256', $payload, $secret);
         
         // Sử dụng hash_equals để tránh timing attack

@@ -13,6 +13,7 @@ class BankAutoDeposit extends Model
         'user_id',
         'bank_id',
         'transaction_code',
+        'casso_transaction_id',
         'amount',
         'base_coins',
         'bonus_coins',

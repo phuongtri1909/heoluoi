@@ -94,8 +94,8 @@
         <a href="{{ route('user.deposit') }}" class="deposit-tab active">
             <i class="fas fa-university me-2"></i>Bank
         </a>
-        <a href="" class="deposit-tab">
-            <i class="fas fa-university me-2"></i>Bank auto
+        <a href="{{ route('user.bank.auto.deposit') }}" class="deposit-tab">
+            <i class="fas fa-robot me-2"></i>Bank auto
         </a>
         <a href="{{ route('user.card.deposit') }}" class="deposit-tab">
             <i class="fas fa-credit-card me-2"></i>Card
@@ -113,7 +113,6 @@
                         <h5 class="mb-0">Nạp cám qua chuyển khoản ngân hàng</h5>
                     </div>
                     <div class="deposit-card-body">
-                        <!-- Debug info (remove in production) -->
                         <div class="alert alert-info d-none">
                             <p>Tỷ giá hiện tại: 1 cám = {{ number_format($coinExchangeRate) }} VNĐ</p>
                             <p>Phí giao dịch: {{ $coinBankPercent }}%</p>

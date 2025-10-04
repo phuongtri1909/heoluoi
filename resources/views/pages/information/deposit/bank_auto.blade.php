@@ -20,6 +20,37 @@
             color: #555;
         }
 
+        /* Payment info value interactions */
+        .payment-info-value {
+            position: relative;
+            user-select: all;
+            cursor: text;
+            padding: 3px 5px;
+            border-radius: 3px;
+            transition: background-color 0.2s;
+        }
+
+        .payment-info-value:hover {
+            background-color: rgba(var(--primary-rgb), 0.05);
+        }
+
+        .payment-info-value:focus {
+            background-color: rgba(var(--primary-rgb), 0.1);
+            outline: none;
+        }
+
+        .copy-button {
+            padding: 2px 6px;
+            font-size: 12px;
+        }
+
+        .payment-qr-code {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            background-color: #f8f9fa;
+        }
+
         /* Bank deposit specific styles */
         .transaction-image {
             max-width: 100%;
@@ -148,7 +179,7 @@
                 </div>
 
                 <!-- Bank Auto Form -->
-                <div class="">
+                <div id="depositContainer">
                     <div class="card-body">
                         <form id="bankAutoDepositForm">
                             @csrf
@@ -189,14 +220,16 @@
                                     <i class="fas fa-money-bill-wave me-2"></i>Nhập số tiền muốn nạp (VNĐ)
                                 </label>
                                 <div class="input-group">
-                                    <input type="number" class="form-control deposit-amount-input" id="amount"
-                                        name="amount" value="{{ old('amount', 100000) }}"
-                                        data-raw="{{ old('amount', 100000) }}"
-                                        min="50000" step="10000">
+                                    <input type="text" class="form-control deposit-amount-input" id="amount"
+                                        name="amount" value="{{ old('amount', '5.000') }}"
+                                        data-raw="{{ old('amount', 5000) }}"
+                                        placeholder="Nhập số tiền (ví dụ: 100.000)"
+                                        pattern="[0-9.,]+"
+                                        inputmode="numeric">
 
                                     <span class="input-group-text">VNĐ</span>
                                 </div>
-                                <div class="form-text">Số tiền tối thiểu: 50.000 VNĐ, phải là bội số của 10.000</div>
+                                <div class="form-text">Số tiền tối thiểu: 5.000 VNĐ, phải là bội số của 10.000</div>
                                 <div class="invalid-feedback amount-error">Vui lòng nhập số tiền hợp lệ</div>
 
                                 <!-- Coin Preview với Bonus -->
@@ -268,11 +301,7 @@
 
             <div class="col-lg-4">
                 <div class="coins-panel">
-                    <div class="coins-balance">
-                        <i class="fas fa-coins coins-icon"></i> {{ number_format(Auth::user()->coins ?? 0) }}
-                    </div>
-                    <div class="coins-label">Số cám hiện có trong tài khoản</div>
-
+                   
                     <!-- Bảng mức nạp tiền -->
                     <div class="deposit-table mt-4">
                         <h6 class="text-white mb-3">
@@ -289,7 +318,7 @@
                                 </thead>
                                 <tbody>
                                     @php
-                                        $amounts = [50000, 100000, 150000, 200000, 250000, 300000, 400000, 500000, 1000000];
+                                        $amounts = [5000, 10000, 50000, 100000, 200000, 300000, 500000, 1000000];
                                     @endphp
                                     @foreach($amounts as $amount)
                                         @php
@@ -298,18 +327,19 @@
                                             $amountAfterFee = $amount - $feeAmount;
                                             $baseCoins = floor($amountAfterFee / $coinExchangeRate);
                                             
-                                            // Tính toán bonus
+                                            // Tính toán bonus theo công thức hàm mũ
                                             $bonusCoins = 0;
                                             if ($amount >= $bonusBaseAmount) {
-                                                $bonusCoins += $bonusBaseCam;
-                                            }
-                                            if ($amount >= $bonusDoubleAmount) {
-                                                $bonusCoins += $bonusDoubleCam;
-                                            }
-                                            if ($amount > $bonusDoubleAmount) {
-                                                $excessAmount = $amount - $bonusDoubleAmount;
-                                                $excessBonus = floor($excessAmount / 100000) * 50;
-                                                $bonusCoins += $excessBonus;
+                                                // Tính số mũ b
+                                                $ratioAmount = $bonusDoubleAmount / $bonusBaseAmount; // 300000/100000 = 3
+                                                $ratioBonus = $bonusDoubleCam / $bonusBaseCam; // 1000/300 = 3.333...
+                                                $b = log($ratioBonus) / log($ratioAmount); // ≈ 1.096
+                                                
+                                                // Tính hệ số a
+                                                $a = $bonusBaseCam / pow($bonusBaseAmount, $b);
+                                                
+                                                // Tính bonus theo công thức: bonus = a * (amount)^b
+                                                $bonusCoins = floor($a * pow($amount, $b));
                                             }
                                             
                                             $totalCoins = $baseCoins + $bonusCoins;
@@ -389,9 +419,24 @@
                         const currentValue = input.val();
                         
                         if (currentValue && currentValue.trim() !== '') {
-                            const formatted = formatVndCurrency(currentValue);
+                            // Remove all non-numeric characters except dots
+                            const cleanValue = currentValue.replace(/[^\d.]/g, '');
+                            
+                            // Format with dots
+                            const formatted = formatVndCurrency(cleanValue);
+                            
+                            // Only update if different to avoid cursor jumping
                             if (formatted !== currentValue) {
+                                const cursorPos = input.prop('selectionStart');
                                 input.val(formatted);
+                                
+                                // Try to maintain cursor position
+                                setTimeout(() => {
+                                    const newLength = formatted.length;
+                                    const newPos = Math.min(cursorPos + (formatted.length - currentValue.length), newLength);
+                                    input.prop('selectionStart', newPos);
+                                    input.prop('selectionEnd', newPos);
+                                }, 0);
                             }
                             
                             const rawValue = parseVndCurrency(formatted);
@@ -416,11 +461,16 @@
                         // Round to nearest 10,000
                         if (rawValue > 0) {
                             rawValue = Math.round(rawValue / 10000) * 10000;
-                            if (rawValue < 50000) rawValue = 50000;
+                            if (rawValue < 5000) rawValue = 5000;
                             
                             const formatted = formatVndCurrency(rawValue.toString());
                             input.val(formatted);
                             input.data('raw', rawValue);
+                            updateCoinPreview();
+                        } else {
+                            // If empty or invalid, set to minimum
+                            input.val('5.000');
+                            input.data('raw', 5000);
                             updateCoinPreview();
                         }
                     } catch (error) {
@@ -439,22 +489,23 @@
                             const amountAfterFee = amount - feeAmount;
                             const baseCoins = Math.floor(amountAfterFee / window.coinExchangeRate);
 
-                            // Calculate bonus
+                            // Calculate bonus theo công thức hàm mũ
+                            // Công thức: bonus = a * (amount)^b
                             let bonusCoins = 0;
                             
                             if (amount >= window.bonusBaseAmount) {
-                                bonusCoins += window.bonusBaseCam;
-                            }
-                            
-                            if (amount >= window.bonusDoubleAmount) {
-                                bonusCoins += window.bonusDoubleCam;
-                            }
-                            
-                            // Progressive bonus for amounts above double threshold
-                            if (amount > window.bonusDoubleAmount) {
-                                const excessAmount = amount - window.bonusDoubleAmount;
-                                const excessBonus = Math.floor(excessAmount / 100000) * 50; // 50 coins per 100k
-                                bonusCoins += excessBonus;
+                                // Tính số mũ b
+                                // b = log(300000/100000)(1000/300) = log3(3.333...) ≈ 1.096
+                                const ratioAmount = window.bonusDoubleAmount / window.bonusBaseAmount; // 300000/100000 = 3
+                                const ratioBonus = window.bonusDoubleCam / window.bonusBaseCam; // 1000/300 = 3.333...
+                                const b = Math.log(ratioBonus) / Math.log(ratioAmount); // ≈ 1.096
+                                
+                                // Tính hệ số a
+                                // a = 300/(100000)^b
+                                const a = window.bonusBaseCam / Math.pow(window.bonusBaseAmount, b);
+                                
+                                // Tính bonus theo công thức: bonus = a * (amount)^b
+                                bonusCoins = Math.floor(a * Math.pow(amount, b));
                             }
 
                             const totalCoins = baseCoins + bonusCoins;
@@ -491,11 +542,23 @@
                     }
 
                     const amount = parseInt($('#amount').data('raw')) || 0;
-                    if (amount < 50000) {
-                        $('.amount-error').show().text('Số tiền tối thiểu là 50.000 VNĐ');
+                    
+                    // Debug logging
+                    console.log('Validation check:', {
+                        amount: amount,
+                        bankId: $('#bankId').val(),
+                        amountRaw: $('#amount').data('raw'),
+                        amountMod10000: amount % 10000
+                    });
+                    
+                    if (amount < 5000) {
+                        $('.amount-error').show().text('Số tiền tối thiểu là 5.000 VNĐ');
                         valid = false;
                     } else if (amount % 10000 !== 0) {
-                        $('.amount-error').show().text('Số tiền phải là bội số của 10.000 VNĐ');
+                        $('.amount-error').show().text('Số tiền phải là bội số của 10.000 VNĐ (ví dụ: 10.000, 20.000, 50.000, 100.000, 1.000.000...)');
+                        valid = false;
+                    } else if (amount > 99999999) {
+                        $('.amount-error').show().text('Số tiền tối đa là 99.999.999 VNĐ');
                         valid = false;
                     } else {
                         $('.amount-error').hide();
@@ -518,13 +581,20 @@
                             dataType: 'json',
                             success: function(response) {
                                 if (response.success) {
-                                    // Redirect to Casso payment
-                                    window.location.href = response.payment_url;
+                                    showBankTransferInfo(response);
                                 } else {
                                     showToast('Có lỗi xảy ra: ' + (response.message || 'Không thể xử lý thanh toán'), 'error');
                                 }
                             },
-                            error: function(xhr) {
+                            error: function(xhr, status, error) {
+                                console.error('AJAX Error Details:', {
+                                    status: xhr.status,
+                                    statusText: xhr.statusText,
+                                    responseText: xhr.responseText,
+                                    responseJSON: xhr.responseJSON,
+                                    error: error
+                                });
+                                
                                 let errorMessage = 'Đã xảy ra lỗi khi xử lý yêu cầu';
 
                                 if (xhr.responseJSON) {
@@ -576,7 +646,7 @@
                     let raw = input.data('raw');
                     if (raw) {
                         raw = Math.round(raw / 10000) * 10000;
-                        if (raw < 50000) raw = 50000;
+                        if (raw < 5000) raw = 5000;
                         input.data('raw', raw);
                         input.val(formatVndCurrency(raw));
                     }
@@ -585,6 +655,171 @@
                 // Initial calculation
                 updateCoinPreview();
             });
+
+            // Function to show bank transfer info
+            function showBankTransferInfo(response) {
+                const bankInfo = response.bank_info;
+                const transactionCode = response.transaction_code;
+                const amount = response.amount;
+                const coins = response.coins;
+
+                const transferInfoHtml = `
+                    <div class="bank-transfer-info">
+                        <div class="alert alert-success">
+                            <h5><i class="fas fa-check-circle me-2"></i>Tạo giao dịch thành công!</h5>
+                            <p class="mb-3">Vui lòng chuyển khoản theo thông tin bên dưới:</p>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="fas fa-university me-2"></i>Thông tin chuyển khoản
+                                </h6>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Ngân hàng:</label>
+                                            <div class="fw-bold">${bankInfo.name}</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Số tài khoản:</label>
+                                            <div class="d-flex align-items-center">
+                                                <span class="fw-bold text-primary payment-info-value" tabindex="0" onclick="this.focus();this.select()" onfocus="this.select()">${bankInfo.account_number}</span>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary ms-2 copy-button" onclick="copyToClipboard('${bankInfo.account_number}')" title="Sao chép số tài khoản">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Tên chủ tài khoản:</label>
+                                            <div class="fw-bold">${bankInfo.account_name}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Số tiền:</label>
+                                            <div class="d-flex align-items-center">
+                                                <span class="fw-bold text-success payment-info-value" tabindex="0" onclick="this.focus();this.select()" onfocus="this.select()">${amount.toLocaleString('vi-VN')}</span>
+                                                <span class="ms-1 fw-bold">VNĐ</span>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary ms-2 copy-button" onclick="copyToClipboard('${amount.toLocaleString('vi-VN')}')" title="Sao chép số tiền">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Nội dung chuyển khoản:</label>
+                                            <div class="d-flex align-items-center">
+                                                <span class="fw-bold text-warning payment-info-value" tabindex="0" onclick="this.focus();this.select()" onfocus="this.select()">${transactionCode}</span>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary ms-2 copy-button" onclick="copyToClipboard('${transactionCode}')" title="Sao chép nội dung chuyển khoản">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Cám nhận được:</label>
+                                            <div class="fw-bold text-info">${coins.toLocaleString('vi-VN')} cám</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                ${bankInfo.qr_code ? `
+                                <div class="text-center mb-3">
+                                    <div class="payment-qr-code mb-3">
+                                        <img src="${bankInfo.qr_code}" alt="QR Code" class="img-fluid" style="max-height: 200px;">
+                                    </div>
+                                    <p class="text-muted">Quét mã QR để thực hiện thanh toán</p>
+                                </div>
+                                ` : ''}
+                                
+                                <div class="alert alert-warning mt-3">
+                                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Lưu ý quan trọng:</h6>
+                                    <ul class="mb-0">
+                                        <li>Nội dung chuyển khoản phải chính xác: <strong>${transactionCode}</strong></li>
+                                        <li>Số tiền chuyển khoản phải đúng: <strong>${amount.toLocaleString('vi-VN')} VNĐ</strong></li>
+                                        <li>Sau khi chuyển khoản, hệ thống sẽ tự động cộng cám trong vòng 1-5 phút</li>
+                                        <li>Nếu không nhận được cám sau 10 phút, vui lòng liên hệ hỗ trợ</li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-center mt-4">
+                                    <button class="btn btn-primary" onclick="location.reload()">
+                                        <i class="fas fa-plus me-2"></i>Tạo giao dịch mới
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Thay thế nội dung form
+                $('#depositContainer').html(transferInfoHtml);
+            }
+
+            // Function to copy text to clipboard
+            function copyToClipboard(text) {
+                const $button = event.target.closest('.copy-button');
+                const originalText = $button.innerHTML;
+
+                // Hiển thị trạng thái đang xử lý
+                $button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+                // Phương pháp 1: Clipboard API (chỉ hoạt động trên HTTPS hoặc localhost)
+                if (navigator.clipboard && window.isSecureContext) {
+                    navigator.clipboard.writeText(text)
+                        .then(() => {
+                            showCopySuccess($button, originalText);
+                        })
+                        .catch(() => {
+                            // Nếu phương pháp 1 thất bại, thử phương pháp 2
+                            copyUsingExecCommand(text, $button, originalText);
+                        });
+                }
+                // Phương pháp 2: document.execCommand (hỗ trợ cũ)
+                else {
+                    copyUsingExecCommand(text, $button, originalText);
+                }
+            }
+
+            // Phương pháp sao chép bằng execCommand
+            function copyUsingExecCommand(text, $button, originalText) {
+                try {
+                    // Tạo phần tử input tạm thời
+                    const $temp = $("<input>");
+                    $("body").append($temp);
+                    $temp.val(text).select();
+
+                    // Thực hiện lệnh sao chép
+                    const successful = document.execCommand('copy');
+
+                    // Dọn dẹp
+                    $temp.remove();
+
+                    if (successful) {
+                        showCopySuccess($button, originalText);
+                    } else {
+                        showCopyFailure($button, originalText);
+                    }
+                } catch (err) {
+                    showCopyFailure($button, originalText);
+                }
+            }
+
+            // Hiển thị thành công
+            function showCopySuccess($button, originalText) {
+                $button.innerHTML = '<i class="fas fa-check"></i>';
+                
+                // Khôi phục nút sau 1 giây
+                setTimeout(() => $button.innerHTML = originalText, 1000);
+            }
+
+            // Hiển thị thất bại
+            function showCopyFailure($button, originalText) {
+                $button.innerHTML = '<i class="fas fa-times"></i>';
+                
+                // Khôi phục nút sau 1 giây
+                setTimeout(() => $button.innerHTML = originalText, 1000);
+            }
         </script>
     @endpush
 @endonce
