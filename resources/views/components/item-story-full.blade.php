@@ -58,7 +58,7 @@
                 height: 50px;
                 position: absolute;
                 display: block;
-                top: 15%;
+                top: 83%;
                 left: -6px;
                 z-index: 15;
                 background: transparent url(/images/defaults/full-label.png) no-repeat;
@@ -115,6 +115,10 @@
                 word-break: break-word;
                 hyphens: auto;
                 max-width: 100%;
+            }
+
+            body.dark-mode .story-description {
+                color: #e0e0e0 !important;
             }
 
             /* Remove any potential HTML formatting that could break layout */

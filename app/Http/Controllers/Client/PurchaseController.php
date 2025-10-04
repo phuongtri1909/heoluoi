@@ -220,7 +220,7 @@ class PurchaseController extends Controller
                 ]);
             }
 
-            if ($user->role == 'author' && $story->user_id == $user->id) {
+            if ($story->user_id == $user->id) {
                 return response()->json([
                     'success' => true,
                     'message' => 'Đây là truyện của bạn, không cần mua combo này.',

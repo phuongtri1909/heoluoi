@@ -32,6 +32,10 @@ class BankAutoDeposit extends Model
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'base_coins' => 'integer',
+        'bonus_coins' => 'integer',
+        'total_coins' => 'integer',
+        'fee_amount' => 'decimal:2',
         'processed_at' => 'datetime',
         'casso_response' => 'array'
     ];
@@ -45,7 +49,15 @@ class BankAutoDeposit extends Model
     }
 
     /**
-     * Get the bank
+     * Get the bank auto
+     */
+    public function bankAuto()
+    {
+        return $this->belongsTo(BankAuto::class, 'bank_id');
+    }
+
+    /**
+     * Get the bank (legacy relationship)
      */
     public function bank()
     {

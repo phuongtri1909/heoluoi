@@ -1,5 +1,73 @@
 @extends('admin.layouts.app')
 
+@push('styles-admin')
+<style>
+    /* Responsive design for story index */
+    @media (max-width: 768px) {
+        .d-flex.flex-column.flex-md-row {
+            flex-direction: column !important;
+        }
+        
+        .d-flex.flex-wrap.gap-2 {
+            flex-direction: column;
+            gap: 0.5rem !important;
+        }
+        
+        .d-flex.flex-wrap.gap-2 > * {
+            width: 100%;
+        }
+        
+        .table-responsive {
+            font-size: 0.875rem;
+        }
+        
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        .card-header h5 {
+            font-size: 1rem;
+        }
+        
+        .card-header p {
+            font-size: 0.75rem;
+        }
+        
+        .action-icon {
+            padding: 0.25rem !important;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .table th,
+        .table td {
+            padding: 0.25rem 0.125rem;
+            font-size: 0.75rem;
+        }
+        
+        .badge {
+            font-size: 0.65rem;
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+        }
+        
+        .text-xs {
+            font-size: 0.7rem !important;
+        }
+        
+        .img-fluid {
+            width: 50px !important;
+            height: 70px !important;
+        }
+    }
+</style>
+@endpush
+
 @section('content-auth')
 <div class="row">
     <div class="col-12">
@@ -17,52 +85,58 @@
                     </div>
                 </div>
 
-                <div class="d-flex justify-content-between mt-3">
-                    <form method="GET" class="d-flex gap-2" id="filterForm">
+                <div class="d-flex flex-column flex-md-row justify-content-between mt-3 gap-3">
+                    <form method="GET" class="d-flex flex-wrap gap-2" id="filterForm">
                         <!-- Status filter -->
-                        <select name="status" class="form-select form-select-sm" style="width: auto;">
-                            <option value="">- Trạng thái -</option>
-                            <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>Hiển thị</option>
-                            <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Nháp</option>
-                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Chờ duyệt</option>
-                            <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Từ chối</option>
-                        </select>
+                        <div style="min-width: 150px;">
+                            <select name="status" class="form-select form-select-sm">
+                                <option value="">- Trạng thái -</option>
+                                <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>Hiển thị</option>
+                                <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Nháp</option>
+                                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Chờ duyệt</option>
+                                <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Từ chối</option>
+                            </select>
+                        </div>
 
-                        <!-- Featured filter - NEW -->
-                        <select name="featured" class="form-select form-select-sm" style="width: auto;">
-                            <option value="">- Đề cử -</option>
-                            <option value="1" {{ request('featured') == '1' ? 'selected' : '' }}>Đề cử</option>
-                            <option value="0" {{ request('featured') == '0' ? 'selected' : '' }}>Thường</option>
-                        </select>
+                        <!-- Featured filter -->
+                        <div style="min-width: 150px;">
+                            <select name="featured" class="form-select form-select-sm">
+                                <option value="">- Đề cử -</option>
+                                <option value="1" {{ request('featured') == '1' ? 'selected' : '' }}>Đề cử</option>
+                                <option value="0" {{ request('featured') == '0' ? 'selected' : '' }}>Thường</option>
+                            </select>
+                        </div>
 
                         <!-- Category filter -->
-                        <select name="category" class="form-select form-select-sm" style="width: auto;">
-                            <option value="">- Thể loại -</option>
-                            @foreach($categories as $category)
-                                <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
-                                    {{ $category->name }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <div style="min-width: 150px;">
+                            <select name="category" class="form-select form-select-sm">
+                                <option value="">- Thể loại -</option>
+                                @foreach($categories as $category)
+                                    <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
+                                        {{ $category->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
 
                         <!-- Search input -->
-                        <div class="input-group input-group-sm">
+                        <div class="input-group input-group-sm" style="min-width: 200px;">
                             <input type="text" class="form-control" name="search"
                                    value="{{ request('search') }}" placeholder="Tìm kiếm...">
-                            <button class="btn bg-gradient-primary btn-sm px-2 mb-0" type="submit">
+                            <button class="btn bg-gradient-primary btn-sm px-3 mb-0" type="submit">
                                 <i class="fas fa-search"></i>
                             </button>
                         </div>
                     </form>
 
-                    <div>
+                    <div class="d-flex flex-wrap gap-2">
                         <a href="{{ route('admin.stories.create') }}" class="btn bg-gradient-primary btn-sm mb-0">
-                            <i class="fas fa-plus me-2"></i>Thêm truyện mới
+                            <i class="fas fa-plus me-1"></i><span class="d-none d-md-inline">Thêm truyện mới</span>
                         </a>
 
-                        <!-- Bulk actions button - NEW -->
+                        <!-- Bulk actions button -->
                         <button type="button" class="btn bg-gradient-warning btn-sm mb-0" data-bs-toggle="modal" data-bs-target="#bulkActionsModal">
-                            <i class="fas fa-star me-2"></i>Đề cử hàng loạt
+                            <i class="fas fa-star me-1"></i><span class="d-none d-md-inline">Đề cử hàng loạt</span>
                         </button>
                     </div>
                 </div>

@@ -19,43 +19,40 @@
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-between mt-3">
-                        <form method="GET" class="d-flex gap-2">
-                            <select name="status" class="form-select form-select-sm" style="width: auto;"
-                                onchange="this.form.submit()">
+                    <div class="d-flex flex-column flex-md-row justify-content-between mt-3 gap-3">
+                        <form method="GET" class="d-flex flex-wrap gap-2" id="filterForm">
+                            <select name="status" class="form-select form-select-sm" style="min-width: 150px;">
                                 <option value="">- Trạng thái -</option>
-                                <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>Hiển thị
-                                </option>
+                                <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>Hiển thị</option>
                                 <option value="draft" {{ request('status') == 'draft' ? 'selected' : '' }}>Nháp</option>
                             </select>
 
-                            <div class="input-group input-group-sm">
+                            <div class="input-group input-group-sm" style="min-width: 200px;">
                                 <input type="text" class="form-control" name="search" value="{{ request('search') }}"
                                     placeholder="Tìm kiếm...">
-                                <button class="btn bg-gradient-primary btn-sm px-2 mb-0" type="submit">
+                                <button class="btn bg-gradient-primary btn-sm px-3 mb-0" type="submit">
                                     <i class="fas fa-search"></i>
                                 </button>
                             </div>
                         </form>
 
-                        <div>
-                            <button type="button" class="btn bg-gradient-danger btn-sm mb-0 me-2" id="bulkDeleteBtn"
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" class="btn bg-gradient-danger btn-sm mb-0" id="bulkDeleteBtn"
                                 disabled>
-                                <i class="fas fa-trash me-2"></i>Xóa đã chọn
+                                <i class="fas fa-trash me-1"></i><span class="d-none d-md-inline">Xóa đã chọn</span>
                             </button>
 
-                            <a href="{{ route('admin.stories.index') }}" class="btn bg-gradient-secondary btn-sm mb-0 me-2">
-                                <i class="fas fa-arrow-left me-2"></i>Quay lại
+                            <a href="{{ route('admin.stories.index') }}" class="btn bg-gradient-secondary btn-sm mb-0">
+                                <i class="fas fa-arrow-left me-1"></i><span class="d-none d-md-inline">Quay lại</span>
                             </a>
                             <a href="{{ route('admin.stories.chapters.bulk-create', $story) }}"
-                                class="btn bg-gradient-success btn-sm mb-0 me-2">
-                                <i class="fas fa-plus-circle me-2"></i>Tạo nhiều chương
+                                class="btn bg-gradient-success btn-sm mb-0">
+                                <i class="fas fa-plus-circle me-1"></i><span class="d-none d-md-inline">Tạo nhiều chương</span>
                             </a>
                             <a href="{{ route('admin.stories.chapters.create', $story) }}"
                                 class="btn bg-gradient-primary btn-sm mb-0">
-                                <i class="fas fa-plus me-2"></i>Thêm chương mới
+                                <i class="fas fa-plus me-1"></i><span class="d-none d-md-inline">Thêm chương mới</span>
                             </a>
-
                         </div>
                     </div>
                 </div>
@@ -236,12 +233,79 @@
         .chapter-checkbox {
             transform: scale(1.1);
         }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .d-flex.flex-column.flex-md-row {
+                flex-direction: column !important;
+            }
+            
+            .d-flex.flex-wrap.gap-2 {
+                flex-direction: column;
+                gap: 0.5rem !important;
+            }
+            
+            .d-flex.flex-wrap.gap-2 > * {
+                width: 100%;
+            }
+            
+            .table-responsive {
+                font-size: 0.875rem;
+            }
+            
+            .btn-sm {
+                padding: 0.375rem 0.75rem;
+                font-size: 0.875rem;
+            }
+            
+            .card-header h5 {
+                font-size: 1rem;
+            }
+            
+            .card-header p {
+                font-size: 0.75rem;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .table th,
+            .table td {
+                padding: 0.25rem 0.125rem;
+                font-size: 0.75rem;
+            }
+            
+            .badge {
+                font-size: 0.65rem;
+                padding: 0.25rem 0.5rem;
+            }
+            
+            .btn-sm {
+                padding: 0.25rem 0.5rem;
+                font-size: 0.75rem;
+            }
+            
+            .action-icon {
+                padding: 0.25rem !important;
+            }
+            
+            .text-xs {
+                font-size: 0.7rem !important;
+            }
+        }
     </style>
 @endpush
 
 @push('scripts-admin')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Auto-submit filters when changed
+            const filterSelects = document.querySelectorAll('#filterForm select');
+            filterSelects.forEach(select => {
+                select.addEventListener('change', function() {
+                    document.getElementById('filterForm').submit();
+                });
+            });
+
             const selectAllCheckbox = document.getElementById('selectAll');
             const chapterCheckboxes = document.querySelectorAll('.chapter-checkbox');
             const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');

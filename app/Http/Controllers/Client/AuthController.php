@@ -54,7 +54,7 @@ class AuthController
                 $readingService = new ReadingHistoryService();
                 $readingService->migrateSessionReadingsToUser($existingUser->id);
 
-                if ($existingUser->role == 'admin') {
+                if ($existingUser->role == 'admin_main' || $existingUser->role == 'admin_sub') {
                     return redirect()->route('admin.dashboard');
                 }
 
@@ -311,7 +311,7 @@ class AuthController
             $readingService = new ReadingHistoryService();
             $readingService->migrateSessionReadingsToUser($user->id);
 
-            if ($user->role == 'admin') {
+            if ($user->role == 'admin_main' || $user->role == 'admin_sub') {
                 return redirect()->route('admin.dashboard');
             }
 

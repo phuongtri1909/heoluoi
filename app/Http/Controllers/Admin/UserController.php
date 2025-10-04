@@ -85,26 +85,6 @@ class UserController extends Controller
             ->orderByDesc('created_at')
             ->paginate(5, ['*'], 'daily_tasks_page');
 
-        $authorChapterEarnings = collect();
-        $authorStoryEarnings = collect();
-       
-        
-        if ($user->role === 'author') {
-            $authorChapterEarnings = ChapterPurchase::whereHas('chapter.story', function($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })
-            ->with(['chapter.story', 'user'])
-            ->orderByDesc('created_at')
-            ->paginate(5, ['*'], 'author_chapter_earnings_page');
-
-            $authorStoryEarnings = StoryPurchase::whereHas('story', function($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })
-            ->with(['story', 'user'])
-            ->orderByDesc('created_at')
-            ->paginate(5, ['*'], 'author_story_earnings_page');
-        }
-
         $coinHistories = $user->coinHistories()
             ->orderByDesc('created_at')
             ->paginate(10, ['*'], 'coin_histories_page');
@@ -148,8 +128,6 @@ class UserController extends Controller
             'bookmarks',
             'coinTransactions',
             'userDailyTasks',
-            'authorChapterEarnings',
-            'authorStoryEarnings',
             'coinHistories',
             'counts'
         ));
@@ -161,8 +139,8 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
 
-        if ($request->has('delete_avatar') && $authUser->role === 'admin') {
-            if (in_array($user->role, ['admin', 'mod'])) {
+        if ($request->has('delete_avatar') && $authUser->role === 'admin_main') {
+            if (in_array($user->role, ['admin_main', 'admin_sub'])) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Không thể xóa ảnh đại diện của Admin/Mod'
@@ -193,7 +171,7 @@ class UserController extends Controller
                 ], 403);
             }
 
-            if ($user->role === 'admin' && !$isSuperAdmin) {
+            if ($user->role === 'admin_main' || $user->role === 'admin_sub' && !$isSuperAdmin) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Không có quyền thực hiện'
@@ -201,7 +179,7 @@ class UserController extends Controller
             }
 
             $request->validate([
-                'role' => 'required|in:user,admin,author'
+                'role' => 'required|in:user,admin_main,admin_sub'
             ], [
                 'role.required' => 'Trường role không được để trống',
                 'role.in' => 'Giá trị không hợp lệ'
@@ -210,8 +188,8 @@ class UserController extends Controller
             $user->role = $request->role;
         }
 
-        if ($authUser->role === 'mod') {
-            if ($user->role === 'admin' || $user->id === $authUser->id) {
+        if ($authUser->role === 'admin_main' || $authUser->role === 'admin_sub') {
+            if ($user->role === 'admin_main' || $user->role === 'admin_sub' || $user->id === $authUser->id) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Không có quyền thực hiện'
@@ -316,14 +294,13 @@ class UserController extends Controller
 
         $stats = [
             'total' => User::where('active', 'active')->count(),
-            'admin' => User::where('active', 'active')->where('role', 'admin')->count(),
-            'mod' => User::where('active', 'active')->where('role', 'mod')->count(),
+            'admin_main' => User::where('active', 'active')->where('role', 'admin_main')->count(),
+            'admin_sub' => User::where('active', 'active')->where('role', 'admin_sub')->count(),
             'user' => User::where('active', 'active')->where('role', 'user')->count(),
-            'author' => User::where('active', 'active')->where('role', 'author')->count(),
         ];
 
-        if ($authUser->role === 'mod') {
-            $query->where('role', '!=', 'admin')->where('role', '!=', 'mod');
+        if ($authUser->role === 'admin_main' || $authUser->role === 'admin_sub') {
+            $query->where('role', '!=', 'admin_main')->where('role', '!=', 'admin_sub');
         }
 
 

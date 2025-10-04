@@ -22,7 +22,7 @@
                     </div>
 
                     <div class="py-3">
-                        <span class="copyright text-dark text-sm text-gray-600 fw-semibold fs-4 font-svn-apple">
+                        <span class="copyright color-text text-sm fw-semibold fs-4 font-svn-apple">
                             © {{ date('Y') }} - {{ config('app.name') }} Bảo Lưu Mọi Quyền
                         </span>
                     </div>

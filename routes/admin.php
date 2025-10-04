@@ -25,6 +25,7 @@ use App\Http\Controllers\Admin\PaypalDepositController;
 use App\Http\Controllers\Admin\ChapterReportController;
 use App\Http\Controllers\Admin\ManualPurchaseController;
 use App\Http\Controllers\Admin\CoinTransferController;
+use App\Http\Controllers\Admin\BankAutoDepositController;
 
 
 Route::group(['as' => 'admin.'], function () {
@@ -90,35 +91,41 @@ Route::group(['as' => 'admin.'], function () {
         Route::delete('logo-site/delete-logo', [LogoSiteController::class, 'deleteLogo'])->name('logo-site.delete-logo');
         Route::delete('logo-site/delete-favicon', [LogoSiteController::class, 'deleteFavicon'])->name('logo-site.delete-favicon');
 
-        // Quản lý giao dịch nạp cám
-        Route::get('/deposits', [DepositController::class, 'adminIndex'])->name('deposits.index');
-        Route::post('/deposits/{deposit}/approve', [DepositController::class, 'approve'])->name('deposits.approve');
-        Route::post('/deposits/{deposit}/reject', [DepositController::class, 'reject'])->name('deposits.reject');
+        // Quản lý giao dịch nạp cám (chỉ admin_main)
+        Route::middleware(['role:admin_main'])->group(function () {
+            Route::get('/deposits', [DepositController::class, 'adminIndex'])->name('deposits.index');
+            Route::post('/deposits/{deposit}/approve', [DepositController::class, 'approve'])->name('deposits.approve');
+            Route::post('/deposits/{deposit}/reject', [DepositController::class, 'reject'])->name('deposits.reject');
 
-        // Quản lý yêu cầu thanh toán
-        Route::get('/request-payments', [RequestPaymentController::class, 'adminIndex'])->name('request.payments.index');
-        Route::post('/request-payments/delete-expired', [RequestPaymentController::class, 'deleteExpired'])->name('request.payments.delete-expired');
+            // Quản lý yêu cầu thanh toán
+            Route::get('/request-payments', [RequestPaymentController::class, 'adminIndex'])->name('request.payments.index');
+            Route::post('/request-payments/delete-expired', [RequestPaymentController::class, 'deleteExpired'])->name('request.payments.delete-expired');
 
-        // Quản lý ngân hàng thủ công
-        Route::resource('banks', BankController::class);
+            // Quản lý ngân hàng thủ công
+            Route::resource('banks', BankController::class);
 
-        // Quản lý ngân hàng tự động
-        Route::resource('bank-autos', BankAutoController::class);
+            // Quản lý ngân hàng tự động
+            Route::resource('bank-autos', BankAutoController::class);
 
-        // Quản lý cấu hình hệ thống
-        Route::resource('configs', ConfigController::class);
+            // Quản lý giao dịch bank auto (chỉ xem, không xóa)
+            Route::get('/bank-auto-deposits', [BankAutoDepositController::class, 'index'])->name('bank-auto-deposits.index');
+            Route::get('/bank-auto-deposits/{bankAutoDeposit}', [BankAutoDepositController::class, 'show'])->name('bank-auto-deposits.show');
 
-        // Quản lý Card Deposit
-        Route::get('/card-deposits', [CardDepositController::class, 'adminIndex'])->name('card-deposits.index');
+            // Quản lý cấu hình hệ thống
+            Route::resource('configs', ConfigController::class);
 
-        // Quản lý PayPal Deposit
-        Route::get('/paypal-deposits', [PaypalDepositController::class, 'adminIndex'])->name('paypal-deposits.index');
-        Route::post('/paypal-deposits/{deposit}/approve', [PaypalDepositController::class, 'approve'])->name('paypal-deposits.approve');
-        Route::post('/paypal-deposits/{deposit}/reject', [PaypalDepositController::class, 'reject'])->name('paypal-deposits.reject');
+            // Quản lý Card Deposit
+            Route::get('/card-deposits', [CardDepositController::class, 'adminIndex'])->name('card-deposits.index');
 
-        // Quản lý Request Payment PayPal
-        Route::get('/request-payment-paypal', [PaypalDepositController::class, 'requestPaymentIndex'])->name('request-payment-paypal.index');
-        Route::post('/request-payment-paypal/delete-expired', [PaypalDepositController::class, 'deleteExpiredRequests'])->name('request-payment-paypal.delete-expired');
+            // Quản lý PayPal Deposit
+            Route::get('/paypal-deposits', [PaypalDepositController::class, 'adminIndex'])->name('paypal-deposits.index');
+            Route::post('/paypal-deposits/{deposit}/approve', [PaypalDepositController::class, 'approve'])->name('paypal-deposits.approve');
+            Route::post('/paypal-deposits/{deposit}/reject', [PaypalDepositController::class, 'reject'])->name('paypal-deposits.reject');
+
+            // Quản lý Request Payment PayPal
+            Route::get('/request-payment-paypal', [PaypalDepositController::class, 'requestPaymentIndex'])->name('request-payment-paypal.index');
+            Route::post('/request-payment-paypal/delete-expired', [PaypalDepositController::class, 'deleteExpiredRequests'])->name('request-payment-paypal.delete-expired');
+        });
 
         // Guide management
         Route::get('/guide/edit', [GuideController::class, 'edit'])->name('guide.edit');
@@ -143,17 +150,19 @@ Route::group(['as' => 'admin.'], function () {
         Route::post('chapter-reports/bulk-update', [ChapterReportController::class, 'bulkUpdate'])->name('chapter-reports.bulk-update');
         Route::get('chapter-reports/stats/api', [ChapterReportController::class, 'statsApi'])->name('chapter-reports.stats.api');
         
-        // Manual Purchases Management
-        Route::get('manual-purchases', [ManualPurchaseController::class, 'index'])->name('manual-purchases.index');
-        Route::get('manual-purchases/create', [ManualPurchaseController::class, 'create'])->name('manual-purchases.create');
-        Route::post('manual-purchases', [ManualPurchaseController::class, 'store'])->name('manual-purchases.store');
-        Route::delete('manual-purchases/story/{storyPurchase}', [ManualPurchaseController::class, 'destroyStoryPurchase'])->name('manual-purchases.destroy.story');
-        Route::delete('manual-purchases/chapter/{chapterPurchase}', [ManualPurchaseController::class, 'destroyChapterPurchase'])->name('manual-purchases.destroy.chapter');
-        
-        // AJAX endpoints
-        Route::get('manual-purchases/api/stories', [ManualPurchaseController::class, 'getStories'])->name('manual-purchases.api.stories');
-        Route::get('manual-purchases/api/chapters', [ManualPurchaseController::class, 'getChapters'])->name('manual-purchases.api.chapters');
-        Route::get('manual-purchases/api/users', [ManualPurchaseController::class, 'getUsers'])->name('manual-purchases.api.users');
+        // Manual Purchases Management (chỉ admin_main)
+        Route::middleware(['role:admin_main'])->group(function () {
+            Route::get('manual-purchases', [ManualPurchaseController::class, 'index'])->name('manual-purchases.index');
+            Route::get('manual-purchases/create', [ManualPurchaseController::class, 'create'])->name('manual-purchases.create');
+            Route::post('manual-purchases', [ManualPurchaseController::class, 'store'])->name('manual-purchases.store');
+            Route::delete('manual-purchases/story/{storyPurchase}', [ManualPurchaseController::class, 'destroyStoryPurchase'])->name('manual-purchases.destroy.story');
+            Route::delete('manual-purchases/chapter/{chapterPurchase}', [ManualPurchaseController::class, 'destroyChapterPurchase'])->name('manual-purchases.destroy.chapter');
+            
+            // AJAX endpoints
+            Route::get('manual-purchases/api/stories', [ManualPurchaseController::class, 'getStories'])->name('manual-purchases.api.stories');
+            Route::get('manual-purchases/api/chapters', [ManualPurchaseController::class, 'getChapters'])->name('manual-purchases.api.chapters');
+            Route::get('manual-purchases/api/users', [ManualPurchaseController::class, 'getUsers'])->name('manual-purchases.api.users');
+        });
         
         // Coin Transfer Management (admin_sub can transfer, admin_main can monitor)
         Route::get('coin-transfers', [CoinTransferController::class, 'index'])->name('coin-transfers.index');

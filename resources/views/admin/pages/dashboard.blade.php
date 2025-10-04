@@ -66,6 +66,7 @@
     .row .col-xl-3:nth-child(8) .stats-card .icon i {
         color: #7b1fa2 !important;
     }
+    
     .chart-container {
         height: 300px;
     }
@@ -81,7 +82,7 @@
 @endpush
 
 @section('content-auth')
-{{-- <div class="d-flex flex-column mb-4">
+<div class="d-flex flex-column mb-4">
     <h2 class="fw-bold mb-0">Dashboard Thống Kê</h2>
     
     <!-- Date Filter -->
@@ -199,89 +200,7 @@
     </div>
 </div>
 
-<!-- Visitor & Online Statistics -->
-<div class="row mb-4">
-    <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-        <div class="card stats-card bg-gradient-info text-white">
-            <div class="card-body p-3">
-                <div class="row">
-                    <div class="col-8">
-                        <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">Tổng lượt truy cập</p>
-                            <h5 class="font-weight-bolder mb-0" id="totalVisits">{{ number_format($visitorStats['total_visits']) }}</h5>
-                        </div>
-                    </div>
-                    <div class="col-4 text-end">
-                        <div class="icon icon-shape bg-white text-center rounded-circle shadow">
-                            <i class="fas fa-globe text-info"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-        <div class="card stats-card bg-gradient-secondary text-white">
-            <div class="card-body p-3">
-                <div class="row">
-                    <div class="col-8">
-                        <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">Truy cập duy nhất</p>
-                            <h5 class="font-weight-bolder mb-0" id="uniqueVisitors">{{ number_format($visitorStats['unique_visitors']) }}</h5>
-                        </div>
-                    </div>
-                    <div class="col-4 text-end">
-                        <div class="icon icon-shape bg-white text-center rounded-circle shadow">
-                            <i class="fas fa-users text-secondary"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-        <div class="card stats-card bg-gradient-warning text-white">
-            <div class="card-body p-3">
-                <div class="row">
-                    <div class="col-8">
-                        <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">Đang online</p>
-                            <h5 class="font-weight-bolder mb-0" id="totalOnline">{{ number_format($onlineStats['total_online']) }}</h5>
-                        </div>
-                    </div>
-                    <div class="col-4 text-end">
-                        <div class="icon icon-shape bg-white text-center rounded-circle shadow">
-                            <i class="fas fa-circle text-warning"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-        <div class="card stats-card bg-gradient-danger text-white">
-            <div class="card-body p-3">
-                <div class="row">
-                    <div class="col-8">
-                        <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">Lượt xem trang</p>
-                            <h5 class="font-weight-bolder mb-0" id="pageViews">{{ number_format($visitorStats['page_views']) }}</h5>
-                        </div>
-                    </div>
-                    <div class="col-4 text-end">
-                        <div class="icon icon-shape bg-white text-center rounded-circle shadow">
-                            <i class="fas fa-chart-bar text-danger"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
+@if($isAdminMain)
 <!-- Coin Statistics -->
 <div class="row mb-4">
     <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
@@ -324,25 +243,6 @@
         </div>
     </div>
     
-    <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-        <div class="card stats-card bg-gradient-danger text-white">
-            <div class="card-body p-3">
-                <div class="row">
-                    <div class="col-8">
-                        <div class="numbers">
-                            <p class="text-sm mb-0 text-capitalize font-weight-bold">Cám đã rút</p>
-                            <h5 class="font-weight-bolder mb-0" id="totalWithdrawn">{{ number_format($coinStats['total_withdrawn']) }}</h5>
-                        </div>
-                    </div>
-                    <div class="col-4 text-end">
-                        <div class="icon icon-shape bg-white text-center rounded-circle shadow">
-                            <i class="fas fa-money-bill-wave text-danger"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
     
     <div class="col-xl-3 col-sm-6">
         <div class="card stats-card bg-gradient-info text-white">
@@ -364,6 +264,8 @@
         </div>
     </div>
 </div>
+@endif
+
 <!-- Detailed Statistics Tables -->
 <div class="row">
     <!-- Story Views -->
@@ -408,6 +310,7 @@
         </div>
     </div>
     
+    @if($isAdminMain)
     <!-- Revenue Statistics -->
     <div class="col-lg-6 mb-4">
         <div class="card">
@@ -451,11 +354,12 @@
             </div>
         </div>
     </div>
+    @endif
 </div>
 
-<!-- Deposit and Withdrawal Statistics -->
-<div class="row">
-    <!-- Deposit Statistics -->
+@if($isAdminMain)
+<!-- Deposit Statistics -->
+<div class="row mb-4">
     <div class="col-lg-6 mb-4">
         <div class="card">
             <div class="card-header pb-0">
@@ -497,249 +401,12 @@
             </div>
         </div>
     </div>
-    
-    <!-- Withdrawal Statistics -->
-    <div class="col-lg-6 mb-4">
-        <div class="card">
-            <div class="card-header pb-0">
-                <h6>Thống Kê Rút Cám</h6>
-            </div>
-            <div class="card-body p-3">
-                <div class="table-responsive">
-                    <table class="table align-items-center mb-0">
-                        <thead>
-                            <tr>
-                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Trạng Thái</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Số Lượng</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tổng Cám</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Trung Bình</th>
-                            </tr>
-                        </thead>
-                        <tbody id="withdrawalTable">
-                            @foreach($withdrawalStats as $withdrawal)
-                            <tr>
-                                <td>
-                                    <span class="badge badge-sm bg-{{ $withdrawal->status == 'approved' ? 'success' : ($withdrawal->status == 'pending' ? 'warning' : 'danger') }}">
-                                        {{ ucfirst($withdrawal->status) }}
-                                    </span>
-                                </td>
-                                <td class="align-middle text-center text-sm">
-                                    <span class="text-xs font-weight-bold">{{ number_format($withdrawal->count) }}</span>
-                                </td>
-                                <td class="align-middle text-center text-sm">
-                                    <span class="text-xs font-weight-bold">{{ number_format($withdrawal->total_amount) }}</span>
-                                </td>
-                                <td class="align-middle text-center text-sm">
-                                    <span class="text-xs font-weight-bold">{{ number_format($withdrawal->avg_amount) }}</span>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
+@endif
 
-<!-- Author Revenue and Daily Tasks -->
+<!-- Daily Tasks -->
 <div class="row">
-    <!-- Author Revenue -->
-    <div class="col-lg-8 mb-4">
-        <div class="card">
-            <div class="card-header pb-0">
-                <h6>Thu Nhập Tác Giả</h6>
-            </div>
-            <div class="card-body p-3">
-                <div class="table-responsive">
-                    <table class="table align-items-center mb-0">
-                        <thead>
-                            <tr>
-                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Tác Giả</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Truyện</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Chương</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Tổng Thu Nhập</th>
-                            </tr>
-                        </thead>
-                        <tbody id="authorRevenueTable">
-                            @foreach($authorRevenueStats as $author)
-                            <tr>
-                                <td>
-                                    <div class="d-flex px-2 py-1">
-                                        <a href="{{ route('admin.users.show', $author->id) }}" class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-sm">{{ $author->name }}</h6>
-                                            <p class="text-xs text-secondary mb-0">{{ $author->email }}</p>
-                                        </a>
-                                    </div>
-                                </td>
-                                <td class="align-middle text-center text-sm">
-                                    <span class="text-xs font-weight-bold">{{ $author->story_count }}</span>
-                                </td>
-                                <td class="align-middle text-center text-sm">
-                                    <span class="text-xs font-weight-bold">{{ $author->chapter_count }}</span>
-                                </td>
-                                <td class="align-middle text-center text-sm">
-                                    <span class="text-xs font-weight-bold">{{ number_format($author->total_revenue) }}</span>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Visitor Statistics -->
-    <div class="col-lg-4 mb-4">
-        <div class="card">
-            <div class="card-header pb-0">
-                <h6>Thống Kê Truy Cập</h6>
-            </div>
-            <div class="card-body p-3">
-                <div class="table-responsive">
-                    <table class="table align-items-center mb-0">
-                        <thead>
-                            <tr>
-                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Chỉ Số</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Giá Trị</th>
-                            </tr>
-                        </thead>
-                        <tbody id="visitorStatsTable">
-                            <tr>
-                                <td>
-                                    <div class="d-flex px-2 py-1">
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-sm">Tổng lượt truy cập</h6>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="align-middle text-center text-sm">
-                                    <span class="text-xs font-weight-bold">{{ number_format($visitorStats['total_visits']) }}</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="d-flex px-2 py-1">
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-sm">Khách duy nhất</h6>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="align-middle text-center text-sm">
-                                    <span class="text-xs font-weight-bold">{{ number_format($visitorStats['unique_visitors']) }}</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="d-flex px-2 py-1">
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-sm">Lượt xem trang</h6>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="align-middle text-center text-sm">
-                                    <span class="text-xs font-weight-bold">{{ number_format($visitorStats['page_views']) }}</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="d-flex px-2 py-1">
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-sm">TB lượt truy cập/ngày</h6>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="align-middle text-center text-sm">
-                                    <span class="text-xs font-weight-bold">{{ number_format($visitorStats['avg_daily_visits']) }}</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Online Users -->
-    <div class="col-lg-4 mb-4">
-        <div class="card">
-            <div class="card-header pb-0">
-                <h6>Người Đang Online</h6>
-            </div>
-            <div class="card-body p-3">
-                <div class="table-responsive">
-                    <table class="table align-items-center mb-0">
-                        <thead>
-                            <tr>
-                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Loại</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Số Lượng</th>
-                            </tr>
-                        </thead>
-                        <tbody id="onlineStatsTable">
-                            <tr>
-                                <td>
-                                    <div class="d-flex px-2 py-1">
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-sm">Tổng online</h6>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="align-middle text-center text-sm">
-                                    <span class="text-xs font-weight-bold">{{ number_format($onlineStats['total_online']) }}</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="d-flex px-2 py-1">
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-sm">Khách</h6>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="align-middle text-center text-sm">
-                                    <span class="text-xs font-weight-bold">{{ number_format($onlineStats['online_guests']) }}</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="d-flex px-2 py-1">
-                                        <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-sm">Thành viên</h6>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="align-middle text-center text-sm">
-                                    <span class="text-xs font-weight-bold">{{ number_format($onlineStats['online_users']) }}</span>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                
-                @if(count($onlineStats['top_pages']) > 0)
-                <div class="mt-3">
-                    <h6 class="text-sm font-weight-bold mb-2">Trang được xem nhiều nhất:</h6>
-                    <div class="list-group list-group-flush">
-                        @foreach($onlineStats['top_pages'] as $page)
-                        <div class="list-group-item px-0 py-1">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="text-xs text-truncate" style="max-width: 200px;" title="{{ $page->current_page }}">
-                                    {{ Str::limit($page->current_page, 30) }}
-                                </span>
-                                <span class="badge badge-sm bg-primary">{{ $page->view_count }}</span>
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-                </div>
-                @endif
-            </div>
-        </div>
-    </div>
-    
-    <!-- Daily Tasks -->
-    <div class="col-lg-4 mb-4">
+    <div class="col-lg-6 mb-4">
         <div class="card">
             <div class="card-header pb-0">
                 <h6>Nhiệm Vụ Hàng Ngày</h6>
@@ -779,11 +446,10 @@
             </div>
         </div>
     </div>
-</div>
-
-<!-- Manual Coin Transactions -->
-<div class="row">
-    <div class="col-12 mb-4">
+    
+    @if($isAdminMain)
+    <!-- Manual Coin Transactions -->
+    <div class="col-lg-6 mb-4">
         <div class="card">
             <div class="card-header pb-0">
                 <h6>Giao Dịch Cám Thủ Công</h6>
@@ -828,7 +494,8 @@
             </div>
         </div>
     </div>
-</div> --}}
+    @endif
+</div>
 @endsection
 
 @push('scripts-admin')
@@ -903,30 +570,27 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('newChapters').textContent = formatNumber(data.basicStats.new_chapters);
         document.getElementById('newComments').textContent = formatNumber(data.basicStats.new_comments);
         
-        // Update visitor stats
-        document.getElementById('totalVisits').textContent = formatNumber(data.visitorStats.total_visits);
-        document.getElementById('uniqueVisitors').textContent = formatNumber(data.visitorStats.unique_visitors);
-        document.getElementById('pageViews').textContent = formatNumber(data.visitorStats.page_views);
-        
-        // Update online stats
-        document.getElementById('totalOnline').textContent = formatNumber(data.onlineStats.total_online);
-        
-        // Update coin stats
-        document.getElementById('totalUserCoins').textContent = formatNumber(data.coinStats.total_user_coins);
-        document.getElementById('totalDeposited').textContent = formatNumber(data.coinStats.total_deposited);
-        document.getElementById('totalWithdrawn').textContent = formatNumber(data.coinStats.total_withdrawn);
-        document.getElementById('totalDailyTaskCoins').textContent = formatNumber(data.coinStats.total_daily_task_coins);
+        // Update coin stats (only if admin_main)
+        if (data.coinStats) {
+            document.getElementById('totalUserCoins').textContent = formatNumber(data.coinStats.total_user_coins);
+            document.getElementById('totalDeposited').textContent = formatNumber(data.coinStats.total_deposited);
+            document.getElementById('totalDailyTaskCoins').textContent = formatNumber(data.coinStats.total_daily_task_coins);
+        }
         
         // Update tables
         updateTable('storyViewsTable', data.storyViews, 'story');
-        updateTable('revenueTable', data.revenueStats, 'revenue');
-        updateTable('depositTable', data.depositStats, 'deposit');
-        updateTable('withdrawalTable', data.withdrawalStats, 'withdrawal');
-        updateTable('authorRevenueTable', data.authorRevenueStats, 'author');
         updateTable('dailyTaskTable', data.dailyTaskStats, 'task');
-        updateTable('manualCoinTable', data.manualCoinStats, 'manual');
-        updateVisitorStatsTable(data.visitorStats);
-        updateOnlineStatsTable(data.onlineStats);
+        
+        // Update revenue tables (only if admin_main)
+        if (data.revenueStats) {
+            updateTable('revenueTable', data.revenueStats, 'revenue');
+        }
+        if (data.depositStats) {
+            updateTable('depositTable', data.depositStats, 'deposit');
+        }
+        if (data.manualCoinStats) {
+            updateTable('manualCoinTable', data.manualCoinStats, 'manual');
+        }
     }
     
     // Function to update table data
@@ -1005,48 +669,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     </td>
                 `;
                 break;
-                
-            case 'withdrawal':
-                row.innerHTML = `
-                    <td>
-                        <span class="badge badge-sm bg-${item.status == 'approved' ? 'success' : (item.status == 'pending' ? 'warning' : 'danger')}">
-                            ${capitalizeFirst(item.status)}
-                        </span>
-                    </td>
-                    <td class="align-middle text-center text-sm">
-                        <span class="text-xs font-weight-bold">${formatNumber(item.count)}</span>
-                    </td>
-                    <td class="align-middle text-center text-sm">
-                        <span class="text-xs font-weight-bold">${formatNumber(item.total_amount)}</span>
-                    </td>
-                    <td class="align-middle text-center text-sm">
-                        <span class="text-xs font-weight-bold">${formatNumber(item.avg_amount)}</span>
-                    </td>
-                `;
-                break;
-                
-            case 'author':
-                row.innerHTML = `
-                    <td>
-                        <div class="d-flex px-2 py-1">
-                            <div class="d-flex flex-column justify-content-center">
-                                <h6 class="mb-0 text-sm">${item.name}</h6>
-                                <p class="text-xs text-secondary mb-0">${item.email}</p>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="align-middle text-center text-sm">
-                        <span class="text-xs font-weight-bold">${item.story_count}</span>
-                    </td>
-                    <td class="align-middle text-center text-sm">
-                        <span class="text-xs font-weight-bold">${item.chapter_count}</span>
-                    </td>
-                    <td class="align-middle text-center text-sm">
-                        <span class="text-xs font-weight-bold">${formatNumber(item.total_revenue)}</span>
-                    </td>
-                `;
-                break;
-                
             case 'task':
                 row.innerHTML = `
                     <td>
@@ -1137,108 +759,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 3000);
     }
     
-    // Function to update visitor stats table
-    function updateVisitorStatsTable(visitorStats) {
-        const tbody = document.getElementById('visitorStatsTable');
-        if (!tbody) return;
-        
-        tbody.innerHTML = `
-            <tr>
-                <td>
-                    <div class="d-flex px-2 py-1">
-                        <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Tổng lượt truy cập</h6>
-                        </div>
-                    </div>
-                </td>
-                <td class="align-middle text-center text-sm">
-                    <span class="text-xs font-weight-bold">${formatNumber(visitorStats.total_visits)}</span>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div class="d-flex px-2 py-1">
-                        <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Khách duy nhất</h6>
-                        </div>
-                    </div>
-                </td>
-                <td class="align-middle text-center text-sm">
-                    <span class="text-xs font-weight-bold">${formatNumber(visitorStats.unique_visitors)}</span>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div class="d-flex px-2 py-1">
-                        <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Lượt xem trang</h6>
-                        </div>
-                    </div>
-                </td>
-                <td class="align-middle text-center text-sm">
-                    <span class="text-xs font-weight-bold">${formatNumber(visitorStats.page_views)}</span>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div class="d-flex px-2 py-1">
-                        <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">TB lượt truy cập/ngày</h6>
-                        </div>
-                    </div>
-                </td>
-                <td class="align-middle text-center text-sm">
-                    <span class="text-xs font-weight-bold">${formatNumber(visitorStats.avg_daily_visits)}</span>
-                </td>
-            </tr>
-        `;
-    }
-    
-    // Function to update online stats table
-    function updateOnlineStatsTable(onlineStats) {
-        const tbody = document.getElementById('onlineStatsTable');
-        if (!tbody) return;
-        
-        tbody.innerHTML = `
-            <tr>
-                <td>
-                    <div class="d-flex px-2 py-1">
-                        <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Tổng online</h6>
-                        </div>
-                    </div>
-                </td>
-                <td class="align-middle text-center text-sm">
-                    <span class="text-xs font-weight-bold">${formatNumber(onlineStats.total_online)}</span>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div class="d-flex px-2 py-1">
-                        <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Khách</h6>
-                        </div>
-                    </div>
-                </td>
-                <td class="align-middle text-center text-sm">
-                    <span class="text-xs font-weight-bold">${formatNumber(onlineStats.online_guests)}</span>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <div class="d-flex px-2 py-1">
-                        <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">Thành viên</h6>
-                        </div>
-                    </div>
-                </td>
-                <td class="align-middle text-center text-sm">
-                    <span class="text-xs font-weight-bold">${formatNumber(onlineStats.online_users)}</span>
-                </td>
-            </tr>
-        `;
-    }
-    
     // Event listeners
     yearSelect.addEventListener('change', function() {
         updateURL();
@@ -1256,4 +776,3 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
-

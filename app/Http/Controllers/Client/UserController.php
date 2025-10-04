@@ -307,31 +307,6 @@ class UserController extends Controller
             } catch (\Exception $e) {
                 return redirect()->route('user.profile')->with('error', 'Cập nhật số điện thoại thất bại');
             }
-        } elseif ($request->has('facebook_link')) {
-            // Kiểm tra quyền - chỉ author và admin mới được update Facebook link
-            $user = Auth::user();
-            if ($user->role !== 'author' && $user->role !== 'admin') {
-                return redirect()->route('user.profile')->with('error', 'Chỉ tác giả mới có thể cập nhật Facebook link');
-            }
-
-            try {
-                $request->validate([
-                    'facebook_link' => 'nullable|url|max:255',
-                ], [
-                    'facebook_link.url' => 'Link Facebook phải là URL hợp lệ',
-                    'facebook_link.max' => 'Link Facebook không được vượt quá 255 ký tự'
-                ]);
-            } catch (\Illuminate\Validation\ValidationException $e) {
-                return redirect()->route('user.profile')->with('error', $e->errors());
-            }
-
-            try {
-                $user->facebook_link = $request->facebook_link;
-                $user->save();
-                return redirect()->route('user.profile')->with('success', 'Cập nhật Facebook thành công');
-            } catch (\Exception $e) {
-                return redirect()->route('user.profile')->with('error', 'Cập nhật Facebook thất bại');
-            }
         } else {
             return response()->json([
                 'status' => 'error',

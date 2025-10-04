@@ -23,7 +23,7 @@ class CommentController extends Controller
 
         $query = Comment::with(['user', 'story', 'approver']);
 
-        if ($authUser->role === 'mod') {
+        if ($authUser->role === 'admin_sub') {
             $query->whereHas('user', function ($q) {
                 $q->whereIn('role', ['user']);
             });
@@ -112,7 +112,7 @@ class CommentController extends Controller
             $finalQuery->where('story_id', $storyId);
         }
 
-        if ($authUser->role === 'mod') {
+        if ($authUser->role === 'admin_sub') {
             $finalQuery->whereHas('user', function ($q) {
                 $q->whereIn('role', ['user']);
             });
@@ -134,8 +134,8 @@ class CommentController extends Controller
         $usersQuery = \App\Models\User::whereHas('comments')
             ->where('active', 'active');
 
-        if ($authUser->role === 'mod') {
-            $usersQuery->whereIn('role', ['user', 'vip']);
+        if ($authUser->role === 'admin_sub') {
+            $usersQuery->whereIn('role', ['user']);
         }
 
         $users = $usersQuery->orderBy('name')->get();
@@ -144,7 +144,7 @@ class CommentController extends Controller
         
         $pendingCommentsCount = Comment::where('approval_status', 'pending')
             ->whereHas('user', function($q) {
-                $q->where('role', '!=', 'admin_main' || 'admin_sub');
+                $q->where('role', '!=', 'admin_main')->where('role', '!=', 'admin_sub');
             })
             ->whereDoesntHave('story', function($q) {
                 $q->whereColumn('stories.user_id', 'comments.user_id');
@@ -167,7 +167,7 @@ class CommentController extends Controller
 
         if (
             $authUser->role === 'admin_main' || $authUser->role === 'admin_sub' ||
-            (!$comment->user || $comment->user->role !== 'admin_main' || $comment->user->role !== 'admin_sub')
+            (!$comment->user || $comment->user->role !== 'admin_main' && $comment->user->role !== 'admin_sub')
         ) {
             $comment->delete();
             return redirect()->route('admin.comments.all')->with('success', 'Xóa bình luận thành công');

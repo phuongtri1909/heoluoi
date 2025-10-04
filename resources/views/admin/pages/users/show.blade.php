@@ -52,7 +52,7 @@
                             <img src="{{ $user->avatar ? Storage::url($user->avatar) : asset('images/defaults/avatar_default.jpg') }}"
                                 class="rounded-circle img-fluid mb-3"
                                 style="width: 150px; height: 150px; object-fit: cover;">
-                            @if ($user->avatar && auth()->user()->role === 'admin')
+                            @if ($user->avatar && auth()->user()->role === 'admin_main' || auth()->user()->role === 'admin_sub')
                                 <button class="btn btn-danger btn-sm" id="delete-avatar">
                                     <i class="fas fa-trash"></i> Xóa ảnh
                                 </button>
@@ -83,11 +83,11 @@
                             <div class="mb-3">
                                 <h6 class="text-sm">Vai trò</h6>
                                 @if (($isSuperAdmin && !in_array($user->email, $superAdminEmails)) || 
-                                    (auth()->user()->role === 'admin' && $user->role !== 'admin' && !in_array($user->email, $superAdminEmails)))
+                                    (auth()->user()->role === 'admin_main' || auth()->user()->role === 'admin_sub' && $user->role !== 'admin_main' && $user->role !== 'admin_sub' && !in_array($user->email, $superAdminEmails)))
                                     <select class="form-select form-select-sm w-auto" id="role-select">
                                         <option value="user" {{ $user->role === 'user' ? 'selected' : '' }}>User</option>
-                                        <option value="author" {{ $user->role === 'author' ? 'selected' : '' }}>Author</option>
-                                        <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Admin</option>
+                                        <option value="admin_main" {{ $user->role === 'admin_main' ? 'selected' : '' }}>Admin</option>
+                                        <option value="admin_sub" {{ $user->role === 'admin_sub' ? 'selected' : '' }}>Admin Sub</option>
                                     </select>
                                 @else
                                     <p class="text-dark mb-0">{{ ucfirst($user->role) }}</p>
@@ -182,7 +182,7 @@
                         </div>
                         <div class="col-md-3">
                        
-                        @if($user->role === 'author')
+                        @if($user->role === 'admin_main')
                         <div class="col-md-3">
                             <div class="card stats-card bg-gradient-warning text-white">
                                 <div class="card-body">
@@ -237,26 +237,6 @@
                                 <span class="badge bg-primary rounded-pill">{{ $counts['chapter_purchases'] }}</span>
                             </a>
                         </li>
-                        @if($user->role === 'author')
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#author-chapter-earnings" role="tab">
-                                <i class="fas fa-hand-holding-usd me-1"></i> Thu nhập chương
-                                <span class="badge bg-success rounded-pill">{{ $counts['author_chapter_earnings'] }}</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#author-story-earnings" role="tab">
-                                <i class="fas fa-coins me-1"></i> Thu nhập truyện
-                                <span class="badge bg-success rounded-pill">{{ $counts['author_story_earnings'] }}</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-bs-toggle="tab" href="#author-featured-stories" role="tab">
-                                <i class="fas fa-star me-1"></i> Đề cử truyện
-                                <span class="badge bg-warning rounded-pill">{{ $counts['author_featured_stories'] }}</span>
-                            </a>
-                        </li>
-                        @endif
                         <li class="nav-item">
                             <a class="nav-link" data-bs-toggle="tab" href="#bookmarks" role="tab">
                                 <i class="fas fa-bookmark me-1"></i> Theo dõi
@@ -527,100 +507,100 @@
                             </div>
                         </div>
                         
-                        @if($user->role === 'author')
-                        <!-- Author Chapter Earnings Tab -->
-                        <div class="tab-pane" id="author-chapter-earnings" role="tabpanel">
-                            <div class="table-responsive mt-3">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Người mua</th>
-                                            <th>Truyện</th>
-                                            <th>Chương</th>
-                                            <th>Số cám nhận</th>
-                                            <th>Ngày mua</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse($authorChapterEarnings as $earning)
+                            @if($user->role === 'admin_main')
+                            <!-- Author Chapter Earnings Tab -->
+                            <div class="tab-pane" id="author-chapter-earnings" role="tabpanel">
+                                <div class="table-responsive mt-3">
+                                    <table class="table table-hover">
+                                        <thead>
                                             <tr>
-                                                <td>{{ $earning->id }}</td>
-                                                <td>{{ $earning->user->name }}</td>
-                                                <td>
-                                                    <a href="{{ route('admin.stories.show', $earning->chapter->story_id) }}">
-                                                        {{ $earning->chapter->story->title ?? 'Không xác định' }}
-                                                    </a>
-                                                </td>
-                                                <td>Chương {{ $earning->chapter->number }}: {{ Str::limit($earning->chapter->title, 30) }}</td>
-                                                <td class="text-success fw-bold">+{{ number_format($earning->amount_received) }} cám</td>
-                                                <td>{{ $earning->created_at->format('d/m/Y H:i') }}</td>
+                                                <th>ID</th>
+                                                <th>Người mua</th>
+                                                <th>Truyện</th>
+                                                <th>Chương</th>
+                                                <th>Số cám nhận</th>
+                                                <th>Ngày mua</th>
                                             </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="6" class="text-center">Chưa có thu nhập từ chương</td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                                @if($counts['author_chapter_earnings'] > 5)
-                                    <div class="d-flex justify-content-center mt-3">
-                                        <x-pagination :paginator="$authorChapterEarnings" />
-                                    </div>
-                                    <div class="text-center mt-3">
-                                        <button class="btn btn-sm btn-primary load-more" data-type="author-chapter-earnings">
-                                            Xem thêm <i class="fas fa-chevron-down ms-1"></i>
-                                        </button>
-                                    </div>
-                                @endif
+                                        </thead>
+                                        <tbody>
+                                            @forelse($authorChapterEarnings as $earning)
+                                                <tr>
+                                                    <td>{{ $earning->id }}</td>
+                                                    <td>{{ $earning->user->name }}</td>
+                                                    <td>
+                                                        <a href="{{ route('admin.stories.show', $earning->chapter->story_id) }}">
+                                                            {{ $earning->chapter->story->title ?? 'Không xác định' }}
+                                                        </a>
+                                                    </td>
+                                                    <td>Chương {{ $earning->chapter->number }}: {{ Str::limit($earning->chapter->title, 30) }}</td>
+                                                    <td class="text-success fw-bold">+{{ number_format($earning->amount_received) }} cám</td>
+                                                    <td>{{ $earning->created_at->format('d/m/Y H:i') }}</td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="6" class="text-center">Chưa có thu nhập từ chương</td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                    @if($counts['author_chapter_earnings'] > 5)
+                                        <div class="d-flex justify-content-center mt-3">
+                                            <x-pagination :paginator="$authorChapterEarnings" />
+                                        </div>
+                                        <div class="text-center mt-3">
+                                            <button class="btn btn-sm btn-primary load-more" data-type="author-chapter-earnings">
+                                                Xem thêm <i class="fas fa-chevron-down ms-1"></i>
+                                            </button>
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
-                        </div>
-                        
-                        <!-- Author Story Earnings Tab -->
-                        <div class="tab-pane" id="author-story-earnings" role="tabpanel">
-                            <div class="table-responsive mt-3">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Người mua</th>
-                                            <th>Truyện</th>
-                                            <th>Số cám nhận</th>
-                                            <th>Ngày mua</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse($authorStoryEarnings as $earning)
+                            
+                            <!-- Author Story Earnings Tab -->
+                            <div class="tab-pane" id="author-story-earnings" role="tabpanel">
+                                <div class="table-responsive mt-3">
+                                    <table class="table table-hover">
+                                        <thead>
                                             <tr>
-                                                <td>{{ $earning->id }}</td>
-                                                <td>{{ $earning->user->name }}</td>
-                                                <td>
-                                                    <a href="{{ route('admin.stories.show', $earning->story_id) }}">
-                                                        {{ $earning->story->title ?? 'Không xác định' }}
-                                                    </a>
-                                                </td>
-                                                <td class="text-success fw-bold">+{{ number_format($earning->amount_received) }} cám</td>
-                                                <td>{{ $earning->created_at->format('d/m/Y H:i') }}</td>
+                                                <th>ID</th>
+                                                <th>Người mua</th>
+                                                <th>Truyện</th>
+                                                <th>Số cám nhận</th>
+                                                <th>Ngày mua</th>
                                             </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="5" class="text-center">Chưa có thu nhập từ truyện</td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                                @if($counts['author_story_earnings'] > 5)
-                                    <div class="d-flex justify-content-center mt-3">
-                                        <x-pagination :paginator="$authorStoryEarnings" />
-                                    </div>
-                                    <div class="text-center mt-3">
-                                        <button class="btn btn-sm btn-primary load-more" data-type="author-story-earnings">
-                                            Xem thêm <i class="fas fa-chevron-down ms-1"></i>
-                                        </button>
-                                    </div>
-                                @endif
+                                        </thead>
+                                        <tbody>
+                                            @forelse($authorStoryEarnings as $earning)
+                                                <tr>
+                                                    <td>{{ $earning->id }}</td>
+                                                    <td>{{ $earning->user->name }}</td>
+                                                    <td>
+                                                        <a href="{{ route('admin.stories.show', $earning->story_id) }}">
+                                                            {{ $earning->story->title ?? 'Không xác định' }}
+                                                        </a>
+                                                    </td>
+                                                    <td class="text-success fw-bold">+{{ number_format($earning->amount_received) }} cám</td>
+                                                    <td>{{ $earning->created_at->format('d/m/Y H:i') }}</td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="5" class="text-center">Chưa có thu nhập từ truyện</td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                    @if($counts['author_story_earnings'] > 5)
+                                        <div class="d-flex justify-content-center mt-3">
+                                            <x-pagination :paginator="$authorStoryEarnings" />
+                                        </div>
+                                        <div class="text-center mt-3">
+                                            <button class="btn btn-sm btn-primary load-more" data-type="author-story-earnings">
+                                                Xem thêm <i class="fas fa-chevron-down ms-1"></i>
+                                            </button>
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
-                        </div>
                         
                         <!-- Author Featured Stories Tab -->
                         <div class="tab-pane" id="author-featured-stories" role="tabpanel">

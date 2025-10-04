@@ -19,7 +19,7 @@
                             <h5 class="mb-0">Danh sách người dùng</h5>
                             <p class="text-sm mb-0">
                                 Tổng số: {{ $stats['total'] }} người dùng
-                                ({{ $stats['admin'] }} Admin / {{ $stats['author'] }} Tác giả / {{ $stats['user'] }} User)
+                                ({{ $stats['admin_main'] }} Admin / {{ $stats['admin_sub'] }} Admin Sub / {{ $stats['user'] }} User)
                             </p>
                         </div>
 
@@ -28,8 +28,8 @@
                         <div class="d-flex flex-column flex-md-row gap-2 mb-2 mb-md-0">
                             <select name="role" class="form-select form-select-sm w-100 w-md-auto">
                                 <option value="">Tất cả vai trò</option>
-                                <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
-                                <option value="author" {{ request('role') == 'author' ? 'selected' : '' }}>Tác giả</option>
+                                <option value="admin_main" {{ request('role') == 'admin_main' ? 'selected' : '' }}>Admin</option>
+                                <option value="admin_sub" {{ request('role') == 'admin_sub' ? 'selected' : '' }}>Admin Sub</option>
                                 <option value="user" {{ request('role') == 'user' ? 'selected' : '' }}>User</option>
                             </select>
 
@@ -114,14 +114,12 @@
                                     <td class="text-center">
                                         <p class="text-xs font-weight-bold mb-0">
 
-                                            @if ($user->role == 'admin')
+                                            @if ($user->role == 'admin_main')
                                                 <span class="badge bg-gradient-danger">{{ $user->role }}</span>
-                                            @elseif ($user->role == 'mod')
+                                            @elseif ($user->role == 'admin_sub')
                                                 <span class="badge bg-gradient-info">{{ $user->role }}</span>
-                                            @elseif ($user->role == 'vip')
+                                            @elseif ($user->role == 'user')
                                                 <span class="badge bg-gradient-warning">{{ $user->role }}</span>
-                                            @elseif ($user->role == 'author')
-                                                <span class="badge bg-gradient-primary">{{ $user->role }}</span>
                                             @else
                                                 <span class="badge bg-gradient-success">{{ $user->role }}</span>
                                             @endif

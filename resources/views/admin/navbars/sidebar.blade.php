@@ -85,6 +85,7 @@
                 </a>
             </li>
 
+            @if (Auth::user()->role === 'admin_main')
             <li class="nav-item">
                 <a class="nav-link {{ Route::currentRouteNamed('admin.banks.*') ? 'active' : '' }}"
                     href="{{ route('admin.banks.index') }}">
@@ -92,7 +93,7 @@
                         class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
                         <i class="fa-solid fa-university text-dark icon-sidebar"></i>
                     </div>
-                    <span class="nav-link-text ms-1">Quản lý Ngân hàng (Thủ công)</span>
+                    <span class="nav-link-text ms-1">Bank (Thủ công)</span>
                 </a>
             </li>
 
@@ -103,7 +104,29 @@
                         class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
                         <i class="fa-solid fa-robot text-dark icon-sidebar"></i>
                     </div>
-                    <span class="nav-link-text ms-1">Quản lý Ngân hàng (Tự động)</span>
+                    <span class="nav-link-text ms-1">Bank (Tự động)</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {{ Route::currentRouteNamed('admin.bank-auto-deposits.*') ? 'active' : '' }}"
+                    href="{{ route('admin.bank-auto-deposits.index') }}">
+                    <div
+                        class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="fa-solid fa-exchange-alt text-dark icon-sidebar"></i>
+                    </div>
+                    <span class="nav-link-text ms-1">Nạp cám auto
+                        @php
+                            try {
+                                $pendingBankAutoCount = \App\Models\BankAutoDeposit::where('status', 'pending')->count();
+                            } catch (\Exception $e) {
+                                $pendingBankAutoCount = 0;
+                            }
+                        @endphp
+                        @if ($pendingBankAutoCount > 0)
+                            <span class="badge bg-danger ms-2">{{ $pendingBankAutoCount }}</span>
+                        @endif
+                    </span>
                 </a>
             </li>
 
@@ -154,6 +177,18 @@
             </li>
 
             <li class="nav-item">
+                <a class="nav-link {{ Route::currentRouteNamed('admin.manual-purchases.*') ? 'active' : '' }}"
+                    href="{{ route('admin.manual-purchases.index') }}">
+                    <div
+                        class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="fa-solid fa-hand-holding-dollar text-dark icon-sidebar"></i>
+                    </div>
+                    <span class="nav-link-text ms-1">Mua thủ công</span>
+                </a>
+            </li>
+            @endif
+
+            <li class="nav-item">
                 <a class="nav-link {{ Route::currentRouteNamed('admin.comments.all') ? 'active' : '' }}"
                     href="{{ route('admin.comments.all') }}">
                     <div
@@ -164,7 +199,7 @@
                         @php
                             $pendingCommentsCount = \App\Models\Comment::where('approval_status', 'pending')
                                 ->whereHas('user', function ($q) {
-                                    $q->where('role', '!=', 'admin');
+                                    $q->where('role', '!=', 'admin_main')->where('role', '!=', 'admin_sub');
                                 })
                                 ->whereDoesntHave('story', function ($q) {
                                     $q->whereColumn('stories.user_id', 'comments.user_id');
@@ -193,17 +228,6 @@
                             <span class="badge bg-danger ms-2">{{ $pendingReportCount }}</span>
                         @endif
                     </span>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a class="nav-link {{ Route::currentRouteNamed('admin.manual-purchases.*') ? 'active' : '' }}"
-                    href="{{ route('admin.manual-purchases.index') }}">
-                    <div
-                        class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-                        <i class="fa-solid fa-hand-holding-dollar text-dark icon-sidebar"></i>
-                    </div>
-                    <span class="nav-link-text ms-1">Mua thủ công</span>
                 </a>
             </li>
 
@@ -251,6 +275,17 @@
                         <span class="nav-link-text ms-1">Giám sát chuyển cám</span>
                     </a>
                 </li>
+
+                <li class="nav-item">
+                    <a class="nav-link {{ Route::currentRouteNamed('admin.coin-history.index') ? 'active' : '' }}"
+                        href="{{ route('admin.coin-history.index') }}">
+                        <div
+                            class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="fa-solid fa-history text-dark icon-sidebar"></i>
+                        </div>
+                        <span class="nav-link-text ms-1">Lịch sử cám</span>
+                    </a>
+                </li>
             @elseif(Auth::user()->role === 'admin_sub')
                 <li class="nav-item">
                     <a class="nav-link {{ Route::currentRouteNamed('admin.coin-transfers.*') ? 'active' : '' }}"
@@ -264,21 +299,12 @@
                 </li>
             @endif
 
-            <li class="nav-item">
-                <a class="nav-link {{ Route::currentRouteNamed('admin.coin-history.index') ? 'active' : '' }}"
-                    href="{{ route('admin.coin-history.index') }}">
-                    <div
-                        class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
-                        <i class="fa-solid fa-history text-dark icon-sidebar"></i>
-                    </div>
-                    <span class="nav-link-text ms-1">Lịch sử cám</span>
-                </a>
-            </li>
 
             <li class="nav-item mt-2">
                 <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Cài đặt</h6>
             </li>
 
+            @if (Auth::user()->role === 'admin_main')
             <li class="nav-item">
                 <a class="nav-link {{ Route::currentRouteNamed('admin.configs.*') ? 'active' : '' }}"
                     href="{{ route('admin.configs.index') }}">
@@ -289,6 +315,7 @@
                     <span class="nav-link-text ms-1">Cấu hình hệ thống</span>
                 </a>
             </li>
+            @endif
 
             <li class="nav-item">
                 <a class="nav-link {{ Route::currentRouteNamed('admin.logo-site.*') ? 'active' : '' }}"

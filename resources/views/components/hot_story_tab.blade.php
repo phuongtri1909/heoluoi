@@ -31,7 +31,7 @@
 
                         <div class="d-flex align-items-center flex-wrap">
                             @if ($story->author_name)
-                                <p class="mb-0 fs-6 fw-semibold">{{ $story->author_name }}</p>
+                                <p class="mb-0 fs-6 fw-semibold text-dark">{{ $story->author_name }}</p>
 
                                 <span class="chapter-separator fs-6">|</span>
                             @endif
@@ -54,3 +54,11 @@
         @endforeach
     </div>
 </div>
+
+@push('styles')
+    <style>
+        body.dark-mode .eye-icon {
+            filter: invert(1);
+        }
+    </style>
+@endpush

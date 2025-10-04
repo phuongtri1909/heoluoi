@@ -98,7 +98,7 @@ class CommentController extends Controller
     {
         $comment = Comment::findOrFail($commentId);
 
-        if (auth()->user()->role !== 'admin' || $comment->level !== 0) {
+        if (auth()->user()->role !== 'admin_main' && auth()->user()->role !== 'admin_sub' || $comment->level !== 0) {
             return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
         }
 
@@ -158,7 +158,7 @@ class CommentController extends Controller
             $isPinned = $comment->is_pinned;
             $storyId = $comment->story_id;
 
-            if ($authUser->role === 'admin') {
+            if ($authUser->role === 'admin_main' || $authUser->role === 'admin_sub') {
                 $comment->delete();
                 
                 if ($isPinned) {
@@ -194,8 +194,8 @@ class CommentController extends Controller
                 ]);
             }
 
-            if ($authUser->role === 'mod') {
-                if ($comment->user && $comment->user->role === 'admin') {
+            if ($authUser->role === 'admin_main' || $authUser->role === 'admin_sub') {
+                if ($comment->user && $comment->user->role === 'admin_main' || $comment->user->role === 'admin_sub') {
                     return response()->json([
                         'status' => 'error',
                         'message' => 'Không thể xóa bình luận của Admin'

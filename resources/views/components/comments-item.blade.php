@@ -66,7 +66,7 @@
 
                 @if (auth()->check())
                     @if (auth()->user()->role === 'admin_main' || auth()->user()->role === 'admin_sub' ||
-                            (auth()->user()->role === 'mod' && $comment->user && in_array($comment->user->role, ['user', 'vip'])))
+                            (auth()->user()->role === 'admin_sub' && $comment->user && in_array($comment->user->role, ['user'])))
                         <span class="delete-comment text-danger ms-2" style="cursor: pointer;"
                             data-id="{{ $comment->id }}">
                             <i class="fas fa-times"></i>

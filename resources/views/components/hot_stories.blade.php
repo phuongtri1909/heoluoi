@@ -188,7 +188,6 @@
             /* Dark mode styles */
             body.dark-mode .sidebar-widget {
                 background-color: #2d2d2d !important;
-                border-color: #404040 !important;
             }
 
             body.dark-mode .widget-header {
