@@ -151,12 +151,10 @@ class BankAutoController extends Controller
         // Tính toán coins
         $calculation = $this->calculateCoins($amount);
         
-        // Tạo transaction code
-        $transactionCode = 'BA' . time() . Str::random(6);
+        $transactionCode = 'HEOLUOI' . time() . strtoupper(Str::random(6)) . Auth::id();
         
         DB::beginTransaction();
         try {
-            // Tạo giao dịch bank auto
             $bankAutoDeposit = BankAutoDeposit::create([
                 'user_id' => Auth::id(),
                 'bank_id' => $bankId,
@@ -171,7 +169,6 @@ class BankAutoController extends Controller
 
             DB::commit();
 
-            // Trả về thông tin chuyển khoản cho user
             return response()->json([
                 'success' => true,
                 'transaction_code' => $transactionCode,
@@ -219,7 +216,6 @@ class BankAutoController extends Controller
      */
     public function callback(Request $request)
     {
-        // Lấy raw payload để verify signature
         $payload = $request->getContent();
         $signature = $request->header('X-Casso-Signature');
         
@@ -229,7 +225,6 @@ class BankAutoController extends Controller
             'headers' => $request->headers->all()
         ]);
         
-        // Verify signature từ Casso Webhook v2
         if (!$signature) {
             Log::warning('Missing Casso signature header');
             return response()->json(['success' => false, 'message' => 'Missing signature'], 401);
@@ -251,7 +246,7 @@ class BankAutoController extends Controller
             return response()->json(['success' => false, 'message' => 'Invalid JSON payload'], 400);
         }
         
-        // Casso Webhook v1 format
+        // Casso Webhook v2 format
         $transactionId = $data['data']['id'] ?? null;
         $reference = $data['data']['reference'] ?? null;
         $description = $data['data']['description'] ?? '';
@@ -286,22 +281,41 @@ class BankAutoController extends Controller
         
         DB::beginTransaction();
         try {
-            // Tìm deposit bằng reference (transaction code)
-            $deposit = BankAutoDeposit::where('transaction_code', $description)
-                ->where('status', BankAutoDeposit::STATUS_PENDING)
-                ->first();
+            $transactionCode = null;
+            
+            if (preg_match_all('/(HEOLUOI[a-zA-Z0-9]{14,})/', $description, $matches)) {
+                $transactionCode = $matches[1][0];
+                
+                Log::info('Found transaction codes in description', [
+                    'description' => $description,
+                    'all_codes' => $matches[1],
+                    'selected_code' => $transactionCode
+                ]);
+            }
+            
+            Log::info('Extracted transaction code', [
+                'description' => $description,
+                'extracted_code' => $transactionCode
+            ]);
+            
+            $deposit = null;
+            if ($transactionCode) {
+                $deposit = BankAutoDeposit::where('transaction_code', $transactionCode)
+                    ->where('status', BankAutoDeposit::STATUS_PENDING)
+                    ->first();
+            }
                 
             if (!$deposit) {
                 Log::warning('Bank auto deposit not found', [
                     'reference' => $reference,
                     'transaction_id' => $transactionId,
-                    'description' => $description
+                    'description' => $description,
+                    'extracted_code' => $transactionCode
                 ]);
                 return response()->json(['success' => false, 'message' => 'Giao dịch không tồn tại']);
             }
             
-            // Kiểm tra số tiền nhận được (cho phép sai lệch nhỏ do phí chuyển khoản)
-            $toleranceAmount = $deposit->amount * 0.99; // Cho phép sai lệch 1%
+            $toleranceAmount = $deposit->amount * 0.99;
             if ($amount < $toleranceAmount) {
                 Log::warning('Insufficient amount received', [
                     'expected' => $deposit->amount,
@@ -321,7 +335,6 @@ class BankAutoController extends Controller
                 return response()->json(['success' => false, 'message' => 'Số tiền không đủ']);
             }
             
-            // Cập nhật trạng thái thành công
             $deposit->update([
                 'status' => BankAutoDeposit::STATUS_SUCCESS,
                 'processed_at' => now(),
