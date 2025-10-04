@@ -838,7 +838,7 @@
                 }
                 
                 currentTransactionCode = transactionCode;
-                const sseUrl = '{{ route("bank.auto.sse") }}?transaction_code=' + encodeURIComponent(transactionCode);
+                const sseUrl = '{{ route("user.bank.auto.sse") }}?transaction_code=' + encodeURIComponent(transactionCode);
                 
                 sseConnection = new EventSource(sseUrl);
                 
