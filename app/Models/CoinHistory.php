@@ -51,6 +51,7 @@ class CoinHistory extends Model
     const TYPE_CARD_DEPOSIT = 'card_deposit';
     const TYPE_PAYPAL_DEPOSIT = 'paypal_deposit';
     const TYPE_BANK_DEPOSIT = 'bank_deposit';
+    const TYPE_BANK_AUTO_DEPOSIT = 'bank_auto_deposit';
     const TYPE_CHAPTER_PURCHASE = 'chapter_purchase';
     const TYPE_STORY_PURCHASE = 'story_purchase';
     const TYPE_CHAPTER_EARNINGS = 'chapter_earnings';
@@ -71,6 +72,7 @@ class CoinHistory extends Model
             self::TYPE_CARD_DEPOSIT => 'Nạp thẻ',
             self::TYPE_PAYPAL_DEPOSIT => 'Nạp PayPal',
             self::TYPE_BANK_DEPOSIT => 'Nạp chuyển khoản',
+            self::TYPE_BANK_AUTO_DEPOSIT => 'Nạp bank auto',
             self::TYPE_CHAPTER_PURCHASE => 'Mua chương',
             self::TYPE_STORY_PURCHASE => 'Mua combo truyện',
             self::TYPE_CHAPTER_EARNINGS => 'Thu nhập từ chương',

@@ -107,8 +107,8 @@
                                 </ul>
                             </li>
                             <li class="nav-item">
-                                <a class="color-2 nav-link fw-bold fs-3" href="{{ route('story.hot') }}">
-                                    Sắp ra mắt
+                                <a class="color-2 nav-link fw-bold fs-3" href="{{ route('story.completed') }}">
+                                    Truyện Full
                                 </a>
                             </li>
                             <li class="nav-item">
@@ -266,8 +266,8 @@
 
                         <hr class="divider my-3">
 
-                        <a href="{{ route('story.hot') }}" class="mobile-menu-item fw-semibold fs-3 color-2">
-                            Sắp ra mắt
+                        <a href="{{ route('story.completed') }}" class="mobile-menu-item fw-semibold fs-3 color-2">
+                            Truyện Full
                         </a>
 
                         <hr class="divider my-3">

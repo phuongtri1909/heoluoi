@@ -20,6 +20,7 @@ use App\Http\Controllers\Client\CardDepositController;
 use App\Http\Controllers\Client\CoinHistoryController;
 use App\Http\Controllers\Client\PaypalDepositController;
 use App\Http\Controllers\Client\RequestPaymentController;
+use App\Http\Controllers\Client\BankAutoController;
 
 
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
@@ -29,6 +30,7 @@ Route::get('/sitemap-chapters.xml', [SitemapController::class, 'chapters'])->nam
 Route::get('/sitemap-categories.xml', [SitemapController::class, 'categories'])->name('sitemap.categories');
 
 Route::post('/card-deposit/callback', [CardDepositController::class, 'callback'])->name('card.deposit.callback');
+Route::post('/bank-auto-deposit/callback', [BankAutoController::class, 'callback'])->name('user.bank.auto.deposit.callback');
 
 
 // Route::get('/check-card', [CardDepositController::class, 'checkCardForm'])->name('check.card.form');
@@ -115,6 +117,13 @@ Route::middleware(['ban:login'])->group(function () {
         Route::post('/paypal-deposit', [PaypalDepositController::class, 'store'])->name('paypal.deposit.store');
         Route::post('/paypal-deposit/confirm', [PaypalDepositController::class, 'confirm'])->name('paypal.deposit.confirm');
         Route::get('/paypal-deposit/status/{transactionCode}', [PaypalDepositController::class, 'checkStatus'])->name('paypal.deposit.status');
+
+        // Bank Auto Deposit Routes
+        Route::get('/bank-auto-deposit', [BankAutoController::class, 'index'])->name('bank.auto.deposit');
+        Route::post('/bank-auto-deposit', [BankAutoController::class, 'store'])->name('bank.auto.deposit.store');
+        Route::post('/bank-auto-deposit/calculate', [BankAutoController::class, 'calculatePreview'])->name('bank.auto.deposit.calculate');
+        Route::get('/bank-auto-deposit/success', [BankAutoController::class, 'success'])->name('bank.auto.success');
+        Route::get('/bank-auto-deposit/cancel', [BankAutoController::class, 'cancel'])->name('bank.auto.cancel');
     });
 
     Route::group(['middleware' => 'auth'], function () {
