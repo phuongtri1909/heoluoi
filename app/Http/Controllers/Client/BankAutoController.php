@@ -120,10 +120,10 @@ class BankAutoController extends Controller
     {
         $amount = $request->input('amount', 0);
         
-        if ($amount < 5000) {
+        if ($amount < 2000) {
             return response()->json([
                 'success' => false,
-                'message' => 'Số tiền tối thiểu là 5.000 VNĐ'
+                'message' => 'Số tiền tối thiểu là 2.000 VNĐ'
             ]);
         }
         
@@ -141,7 +141,7 @@ class BankAutoController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'amount' => 'required|integer|min:5000',
+            'amount' => 'required|integer|min:2000',
             'bank_id' => 'required|exists:bank_autos,id'
         ]);
 

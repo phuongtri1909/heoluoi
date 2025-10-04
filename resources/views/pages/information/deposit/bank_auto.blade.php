@@ -221,15 +221,15 @@
                                 </label>
                                 <div class="input-group">
                                     <input type="text" class="form-control deposit-amount-input" id="amount"
-                                        name="amount" value="{{ old('amount', '5.000') }}"
-                                        data-raw="{{ old('amount', 5000) }}"
+                                        name="amount"                                         value="{{ old('amount', '2.000') }}"
+                                        data-raw="{{ old('amount', 2000) }}"
                                         placeholder="Nhập số tiền (ví dụ: 100.000)"
                                         pattern="[0-9.,]+"
                                         inputmode="numeric">
 
                                     <span class="input-group-text">VNĐ</span>
                                 </div>
-                                <div class="form-text">Số tiền tối thiểu: 5.000 VNĐ, phải là bội số của 10.000</div>
+                                <div class="form-text">Số tiền tối thiểu: 2.000 VNĐ, phải là bội số của 10.000</div>
                                 <div class="invalid-feedback amount-error">Vui lòng nhập số tiền hợp lệ</div>
 
                                 <!-- Coin Preview với Bonus -->
@@ -318,7 +318,7 @@
                                 </thead>
                                 <tbody>
                                     @php
-                                        $amounts = [5000, 10000, 50000, 100000, 200000, 300000, 500000, 1000000];
+                                        $amounts = [2000, 10000, 50000, 100000, 200000, 300000, 500000, 1000000];
                                     @endphp
                                     @foreach($amounts as $amount)
                                         @php
@@ -461,7 +461,7 @@
                         // Round to nearest 10,000
                         if (rawValue > 0) {
                             rawValue = Math.round(rawValue / 10000) * 10000;
-                            if (rawValue < 5000) rawValue = 5000;
+                            if (rawValue < 2000) rawValue = 2000;
                             
                             const formatted = formatVndCurrency(rawValue.toString());
                             input.val(formatted);
@@ -469,8 +469,8 @@
                             updateCoinPreview();
                         } else {
                             // If empty or invalid, set to minimum
-                            input.val('5.000');
-                            input.data('raw', 5000);
+                            input.val('2.000');
+                            input.data('raw', 2000);
                             updateCoinPreview();
                         }
                     } catch (error) {
@@ -551,8 +551,8 @@
                         amountMod10000: amount % 10000
                     });
                     
-                    if (amount < 5000) {
-                        $('.amount-error').show().text('Số tiền tối thiểu là 5.000 VNĐ');
+                    if (amount < 2000) {
+                        $('.amount-error').show().text('Số tiền tối thiểu là 2.000 VNĐ');
                         valid = false;
                     } else if (amount % 10000 !== 0) {
                         $('.amount-error').show().text('Số tiền phải là bội số của 10.000 VNĐ (ví dụ: 10.000, 20.000, 50.000, 100.000, 1.000.000...)');
@@ -646,7 +646,7 @@
                     let raw = input.data('raw');
                     if (raw) {
                         raw = Math.round(raw / 10000) * 10000;
-                        if (raw < 5000) raw = 5000;
+                        if (raw < 2000) raw = 2000;
                         input.data('raw', raw);
                         input.val(formatVndCurrency(raw));
                     }
