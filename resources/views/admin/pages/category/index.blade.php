@@ -1,5 +1,46 @@
 @extends('admin.layouts.app')
 
+@push('styles-admin')
+<style>
+    @media (max-width: 768px) {
+        .d-flex.justify-content-between {
+            flex-direction: column !important;
+            gap: 1rem;
+        }
+        
+        .btn-sm {
+            width: 100%;
+        }
+        
+        .table th,
+        .table td {
+            padding: 0.5rem 0.25rem;
+            font-size: 0.8rem;
+        }
+        
+        .text-truncate {
+            max-width: 150px;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .table th,
+        .table td {
+            padding: 0.375rem 0.125rem;
+            font-size: 0.75rem;
+        }
+        
+        .text-truncate {
+            max-width: 100px;
+        }
+        
+        .action-icon {
+            padding: 0.25rem !important;
+        }
+    }
+</style>
+@endpush
+
 @section('content-auth')
     <div class="row">
         <div class="col-12">

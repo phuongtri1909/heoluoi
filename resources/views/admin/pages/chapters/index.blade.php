@@ -265,6 +265,35 @@
             .card-header p {
                 font-size: 0.75rem;
             }
+            
+            /* Action buttons in table - 2 columns */
+            .table .d-flex.flex-wrap {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr;
+                gap: 0.25rem;
+                justify-content: center;
+                max-width: 80px;
+            }
+            
+            .table .d-flex.flex-wrap > div {
+                width: 100%;
+                margin-bottom: 0 !important;
+                margin-right: 0 !important;
+            }
+            
+            .table .action-icon {
+                width: 32px;
+                height: 32px;
+                padding: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.75rem;
+            }
+            
+            .table .action-icon i {
+                font-size: 0.7rem;
+            }
         }
         
         @media (max-width: 576px) {
@@ -290,6 +319,35 @@
             
             .text-xs {
                 font-size: 0.7rem !important;
+            }
+            
+            /* Action buttons in table - 2 columns */
+            .table .d-flex.flex-wrap {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr;
+                gap: 0.125rem;
+                justify-content: center;
+                max-width: 70px;
+            }
+            
+            .table .d-flex.flex-wrap > div {
+                width: 100%;
+                margin-bottom: 0 !important;
+                margin-right: 0 !important;
+            }
+            
+            .table .action-icon {
+                width: 28px;
+                height: 28px;
+                padding: 0;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.7rem;
+            }
+            
+            .table .action-icon i {
+                font-size: 0.65rem;
             }
         }
     </style>

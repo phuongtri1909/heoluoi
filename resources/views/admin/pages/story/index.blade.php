@@ -37,6 +37,35 @@
         .action-icon {
             padding: 0.25rem !important;
         }
+        
+        /* Action buttons in table - 2 columns */
+        .table .d-flex.flex-wrap {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.25rem;
+            justify-content: center;
+            max-width: 80px;
+        }
+        
+        .table .d-flex.flex-wrap > div {
+            width: 100%;
+            margin-bottom: 0 !important;
+            margin-right: 0 !important;
+        }
+        
+        .table .action-icon {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+        
+        .table .action-icon i {
+            font-size: 0.7rem;
+        }
     }
     
     @media (max-width: 576px) {
@@ -63,6 +92,35 @@
         .img-fluid {
             width: 50px !important;
             height: 70px !important;
+        }
+        
+        /* Action buttons in table - 2 columns */
+        .table .d-flex.flex-wrap {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.125rem;
+            justify-content: center;
+            max-width: 70px;
+        }
+        
+        .table .d-flex.flex-wrap > div {
+            width: 100%;
+            margin-bottom: 0 !important;
+            margin-right: 0 !important;
+        }
+        
+        .table .action-icon {
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+        
+        .table .action-icon i {
+            font-size: 0.65rem;
         }
     }
 </style>
@@ -121,7 +179,7 @@
 
                         <!-- Search input -->
                         <div class="input-group input-group-sm" style="min-width: 200px;">
-                            <input type="text" class="form-control" name="search"
+                            <input type="text" class="form-control w-auto" name="search"
                                    value="{{ request('search') }}" placeholder="Tìm kiếm...">
                             <button class="btn bg-gradient-primary btn-sm px-3 mb-0" type="submit">
                                 <i class="fas fa-search"></i>
@@ -130,7 +188,7 @@
                     </form>
 
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="{{ route('admin.stories.create') }}" class="btn bg-gradient-primary btn-sm mb-0">
+                        <a href="{{ route('admin.stories.create') }}" class="btn bg-gradient-primary btn-sm mb-0 d-flex align-items-center">
                             <i class="fas fa-plus me-1"></i><span class="d-none d-md-inline">Thêm truyện mới</span>
                         </a>
 

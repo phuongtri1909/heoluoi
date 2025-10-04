@@ -1,0 +1,414 @@
+/* Form Responsive Components */
+@media (max-width: 768px) {
+    /* Form layouts */
+    .form-row .col-md-6,
+    .form-row .col-md-4,
+    .form-row .col-md-8,
+    .form-row .col-md-3,
+    .form-row .col-md-9 {
+        width: 100% !important;
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 1rem;
+    }
+    
+    /* Form groups */
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    /* Form controls */
+    .form-control,
+    .form-select,
+    .form-check-input {
+        font-size: 0.9rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    /* Form labels */
+    .form-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Buttons */
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    .btn-group .btn {
+        width: auto;
+        margin-bottom: 0;
+    }
+    
+    /* Card body */
+    .card-body {
+        padding: 1rem;
+    }
+    
+    /* Textarea */
+    textarea.form-control {
+        min-height: 120px;
+    }
+    
+    /* File input */
+    .form-control[type="file"] {
+        padding: 0.375rem 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Form controls */
+    .form-control,
+    .form-select,
+    .form-check-input {
+        font-size: 0.8rem;
+        padding: 0.375rem 0.5rem;
+    }
+    
+    /* Form labels */
+    .form-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+    
+    /* Buttons */
+    .btn {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .btn-sm {
+        font-size: 0.75rem;
+        padding: 0.375rem 0.5rem;
+    }
+    
+    /* Card body */
+    .card-body {
+        padding: 0.75rem;
+    }
+    
+    /* Textarea */
+    textarea.form-control {
+        min-height: 100px;
+    }
+    
+    /* Form groups */
+    .form-group {
+        margin-bottom: 0.75rem;
+    }
+}
+
+/* Modal responsive */
+@media (max-width: 768px) {
+    .modal-dialog {
+        margin: 0.5rem;
+        max-width: calc(100% - 1rem);
+    }
+    
+    .modal-content {
+        border-radius: 0.5rem;
+    }
+    
+    .modal-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    .modal-footer {
+        padding: 0.75rem 1rem;
+        flex-direction: column;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .modal-dialog {
+        margin: 0.25rem;
+        max-width: calc(100% - 0.5rem);
+    }
+    
+    .modal-header {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .modal-body {
+        padding: 0.75rem;
+    }
+    
+    .modal-footer {
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+/* Table responsive enhancements */
+@media (max-width: 768px) {
+    .table-responsive {
+        border-radius: 0.375rem;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    
+    .table th,
+    .table td {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    /* Action buttons in tables */
+    .table .btn-group {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .table .btn-group .btn {
+        width: 100%;
+        margin-bottom: 0;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Hide less important columns on very small screens */
+    .table th:nth-child(n+6),
+    .table td:nth-child(n+6) {
+        display: none;
+    }
+    
+    /* Show only essential columns */
+    .table th:nth-child(1),
+    .table td:nth-child(1),
+    .table th:nth-child(2),
+    .table td:nth-child(2),
+    .table th:nth-child(3),
+    .table td:nth-child(3),
+    .table th:last-child,
+    .table td:last-child {
+        display: table-cell;
+    }
+}
+
+/* Card responsive */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1rem;
+        border-radius: 0.5rem;
+    }
+    
+    .card-header {
+        padding: 0.75rem 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .card-footer {
+        padding: 0.75rem 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-header {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .card-body {
+        padding: 0.75rem;
+    }
+    
+    .card-footer {
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+/* Pagination responsive */
+@media (max-width: 768px) {
+    .pagination {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .page-link {
+        padding: 0.375rem 0.5rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .pagination {
+        font-size: 0.75rem;
+    }
+    
+    .page-link {
+        padding: 0.25rem 0.375rem;
+        font-size: 0.75rem;
+    }
+}
+
+/* Alert responsive */
+@media (max-width: 768px) {
+    .alert {
+        font-size: 0.875rem;
+        padding: 0.75rem 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .alert {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.75rem;
+    }
+}
+
+/* Badge responsive */
+@media (max-width: 768px) {
+    .badge {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .badge {
+        font-size: 0.65rem;
+        padding: 0.2rem 0.375rem;
+    }
+}
+
+/* Image responsive */
+@media (max-width: 768px) {
+    .img-fluid {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    .img-thumbnail {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+    }
+}
+
+@media (max-width: 576px) {
+    .img-thumbnail {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* Utility classes */
+.responsive-hide-mobile {
+    display: block;
+}
+
+.responsive-show-mobile {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .responsive-hide-mobile {
+        display: none;
+    }
+    
+    .responsive-show-mobile {
+        display: block;
+    }
+}
+
+/* Action buttons in tables - 2 columns layout */
+@media (max-width: 768px) {
+    .table .d-flex.flex-wrap {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.25rem;
+        justify-content: center;
+        max-width: 80px;
+    }
+    
+    .table .d-flex.flex-wrap > div {
+        width: 100%;
+        margin-bottom: 0 !important;
+        margin-right: 0 !important;
+    }
+    
+    .table .action-icon {
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+    }
+    
+    .table .action-icon i {
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .table .d-flex.flex-wrap {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.125rem;
+        justify-content: center;
+        max-width: 70px;
+    }
+    
+    .table .d-flex.flex-wrap > div {
+        width: 100%;
+        margin-bottom: 0 !important;
+        margin-right: 0 !important;
+    }
+    
+    .table .action-icon {
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+    }
+    
+    .table .action-icon i {
+        font-size: 0.65rem;
+    }
+}
+
+/* Fix for Bootstrap grid on mobile */
+@media (max-width: 768px) {
+    .row {
+        margin-left: -0.5rem;
+        margin-right: -0.5rem;
+    }
+    
+    .col,
+    [class*="col-"] {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .row {
+        margin-left: -0.25rem;
+        margin-right: -0.25rem;
+    }
+    
+    .col,
+    [class*="col-"] {
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+    }
+}

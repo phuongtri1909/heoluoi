@@ -1,5 +1,49 @@
 @extends('admin.layouts.app')
 
+@push('styles-admin')
+<style>
+    @media (max-width: 768px) {
+        .row .col-md-12 {
+            width: 100% !important;
+            flex: 0 0 100% !important;
+            max-width: 100% !important;
+            margin-bottom: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .form-control,
+        .form-select {
+            font-size: 0.8rem;
+            padding: 0.5rem 0.75rem;
+        }
+        
+        .form-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .btn {
+            font-size: 0.8rem;
+            padding: 0.5rem 0.75rem;
+        }
+        
+        textarea.form-control {
+            min-height: 100px;
+        }
+    }
+</style>
+@endpush
+
 @section('content-auth')
 <div class="row">
     <div class="col-12">

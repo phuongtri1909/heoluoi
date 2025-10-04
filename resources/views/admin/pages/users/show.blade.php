@@ -78,16 +78,41 @@
 
                             @php 
                                 $superAdminEmails = explode(',', env('SUPER_ADMIN_EMAILS', 'admin@gmail.com'));
-                                $isSuperAdmin = in_array(auth()->user()->email, $superAdminEmails);
+                                $isSuperAdmin = in_array(strtolower(auth()->user()->email), array_map('strtolower', $superAdminEmails));
+                                $canChangeRole = false;
+                                $availableRoles = [];
+                                
+                                if ($user->id !== auth()->id() && !in_array(strtolower($user->email), array_map('strtolower', $superAdminEmails))) {
+                                    if (auth()->user()->role === 'admin_main') {
+                                        $canChangeRole = true;
+                                        if ($isSuperAdmin) {
+                                            // Super Admin có thể đổi tất cả role
+                                            $availableRoles = ['user', 'admin_sub', 'admin_main'];
+                                        } else {
+                                            // admin_main thường chỉ có thể đổi user và admin_sub
+                                            if ($user->role === 'admin_main') {
+                                                $canChangeRole = false; // Không thể đổi admin_main khác
+                                            } else {
+                                                $availableRoles = ['user', 'admin_sub', 'admin_main'];
+                                            }
+                                        }
+                                    } elseif (auth()->user()->role === 'admin_sub') {
+                                        if ($user->role !== 'admin_main') {
+                                            $canChangeRole = true;
+                                            $availableRoles = ['user', 'admin_sub'];
+                                        }
+                                    }
+                                }
                             @endphp
                             <div class="mb-3">
                                 <h6 class="text-sm">Vai trò</h6>
-                                @if (($isSuperAdmin && !in_array($user->email, $superAdminEmails)) || 
-                                    (auth()->user()->role === 'admin_main' || auth()->user()->role === 'admin_sub' && $user->role !== 'admin_main' && $user->role !== 'admin_sub' && !in_array($user->email, $superAdminEmails)))
+                                @if ($canChangeRole)
                                     <select class="form-select form-select-sm w-auto" id="role-select">
-                                        <option value="user" {{ $user->role === 'user' ? 'selected' : '' }}>User</option>
-                                        <option value="admin_main" {{ $user->role === 'admin_main' ? 'selected' : '' }}>Admin</option>
-                                        <option value="admin_sub" {{ $user->role === 'admin_sub' ? 'selected' : '' }}>Admin Sub</option>
+                                        @foreach($availableRoles as $role)
+                                            <option value="{{ $role }}" {{ $user->role === $role ? 'selected' : '' }}>
+                                                {{ $role === 'admin_main' ? 'Admin' : ($role === 'admin_sub' ? 'Admin Sub' : 'User') }}
+                                            </option>
+                                        @endforeach
                                     </select>
                                 @else
                                     <p class="text-dark mb-0">{{ ucfirst($user->role) }}</p>
@@ -180,19 +205,16 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                       
-                        @if($user->role === 'admin_main')
+                        @if($user->role === 'admin_main' && auth()->user()->role === 'admin_main')
                         <div class="col-md-3">
                             <div class="card stats-card bg-gradient-warning text-white">
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between">
                                         <div>
-                                            <h5 class="text-white mb-0">{{ number_format($stats['author_revenue']) }}</h5>
+                                            <h5 class="text-white mb-0">{{ number_format($stats['total_spent']) }}</h5>
                                             <p class="mb-0 text-sm">Doanh thu</p>
                                             <small class="text-white-50">
-                                                T: {{ number_format($stats['author_story_revenue']) }} | 
-                                                C: {{ number_format($stats['author_chapter_revenue']) }}
+                                                Từ việc mua truyện và chương
                                             </small>
                                         </div>
                                         <div class="icon-shape bg-white text-center rounded-circle shadow">
@@ -207,6 +229,7 @@
 
                     <!-- Nav tabs -->
                     <ul class="nav nav-tabs mt-4" role="tablist">
+                        @if(auth()->user()->role === 'admin_main')
                         <li class="nav-item">
                             <a class="nav-link active" data-bs-toggle="tab" href="#deposits" role="tab">
                                 <i class="fas fa-wallet me-1"></i> Nạp cám (Bank)
@@ -237,6 +260,7 @@
                                 <span class="badge bg-primary rounded-pill">{{ $counts['chapter_purchases'] }}</span>
                             </a>
                         </li>
+                        @endif
                         <li class="nav-item">
                             <a class="nav-link" data-bs-toggle="tab" href="#bookmarks" role="tab">
                                 <i class="fas fa-bookmark me-1"></i> Theo dõi
@@ -265,6 +289,7 @@
                     
                     <!-- Tab panes -->
                     <div class="tab-content">
+                        @if(auth()->user()->role === 'admin_main')
                         <!-- Deposits Tab -->
                         <div class="tab-pane active" id="deposits" role="tabpanel">
                             <div class="table-responsive mt-3">
@@ -507,119 +532,10 @@
                             </div>
                         </div>
                         
-                            @if($user->role === 'admin_main')
-                            <!-- Author Chapter Earnings Tab -->
-                            <div class="tab-pane" id="author-chapter-earnings" role="tabpanel">
-                                <div class="table-responsive mt-3">
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>ID</th>
-                                                <th>Người mua</th>
-                                                <th>Truyện</th>
-                                                <th>Chương</th>
-                                                <th>Số cám nhận</th>
-                                                <th>Ngày mua</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @forelse($authorChapterEarnings as $earning)
-                                                <tr>
-                                                    <td>{{ $earning->id }}</td>
-                                                    <td>{{ $earning->user->name }}</td>
-                                                    <td>
-                                                        <a href="{{ route('admin.stories.show', $earning->chapter->story_id) }}">
-                                                            {{ $earning->chapter->story->title ?? 'Không xác định' }}
-                                                        </a>
-                                                    </td>
-                                                    <td>Chương {{ $earning->chapter->number }}: {{ Str::limit($earning->chapter->title, 30) }}</td>
-                                                    <td class="text-success fw-bold">+{{ number_format($earning->amount_received) }} cám</td>
-                                                    <td>{{ $earning->created_at->format('d/m/Y H:i') }}</td>
-                                                </tr>
-                                            @empty
-                                                <tr>
-                                                    <td colspan="6" class="text-center">Chưa có thu nhập từ chương</td>
-                                                </tr>
-                                            @endforelse
-                                        </tbody>
-                                    </table>
-                                    @if($counts['author_chapter_earnings'] > 5)
-                                        <div class="d-flex justify-content-center mt-3">
-                                            <x-pagination :paginator="$authorChapterEarnings" />
-                                        </div>
-                                        <div class="text-center mt-3">
-                                            <button class="btn btn-sm btn-primary load-more" data-type="author-chapter-earnings">
-                                                Xem thêm <i class="fas fa-chevron-down ms-1"></i>
-                                            </button>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                            
-                            <!-- Author Story Earnings Tab -->
-                            <div class="tab-pane" id="author-story-earnings" role="tabpanel">
-                                <div class="table-responsive mt-3">
-                                    <table class="table table-hover">
-                                        <thead>
-                                            <tr>
-                                                <th>ID</th>
-                                                <th>Người mua</th>
-                                                <th>Truyện</th>
-                                                <th>Số cám nhận</th>
-                                                <th>Ngày mua</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @forelse($authorStoryEarnings as $earning)
-                                                <tr>
-                                                    <td>{{ $earning->id }}</td>
-                                                    <td>{{ $earning->user->name }}</td>
-                                                    <td>
-                                                        <a href="{{ route('admin.stories.show', $earning->story_id) }}">
-                                                            {{ $earning->story->title ?? 'Không xác định' }}
-                                                        </a>
-                                                    </td>
-                                                    <td class="text-success fw-bold">+{{ number_format($earning->amount_received) }} cám</td>
-                                                    <td>{{ $earning->created_at->format('d/m/Y H:i') }}</td>
-                                                </tr>
-                                            @empty
-                                                <tr>
-                                                    <td colspan="5" class="text-center">Chưa có thu nhập từ truyện</td>
-                                                </tr>
-                                            @endforelse
-                                        </tbody>
-                                    </table>
-                                    @if($counts['author_story_earnings'] > 5)
-                                        <div class="d-flex justify-content-center mt-3">
-                                            <x-pagination :paginator="$authorStoryEarnings" />
-                                        </div>
-                                        <div class="text-center mt-3">
-                                            <button class="btn btn-sm btn-primary load-more" data-type="author-story-earnings">
-                                                Xem thêm <i class="fas fa-chevron-down ms-1"></i>
-                                            </button>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        
-                        <!-- Author Featured Stories Tab -->
-                        <div class="tab-pane" id="author-featured-stories" role="tabpanel">
-                            @include('admin.pages.users.partials.author-featured-stories-table', ['data' => $authorFeaturedStories])
-                            @if($counts['author_featured_stories'] > 5)
-                                <div class="d-flex justify-content-center mt-3">
-                                    <x-pagination :paginator="$authorFeaturedStories" />
-                                </div>
-                                <div class="text-center mt-3">
-                                    <button class="btn btn-sm btn-primary load-more" data-type="author-featured-stories">
-                                        Xem thêm <i class="fas fa-chevron-down ms-1"></i>
-                                    </button>
-                                </div>
-                            @endif
-                        </div>
                         @endif
                         
                         <!-- Bookmarks Tab -->
-                        <div class="tab-pane" id="bookmarks" role="tabpanel">
+                        <div class="tab-pane {{ auth()->user()->role === 'admin_sub' ? 'active' : '' }}" id="bookmarks" role="tabpanel">
                             <div class="table-responsive mt-3">
                                 <table class="table table-hover">
                                     <thead>

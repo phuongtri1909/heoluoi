@@ -21,7 +21,8 @@
     @vite('resources/assets/frontend/css/styles.css')
 
     @vite('resources/assets/admin/css/dashboard.css')
-
+    @vite('resources/assets/admin/css/responsive.css')
+    @vite('resources/assets/admin/css/components.css')
     @vite('resources/assets/admin/css/styles-admin.css')
     @stack('styles-admin')
     <title>{{ config('app.name') }} - {{ __('dashboard') }}</title>

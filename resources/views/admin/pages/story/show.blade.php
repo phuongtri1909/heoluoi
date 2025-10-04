@@ -1,5 +1,59 @@
 @extends('admin.layouts.app')
 
+@push('styles-admin')
+<style>
+    @media (max-width: 768px) {
+        .d-flex.justify-content-between {
+            flex-direction: column !important;
+            gap: 1rem;
+        }
+        
+        .d-flex.justify-content-between > div {
+            width: 100%;
+        }
+        
+        .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        
+        .row .col-md-3,
+        .row .col-md-9 {
+            width: 100% !important;
+            flex: 0 0 100% !important;
+            max-width: 100% !important;
+            margin-bottom: 1rem;
+        }
+        
+        .img-fluid {
+            max-height: 200px !important;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .btn {
+            font-size: 0.8rem;
+            padding: 0.5rem 0.75rem;
+        }
+        
+        .img-fluid {
+            max-height: 150px !important;
+        }
+        
+        .badge {
+            font-size: 0.65rem;
+            padding: 0.25rem 0.5rem;
+        }
+        
+        .table th,
+        .table td {
+            padding: 0.375rem 0.125rem;
+            font-size: 0.75rem;
+        }
+    }
+</style>
+@endpush
+
 @section('content-auth')
     <div class="row">
         <div class="col-12">

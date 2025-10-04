@@ -47,28 +47,38 @@ class UserController extends Controller
             'balance' => $user->coins
         ];
 
-        $deposits = $user->deposits()
-            ->with('bank')
-            ->orderByDesc('created_at')
-            ->paginate(5, ['*'], 'deposits_page');
+        // Chỉ load dữ liệu liên quan đến doanh thu cho admin_main
+        if ($authUser->role === 'admin_main') {
+            $deposits = $user->deposits()
+                ->with('bank')
+                ->orderByDesc('created_at')
+                ->paginate(5, ['*'], 'deposits_page');
 
-        $paypalDeposits = $user->paypalDeposits()
-            ->orderByDesc('created_at')
-            ->paginate(5, ['*'], 'paypal_deposits_page');
+            $paypalDeposits = $user->paypalDeposits()
+                ->orderByDesc('created_at')
+                ->paginate(5, ['*'], 'paypal_deposits_page');
 
-        $cardDeposits = $user->cardDeposits()
-            ->orderByDesc('created_at')
-            ->paginate(5, ['*'], 'card_deposits_page');
+            $cardDeposits = $user->cardDeposits()
+                ->orderByDesc('created_at')
+                ->paginate(5, ['*'], 'card_deposits_page');
 
-        $chapterPurchases = $user->chapterPurchases()
-            ->with(['chapter.story'])
-            ->orderByDesc('created_at')
-            ->paginate(5, ['*'], 'chapter_page');
+            $chapterPurchases = $user->chapterPurchases()
+                ->with(['chapter.story'])
+                ->orderByDesc('created_at')
+                ->paginate(5, ['*'], 'chapter_page');
 
-        $storyPurchases = $user->storyPurchases()
-            ->with(['story'])
-            ->orderByDesc('created_at')
-            ->paginate(5, ['*'], 'story_page');
+            $storyPurchases = $user->storyPurchases()
+                ->with(['story'])
+                ->orderByDesc('created_at')
+                ->paginate(5, ['*'], 'story_page');
+        } else {
+            // admin_sub không cần dữ liệu này
+            $deposits = collect();
+            $paypalDeposits = collect();
+            $cardDeposits = collect();
+            $chapterPurchases = collect();
+            $storyPurchases = collect();
+        }
 
         $bookmarks = $user->bookmarks()
             ->with(['story', 'lastChapter'])
@@ -89,29 +99,39 @@ class UserController extends Controller
             ->orderByDesc('created_at')
             ->paginate(10, ['*'], 'coin_histories_page');
 
-        $counts = DB::select("
-            SELECT 
-                (SELECT COUNT(*) FROM deposits WHERE user_id = ?) as deposits,
-                (SELECT COUNT(*) FROM paypal_deposits WHERE user_id = ?) as paypal_deposits,
-                (SELECT COUNT(*) FROM card_deposits WHERE user_id = ?) as card_deposits,
-                (SELECT COUNT(*) FROM chapter_purchases WHERE user_id = ?) as chapter_purchases,
-                (SELECT COUNT(*) FROM story_purchases WHERE user_id = ?) as story_purchases,
-                (SELECT COUNT(*) FROM bookmarks WHERE user_id = ?) as bookmarks,
-                (SELECT COUNT(*) FROM coin_transactions WHERE user_id = ?) as coin_transactions,
-                (SELECT COUNT(*) FROM user_daily_tasks WHERE user_id = ?) as user_daily_tasks,
-                (SELECT COUNT(*) FROM coin_histories WHERE user_id = ?) as coin_histories,
-                (SELECT COUNT(*) FROM chapter_purchases cp 
-                 JOIN chapters c ON cp.chapter_id = c.id 
-                 JOIN stories s ON c.story_id = s.id 
-                 WHERE s.user_id = ?) as author_chapter_earnings,
-                (SELECT COUNT(*) FROM story_purchases sp 
-                 JOIN stories s ON sp.story_id = s.id 
-                 WHERE s.user_id = ?) as author_story_earnings
-        ", [
-            $user->id, $user->id, $user->id, $user->id, $user->id, 
-            $user->id, $user->id, $user->id, $user->id, $user->id,
-            $user->id
-        ])[0];
+        if ($authUser->role === 'admin_main') {
+            $counts = DB::select("
+                SELECT 
+                    (SELECT COUNT(*) FROM deposits WHERE user_id = ?) as deposits,
+                    (SELECT COUNT(*) FROM paypal_deposits WHERE user_id = ?) as paypal_deposits,
+                    (SELECT COUNT(*) FROM card_deposits WHERE user_id = ?) as card_deposits,
+                    (SELECT COUNT(*) FROM chapter_purchases WHERE user_id = ?) as chapter_purchases,
+                    (SELECT COUNT(*) FROM story_purchases WHERE user_id = ?) as story_purchases,
+                    (SELECT COUNT(*) FROM bookmarks WHERE user_id = ?) as bookmarks,
+                    (SELECT COUNT(*) FROM coin_transactions WHERE user_id = ?) as coin_transactions,
+                    (SELECT COUNT(*) FROM user_daily_tasks WHERE user_id = ?) as user_daily_tasks,
+                    (SELECT COUNT(*) FROM coin_histories WHERE user_id = ?) as coin_histories
+            ", [
+                $user->id, $user->id, $user->id, $user->id, $user->id, 
+                $user->id, $user->id, $user->id, $user->id
+            ])[0];
+        } else {
+            // admin_sub chỉ cần counts cơ bản
+            $counts = DB::select("
+                SELECT 
+                    0 as deposits,
+                    0 as paypal_deposits,
+                    0 as card_deposits,
+                    0 as chapter_purchases,
+                    0 as story_purchases,
+                    (SELECT COUNT(*) FROM bookmarks WHERE user_id = ?) as bookmarks,
+                    (SELECT COUNT(*) FROM coin_transactions WHERE user_id = ?) as coin_transactions,
+                    (SELECT COUNT(*) FROM user_daily_tasks WHERE user_id = ?) as user_daily_tasks,
+                    (SELECT COUNT(*) FROM coin_histories WHERE user_id = ?) as coin_histories
+            ", [
+                $user->id, $user->id, $user->id, $user->id
+            ])[0];
+        }
 
         $counts = (array) $counts;
 
@@ -161,17 +181,49 @@ class UserController extends Controller
         }
 
         $superAdminEmails = explode(',', env('SUPER_ADMIN_EMAILS', 'admin@gmail.com'));
-        $isSuperAdmin = in_array($authUser->email, $superAdminEmails);
+        $isSuperAdmin = in_array(strtolower($authUser->email), array_map('strtolower', $superAdminEmails));
 
         if ($request->has('role')) {
-            if (in_array($user->email, $superAdminEmails)) {
+            if (in_array(strtolower($user->email), array_map('strtolower', $superAdminEmails))) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Không thể thay đổi quyền của Super Admin'
                 ], 403);
             }
 
-            if ($user->role === 'admin_main' || $user->role === 'admin_sub' && !$isSuperAdmin) {
+            // Không được đổi chính mình
+            if ($user->id === $authUser->id) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Không thể thay đổi quyền của chính mình'
+                ], 403);
+            }
+
+            // Phân quyền theo role
+            if ($authUser->role === 'admin_main') {
+                if ($isSuperAdmin) {
+                    // Super Admin có thể đổi tất cả role (trừ Super Admin khác)
+                    // Super Admin có thể đổi admin_main xuống admin_sub hoặc user
+                } else {
+                    // admin_main thường chỉ có thể đổi user thành admin_sub hoặc admin_main
+                    // admin_main thường không thể đổi admin_main khác
+                    if ($user->role === 'admin_main') {
+                        return response()->json([
+                            'status' => 'error',
+                            'message' => 'Không có quyền thay đổi quyền của Admin chính'
+                        ], 403);
+                    }
+                }
+            } elseif ($authUser->role === 'admin_sub') {
+                // admin_sub chỉ có thể đổi user thành admin_sub hoặc user
+                // admin_sub không thể đổi admin_main
+                if ($user->role === 'admin_main') {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Không có quyền thay đổi quyền của Admin chính'
+                    ], 403);
+                }
+            } else {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Không có quyền thực hiện'
@@ -186,15 +238,6 @@ class UserController extends Controller
             ]);
 
             $user->role = $request->role;
-        }
-
-        if ($authUser->role === 'admin_main' || $authUser->role === 'admin_sub') {
-            if ($user->role === 'admin_main' || $user->role === 'admin_sub' || $user->id === $authUser->id) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Không có quyền thực hiện'
-                ], 403);
-            }
         }
 
         $banTypes = ['login', 'comment', 'rate', 'read'];
@@ -299,9 +342,8 @@ class UserController extends Controller
             'user' => User::where('active', 'active')->where('role', 'user')->count(),
         ];
 
-        if ($authUser->role === 'admin_main' || $authUser->role === 'admin_sub') {
-            $query->where('role', '!=', 'admin_main')->where('role', '!=', 'admin_sub');
-        }
+        // Hiển thị tất cả users cho tất cả admin
+        // Không cần filter theo role nữa
 
 
         if ($request->filled('role')) {

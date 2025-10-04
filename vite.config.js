@@ -12,6 +12,8 @@ export default defineConfig({
                 'resources/assets/frontend/css/advanced-search.css',
                 'resources/assets/frontend/js/advanced-search.js',
                 'resources/assets/admin/css/dashboard.css',
+                'resources/assets/admin/css/responsive.css',
+                'resources/assets/admin/css/components.css',
                 'resources/assets/admin/js/dashboard.min.js',
                 'resources/assets/admin/css/styles-admin.css'
             ],

@@ -1,5 +1,58 @@
 @extends('admin.layouts.app')
 
+@push('styles-admin')
+<style>
+    @media (max-width: 768px) {
+        .row .col-md-8,
+        .row .col-md-4 {
+            width: 100% !important;
+            flex: 0 0 100% !important;
+            max-width: 100% !important;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-control,
+        .form-select {
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            width: 100%;
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-body {
+            padding: 1rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .form-control,
+        .form-select {
+            font-size: 0.8rem;
+            padding: 0.5rem 0.75rem;
+        }
+        
+        .form-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .btn {
+            font-size: 0.8rem;
+            padding: 0.5rem 0.75rem;
+        }
+        
+        .card-body {
+            padding: 0.75rem;
+        }
+    }
+</style>
+@endpush
+
 @section('content-auth')
     <div class="row">
         <div class="col-12">
