@@ -342,6 +342,9 @@ class BankAutoController extends Controller
                 'casso_response' => $data
             ]);
             
+            // Broadcast SSE event để notify frontend
+            $this->broadcastTransactionUpdate($transactionCode, 'success', $deposit);
+            
             // Cộng coins cho user
             $user = $deposit->user;
             if ($user) {
@@ -462,6 +465,86 @@ class BankAutoController extends Controller
         }
         
         return $sortedData;
+    }
+    
+    /**
+     * Broadcast transaction update via SSE
+     */
+    private function broadcastTransactionUpdate($transactionCode, $status, $deposit)
+    {
+        // Tạo file để store SSE data
+        $sseData = [
+            'transaction_code' => $transactionCode,
+            'status' => $status,
+            'deposit_id' => $deposit->id,
+            'amount' => $deposit->amount,
+            'total_coins' => $deposit->total_coins,
+            'timestamp' => now()->toISOString(),
+        ];
+        
+        // Lưu vào file để SSE endpoint có thể đọc
+        $filename = storage_path('app/sse_transaction_' . $transactionCode . '.json');
+        file_put_contents($filename, json_encode($sseData));
+        
+        Log::info('SSE transaction update broadcasted', [
+            'transaction_code' => $transactionCode,
+            'status' => $status,
+            'filename' => $filename
+        ]);
+    }
+    
+    /**
+     * SSE endpoint để listen transaction updates
+     */
+    public function sseTransactionUpdates(Request $request)
+    {
+        $transactionCode = $request->get('transaction_code');
+        
+        if (!$transactionCode) {
+            return response('Missing transaction_code', 400);
+        }
+        
+        // Set headers cho SSE
+        return response()->stream(function () use ($transactionCode) {
+            $filename = storage_path('app/sse_transaction_' . $transactionCode . '.json');
+            $lastModified = 0;
+            
+            while (true) {
+                // Kiểm tra file có thay đổi không
+                if (file_exists($filename)) {
+                    $currentModified = filemtime($filename);
+                    
+                    if ($currentModified > $lastModified) {
+                        $data = json_decode(file_get_contents($filename), true);
+                        
+                        // Gửi SSE event
+                        echo "data: " . json_encode($data) . "\n\n";
+                        
+                        $lastModified = $currentModified;
+                        
+                        // Nếu status là success, close connection
+                        if ($data['status'] === 'success') {
+                            echo "data: " . json_encode(['type' => 'close']) . "\n\n";
+                            break;
+                        }
+                    }
+                }
+                
+                // Sleep 1 giây trước khi check lại
+                sleep(1);
+                
+                // Check connection
+                if (connection_aborted()) {
+                    break;
+                }
+            }
+        }, 200, [
+            'Content-Type' => 'text/event-stream',
+            'Cache-Control' => 'no-cache',
+            'Connection' => 'keep-alive',
+            'Access-Control-Allow-Origin' => '*',
+            'Access-Control-Allow-Headers' => 'Cache-Control',
+        ]);
     }
 
     /**

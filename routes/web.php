@@ -124,6 +124,7 @@ Route::middleware(['ban:login'])->group(function () {
         Route::post('/bank-auto-deposit/calculate', [BankAutoController::class, 'calculatePreview'])->name('bank.auto.deposit.calculate');
         Route::get('/bank-auto-deposit/success', [BankAutoController::class, 'success'])->name('bank.auto.success');
         Route::get('/bank-auto-deposit/cancel', [BankAutoController::class, 'cancel'])->name('bank.auto.cancel');
+        Route::get('/bank-auto-deposit/sse', [BankAutoController::class, 'sseTransactionUpdates'])->name('bank.auto.sse');
     });
 
     Route::group(['middleware' => 'auth'], function () {

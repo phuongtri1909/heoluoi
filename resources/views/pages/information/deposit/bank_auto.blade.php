@@ -757,6 +757,9 @@
 
                 // Thay thế nội dung form
                 $('#depositContainer').html(transferInfoHtml);
+                
+                // Start SSE connection để listen updates
+                startSSEConnection(transactionCode);
             }
 
             // Function to copy text to clipboard
@@ -822,6 +825,86 @@
                 
                 // Khôi phục nút sau 1 giây
                 setTimeout(() => $button.innerHTML = originalText, 1000);
+            }
+            
+            // SSE để listen transaction updates
+            let currentTransactionCode = null;
+            let sseConnection = null;
+            
+            // Start SSE connection khi có transaction code
+            function startSSEConnection(transactionCode) {
+                if (sseConnection) {
+                    sseConnection.close();
+                }
+                
+                currentTransactionCode = transactionCode;
+                const sseUrl = '{{ route("bank.auto.sse") }}?transaction_code=' + encodeURIComponent(transactionCode);
+                
+                sseConnection = new EventSource(sseUrl);
+                
+                sseConnection.onmessage = function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        
+                        if (data.type === 'close') {
+                            sseConnection.close();
+                            return;
+                        }
+                        
+                        if (data.status === 'success') {
+                            // Hiển thị thông báo thành công
+                            showSuccessNotification(data);
+                            
+                            // Reload trang sau 2 giây
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 2000);
+                            
+                            // Close SSE connection
+                            sseConnection.close();
+                        }
+                    } catch (error) {
+                        console.error('SSE parsing error:', error);
+                    }
+                };
+                
+                sseConnection.onerror = function(event) {
+                    console.error('SSE connection error:', event);
+                    // Retry connection sau 5 giây
+                    setTimeout(() => {
+                        if (currentTransactionCode) {
+                            startSSEConnection(currentTransactionCode);
+                        }
+                    }, 5000);
+                };
+            }
+            
+            // Hiển thị thông báo thành công
+            function showSuccessNotification(data) {
+                // Tạo toast notification
+                const toast = `
+                    <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Giao dịch thành công! Bạn đã nhận được ${data.total_coins.toLocaleString('vi-VN')} cám.
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                        </div>
+                    </div>
+                `;
+                
+                // Thêm toast vào container
+                if (!$('#toast-container').length) {
+                    $('body').append('<div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3"></div>');
+                }
+                
+                $('#toast-container').append(toast);
+                
+                // Show toast
+                const toastElement = $('#toast-container .toast').last();
+                const toastInstance = new bootstrap.Toast(toastElement[0]);
+                toastInstance.show();
             }
         </script>
     @endpush
