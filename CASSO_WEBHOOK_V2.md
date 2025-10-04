@@ -123,18 +123,53 @@ private function verifyCassoSignature($payload, $signature)
         return false;
     }
     
-    // Calculate expected signature
-    $expectedSignature = hash_hmac('sha256', $timestamp . '.' . $payload, $secret);
+    // Parse JSON payload
+    $data = json_decode($payload, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        Log::error('Invalid JSON payload for signature verification');
+        return false;
+    }
+    
+    // Sort data by key recursively
+    $sortedData = $this->sortDataByKey($data);
+    
+    // Create message to sign: timestamp.json_encode(sortedData)
+    $messageToSign = $timestamp . '.' . json_encode($sortedData, JSON_UNESCAPED_SLASHES);
+    
+    // Calculate expected signature using SHA512
+    $expectedSignature = hash_hmac('sha512', $messageToSign, $secret);
     
     // Use hash_equals to prevent timing attacks
     return hash_equals($expectedSignature, $receivedSignature);
+}
+
+private function sortDataByKey($data)
+{
+    if (!is_array($data)) {
+        return $data;
+    }
+    
+    $sortedData = [];
+    $keys = array_keys($data);
+    sort($keys);
+    
+    foreach ($keys as $key) {
+        if (is_array($data[$key])) {
+            $sortedData[$key] = $this->sortDataByKey($data[$key]);
+        } else {
+            $sortedData[$key] = $data[$key];
+        }
+    }
+    
+    return $sortedData;
 }
 ```
 
 **Lưu ý quan trọng:**
 - Signature format: `t=timestamp,v1=signature`
 - Timestamp: Kiểm tra trong vòng 5 phút
-- Algorithm: HMAC-SHA256 với `timestamp.payload`
+- Algorithm: HMAC-SHA512 với `timestamp.json_encode(sortedData)`
+- Data sorting: Phải sort data theo key trước khi encode JSON
 - Header: `X-Casso-Signature`
 
 ## Webhook Format

@@ -368,6 +368,7 @@ class BankAutoController extends Controller
     /**
      * Verify signature từ Casso Webhook v1
      * Format: t=timestamp,v1=signature
+     * Algorithm: SHA512 với sorted data
      */
     private function verifyCassoSignature($payload, $signature)
     {
@@ -401,11 +402,48 @@ class BankAutoController extends Controller
             return false;
         }
         
-        // Calculate expected signature
-        $expectedSignature = hash_hmac('sha256', $timestamp . '.' . $payload, $secret);
+        // Parse JSON payload
+        $data = json_decode($payload, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            Log::error('Invalid JSON payload for signature verification', ['error' => json_last_error_msg()]);
+            return false;
+        }
+        
+        // Sort data by key recursively
+        $sortedData = $this->sortDataByKey($data);
+        
+        // Create message to sign: timestamp.json_encode(sortedData)
+        $messageToSign = $timestamp . '.' . json_encode($sortedData, JSON_UNESCAPED_SLASHES);
+        
+        // Calculate expected signature using SHA512
+        $expectedSignature = hash_hmac('sha512', $messageToSign, $secret);
         
         // Use hash_equals to prevent timing attacks
         return hash_equals($expectedSignature, $receivedSignature);
+    }
+    
+    /**
+     * Sort data by key recursively
+     */
+    private function sortDataByKey($data)
+    {
+        if (!is_array($data)) {
+            return $data;
+        }
+        
+        $sortedData = [];
+        $keys = array_keys($data);
+        sort($keys);
+        
+        foreach ($keys as $key) {
+            if (is_array($data[$key])) {
+                $sortedData[$key] = $this->sortDataByKey($data[$key]);
+            } else {
+                $sortedData[$key] = $data[$key];
+            }
+        }
+        
+        return $sortedData;
     }
 
     /**
