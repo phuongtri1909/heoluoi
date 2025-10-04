@@ -265,7 +265,8 @@ class BankAutoController extends Controller
             'reference' => $reference,
             'amount' => $amount,
             'account_number' => $accountNumber,
-            'bank_name' => $bankName
+            'bank_name' => $bankName,
+            'description' => $description
         ]);
         
         if (!$transactionId) {
@@ -286,14 +287,15 @@ class BankAutoController extends Controller
         DB::beginTransaction();
         try {
             // Tìm deposit bằng reference (transaction code)
-            $deposit = BankAutoDeposit::where('transaction_code', $reference)
+            $deposit = BankAutoDeposit::where('transaction_code', $description)
                 ->where('status', BankAutoDeposit::STATUS_PENDING)
                 ->first();
                 
             if (!$deposit) {
                 Log::warning('Bank auto deposit not found', [
                     'reference' => $reference,
-                    'transaction_id' => $transactionId
+                    'transaction_id' => $transactionId,
+                    'description' => $description
                 ]);
                 return response()->json(['success' => false, 'message' => 'Giao dịch không tồn tại']);
             }
@@ -305,7 +307,8 @@ class BankAutoController extends Controller
                     'expected' => $deposit->amount,
                     'tolerance' => $toleranceAmount,
                     'received' => $amount,
-                    'reference' => $reference
+                    'reference' => $reference,
+                    'description' => $description
                 ]);
                 
                 $deposit->update([
@@ -344,7 +347,8 @@ class BankAutoController extends Controller
                     'casso_transaction_id' => $transactionId,
                     'coins_added' => $deposit->total_coins,
                     'amount_received' => $amount,
-                    'bank_name' => $bankName
+                    'bank_name' => $bankName,
+                    'description' => $description
                 ]);
             }
             
@@ -358,7 +362,8 @@ class BankAutoController extends Controller
                 'transaction_id' => $transactionId,
                 'reference' => $reference,
                 'data' => $data,
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
+                'description' => $description
             ]);
             return response()->json(['success' => false, 'message' => 'Có lỗi xảy ra']);
         }
