@@ -142,7 +142,7 @@ class BankAutoController extends Controller
     {
         $request->validate([
             'amount' => 'required|integer|min:5000',
-            'bank_id' => 'required|exists:banks,id'
+            'bank_id' => 'required|exists:bank_autos,id'
         ]);
 
         $amount = $request->input('amount');
