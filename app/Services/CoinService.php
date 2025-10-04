@@ -84,14 +84,13 @@ class CoinService
             // Subtract from buyer
             $buyerTransaction = $this->subtractCoins($fromUser, $amount, $transactionType, $description, $reference);
 
-            // Add to seller
-            $sellerTransaction = $this->addCoins($toUser, $amount, $this->getEarningsType($transactionType), $description, $reference);
+            // // Add to seller
+            // $sellerTransaction = $this->addCoins($toUser, $amount, $this->getEarningsType($transactionType), $description, $reference);
 
             DB::commit();
 
             return [
-                'buyer_transaction' => $buyerTransaction,
-                'seller_transaction' => $sellerTransaction,
+                'buyer_transaction' => $buyerTransaction
             ];
 
         } catch (\Exception $e) {
