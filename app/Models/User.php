@@ -81,7 +81,12 @@ class User extends Authenticatable
 
     public function userBan()
     {
-        return $this->hasOne(UserBan::class);
+        return $this->hasOne(UserBan::class)->withDefault([
+            'login' => false,
+            'comment' => false,
+            'rate' => false,
+            'read' => false,
+        ]);
     }
 
     public function banIps()

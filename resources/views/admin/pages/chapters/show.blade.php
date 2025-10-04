@@ -272,6 +272,24 @@
                             </div>
                         </div>
 
+                        @if($chapter->scheduled_publish_at && $chapter->status === 'draft')
+                        <div class="col-md-6">
+                            <div class="info-row">
+                                <div class="info-label">
+                                    <i class="fas fa-clock me-2"></i>Thời gian đếm ngược:
+                                </div>
+                                <div class="info-value">
+                                    <div class="countdown-timer" data-scheduled-time="{{ $chapter->scheduled_publish_at->toISOString() }}">
+                                        <span class="text-warning font-weight-bold">
+                                            <i class="fas fa-clock me-1"></i>
+                                            <span class="countdown-text">Đang tính...</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
                         <div class="col-md-6">
                             <div class="info-row">
                                 <div class="info-label">
@@ -365,7 +383,7 @@
                                 <form method="POST"
                                       action="{{ route('admin.stories.chapters.destroy', ['story' => $story, 'chapter' => $chapter]) }}"
                                       class="d-inline-block"
-                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa chương này?')">
+                                      onsubmit="return false;" id="deleteForm">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn-action btn-delete">
@@ -463,14 +481,63 @@
         }
 
         // Add confirmation for delete action
-        const deleteForm = document.querySelector('form[action*="destroy"]');
+        const deleteForm = document.getElementById('deleteForm');
         if (deleteForm) {
             deleteForm.addEventListener('submit', function(e) {
-                if (!confirm('Bạn có chắc chắn muốn xóa chương này? Hành động này không thể hoàn tác!')) {
-                    e.preventDefault();
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Xác nhận xóa',
+                    text: 'Bạn có chắc chắn muốn xóa chương này? Hành động này không thể hoàn tác!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Xóa',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        deleteForm.submit();
+                    }
+                });
+            });
+        }
+
+        // Countdown timer functionality
+        function updateCountdownTimers() {
+            document.querySelectorAll('.countdown-timer').forEach(timer => {
+                const scheduledTime = new Date(timer.dataset.scheduledTime);
+                const now = new Date();
+                const timeDiff = scheduledTime.getTime() - now.getTime();
+
+                if (timeDiff > 0) {
+                    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+
+                    let countdownText = '';
+                    if (days > 0) {
+                        countdownText = `${days} ngày ${hours}h ${minutes}m`;
+                    } else if (hours > 0) {
+                        countdownText = `${hours}h ${minutes}m ${seconds}s`;
+                    } else if (minutes > 0) {
+                        countdownText = `${minutes}m ${seconds}s`;
+                    } else {
+                        countdownText = `${seconds}s`;
+                    }
+
+                    timer.querySelector('.countdown-text').textContent = countdownText;
+                } else {
+                    timer.querySelector('.countdown-text').textContent = 'Đã đến giờ';
+                    timer.querySelector('.text-warning').classList.remove('text-warning');
+                    timer.querySelector('.text-warning').classList.add('text-success');
                 }
             });
         }
+
+        // Update countdown every second
+        setInterval(updateCountdownTimers, 1000);
+        updateCountdownTimers(); // Initial call
     });
 </script>
 @endpush

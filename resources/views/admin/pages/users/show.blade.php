@@ -93,34 +93,35 @@
                                     <p class="text-dark mb-0">{{ ucfirst($user->role) }}</p>
                                 @endif
                             </div>
+                           
                             <div class="mb-3">
                                 <h6 class="text-sm mb-3">Trạng thái hạn chế</h6>
                                 <div class="d-flex flex-wrap gap-3">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input ban-toggle" type="checkbox" data-type="login"
-                                            {{ $user->ban_login ? 'checked' : '' }}>
+                                            {{ $user->userBan->login ? 'checked' : '' }}>
                                         <label class="form-check-label">Cấm đăng nhập</label>
                                     </div>
                                     <div class="form-check form-switch">
                                         <input class="form-check-input ban-toggle" type="checkbox" data-type="comment"
-                                            {{ $user->ban_comment ? 'checked' : '' }}>
+                                            {{ $user->userBan->comment ? 'checked' : '' }}>
                                         <label class="form-check-label">Cấm bình luận</label>
                                     </div>
                                     <div class="form-check form-switch">
                                         <input class="form-check-input ban-toggle" type="checkbox" data-type="rate"
-                                            {{ $user->ban_rate ? 'checked' : '' }}>
+                                            {{ $user->userBan->rate ? 'checked' : '' }}>
                                         <label class="form-check-label">Cấm đánh giá</label>
                                     </div>
                                     <div class="form-check form-switch">
                                         <input class="form-check-input ban-toggle" type="checkbox" data-type="read"
-                                            {{ $user->ban_read ? 'checked' : '' }}>
+                                            {{ $user->userBan->read ? 'checked' : '' }}>
                                         <label class="form-check-label">Cấm đọc truyện</label>
                                     </div>
 
                                     @if (auth()->user()->role === 'admin_main' || auth()->user()->role === 'admin_sub')
                                         <div class="form-check form-switch">
                                             <input class="form-check-input ban-toggle" type="checkbox" data-type="ip"
-                                                {{ $user->banned_ips()->exists() ? 'checked' : '' }}>
+                                                {{ $user->banIps()->exists() ? 'checked' : '' }}>
                                             <label class="form-check-label">Cấm IP</label>
                                         </div>
                                     @endif

@@ -70,6 +70,8 @@ Route::group(['as' => 'admin.'], function () {
         Route::get('stories/{story}/chapters/bulk-create', [ChapterController::class, 'bulkCreate'])->name('stories.chapters.bulk-create');
         Route::post('stories/{story}/chapters/bulk-store', [ChapterController::class, 'bulkStore'])->name('stories.chapters.bulk-store');
         Route::post('stories/{story}/chapters/check-existing', [ChapterController::class, 'checkExisting'])->name('stories.chapters.check-existing');
+        Route::post('stories/{story}/chapters/bulk-destroy', [ChapterController::class, 'bulkDestroy'])->name('stories.chapters.bulk-destroy');
+        Route::post('stories/{story}/chapters/check-deletable', [ChapterController::class, 'checkDeletable'])->name('stories.chapters.check-deletable');
 
         Route::resource('stories.chapters', ChapterController::class);
 
@@ -156,5 +158,14 @@ Route::group(['as' => 'admin.'], function () {
         Route::get('coin-transfers/{transfer}', [CoinTransferController::class, 'show'])->name('coin-transfers.show');
         Route::get('coin-transfers/user-suggestions', [CoinTransferController::class, 'getUserSuggestions'])->name('coin-transfers.user-suggestions');
         Route::get('coin-transfers/stats/api', [CoinTransferController::class, 'statsApi'])->name('coin-transfers.stats.api');
+        
+        // Get server time for bulk create chapters
+        Route::get('get-server-time', function() {
+            $vietnamTime = \Carbon\Carbon::now('Asia/Ho_Chi_Minh');
+            return response()->json([
+                'time' => $vietnamTime->format('Y-m-d\TH:i:s'),
+                'timezone' => 'Asia/Ho_Chi_Minh'
+            ]);
+        })->name('get-server-time');
     });
 });

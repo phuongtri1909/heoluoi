@@ -4,14 +4,17 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Bank;
 use App\Models\User;
-use App\Models\Bookmark;
 use App\Models\BanIp;
+use App\Models\Bookmark;
 use App\Models\UserReading;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Models\StoryPurchase;
 use Illuminate\Support\Carbon;
 use App\Mail\OTPUpdateUserMail;
+use App\Models\ChapterPurchase;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
@@ -19,7 +22,6 @@ use Illuminate\Support\Facades\Redis;
 use Intervention\Image\Facades\Image;
 use App\Services\ReadingHistoryService;
 use Illuminate\Support\Facades\Storage;
-use App\Http\Controllers\Controller;
 
 class UserController extends Controller
 {
@@ -29,94 +31,73 @@ class UserController extends Controller
         $authUser = Auth::user();
         $user = User::findOrFail($id);
 
-        // Check permissions
         if ($authUser->role === 'admin_sub') {
             if ($user->role === 'admin_main' || $user->role === 'admin_sub') {
                 abort(403, 'Unauthorized action.');
             }
         }
 
-        // Only show active users
         if ($user->active !== 'active') {
             abort(404);
         }
 
-        // Get financial statistics - optimized to avoid N+1 queries
         $stats = [
             'total_deposits' => $user->total_deposits,
             'total_spent' => $user->total_chapter_spending + $user->total_story_spending,
-            'balance' => $user->coins,
-            'author_revenue' => $user->role === 'author' ? $user->author_revenue : 0,
-            'author_story_revenue' => $user->role === 'author' ? \App\Models\StoryPurchase::whereHas('story', function($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })->sum('amount_received') : 0,
-            'author_chapter_revenue' => $user->role === 'author' ? \App\Models\ChapterPurchase::whereHas('chapter.story', function($query) use ($user) {
-                $query->where('user_id', $user->id);
-            })->sum('amount_received') : 0,
+            'balance' => $user->coins
         ];
 
-        // Get deposits with pagination
         $deposits = $user->deposits()
             ->with('bank')
             ->orderByDesc('created_at')
             ->paginate(5, ['*'], 'deposits_page');
 
-        // Get PayPal deposits with pagination
         $paypalDeposits = $user->paypalDeposits()
             ->orderByDesc('created_at')
             ->paginate(5, ['*'], 'paypal_deposits_page');
 
-        // Get card deposits with pagination
         $cardDeposits = $user->cardDeposits()
             ->orderByDesc('created_at')
             ->paginate(5, ['*'], 'card_deposits_page');
 
-        // Get chapter purchases with pagination
         $chapterPurchases = $user->chapterPurchases()
             ->with(['chapter.story'])
             ->orderByDesc('created_at')
             ->paginate(5, ['*'], 'chapter_page');
 
-        // Get story purchases with pagination
         $storyPurchases = $user->storyPurchases()
             ->with(['story'])
             ->orderByDesc('created_at')
             ->paginate(5, ['*'], 'story_page');
 
-        // Get bookmarks with pagination
         $bookmarks = $user->bookmarks()
             ->with(['story', 'lastChapter'])
             ->orderByDesc('created_at')
             ->paginate(5, ['*'], 'bookmarks_page');
 
-        // Get coin transactions with pagination
         $coinTransactions = $user->coinTransactions()
             ->with('admin')
             ->orderByDesc('created_at')
             ->paginate(5, ['*'], 'coin_page');
 
-        // Get user daily tasks with pagination
         $userDailyTasks = $user->userDailyTasks()
             ->with('dailyTask')
             ->orderByDesc('created_at')
             ->paginate(5, ['*'], 'daily_tasks_page');
 
-        // Get author earnings (if user is author)
         $authorChapterEarnings = collect();
         $authorStoryEarnings = collect();
        
         
         if ($user->role === 'author') {
-            // Get chapter earnings
-            $authorChapterEarnings = \App\Models\ChapterPurchase::whereHas('chapter.story', function($query) use ($user) {
+            $authorChapterEarnings = ChapterPurchase::whereHas('chapter.story', function($query) use ($user) {
                 $query->where('user_id', $user->id);
             })
             ->with(['chapter.story', 'user'])
             ->orderByDesc('created_at')
             ->paginate(5, ['*'], 'author_chapter_earnings_page');
 
-            // Get story earnings
-            $authorStoryEarnings = \App\Models\StoryPurchase::whereHas('story', function($query) use ($user) {
+            $authorStoryEarnings = StoryPurchase::whereHas('story', function($query) use ($user) {
                 $query->where('user_id', $user->id);
             })
             ->with(['story', 'user'])
@@ -124,13 +105,10 @@ class UserController extends Controller
             ->paginate(5, ['*'], 'author_story_earnings_page');
         }
 
-        // Get coin history with pagination
         $coinHistories = $user->coinHistories()
             ->orderByDesc('created_at')
             ->paginate(10, ['*'], 'coin_histories_page');
 
-        // Count totals for tabs - optimized to avoid N+1 queries
-        // Use single query with selectRaw to get all counts at once
         $counts = DB::select("
             SELECT 
                 (SELECT COUNT(*) FROM deposits WHERE user_id = ?) as deposits,
@@ -157,6 +135,8 @@ class UserController extends Controller
 
         $counts = (array) $counts;
 
+        $user->load('userBan');
+
         return view('admin.pages.users.show', compact(
             'user',
             'stats',
@@ -182,7 +162,6 @@ class UserController extends Controller
 
 
         if ($request->has('delete_avatar') && $authUser->role === 'admin') {
-            // Check if target user is admin or mod
             if (in_array($user->role, ['admin', 'mod'])) {
                 return response()->json([
                     'status' => 'error',
@@ -190,7 +169,6 @@ class UserController extends Controller
                 ], 403);
             }
 
-            // Delete avatar using Storage facade instead of File facade
             if ($user->avatar) {
                 Storage::disk('public')->delete($user->avatar);
             }
@@ -204,13 +182,10 @@ class UserController extends Controller
             ]);
         }
 
-        // Special case for admin@gmail.com (super admin)
-        // Get super admin emails from env
         $superAdminEmails = explode(',', env('SUPER_ADMIN_EMAILS', 'admin@gmail.com'));
         $isSuperAdmin = in_array($authUser->email, $superAdminEmails);
 
         if ($request->has('role')) {
-            // Prevent changing super admin's role
             if (in_array($user->email, $superAdminEmails)) {
                 return response()->json([
                     'status' => 'error',
@@ -218,7 +193,6 @@ class UserController extends Controller
                 ], 403);
             }
 
-            // Only super admin can change admin roles
             if ($user->role === 'admin' && !$isSuperAdmin) {
                 return response()->json([
                     'status' => 'error',
@@ -236,7 +210,6 @@ class UserController extends Controller
             $user->role = $request->role;
         }
 
-        // Check permissions
         if ($authUser->role === 'mod') {
             if ($user->role === 'admin' || $user->id === $authUser->id) {
                 return response()->json([
@@ -246,12 +219,38 @@ class UserController extends Controller
             }
         }
 
-        // Handle ban toggles
         $banTypes = ['login', 'comment', 'rate', 'read'];
+        $hasBanField = false;
         foreach ($banTypes as $type) {
             $field = "ban_$type";
             if ($request->has($field)) {
-                $user->$field = $request->boolean($field);
+                $hasBanField = true;
+            }
+        }
+
+        if ($hasBanField) {
+            $userBan = $user->userBan()->firstOrCreate([
+                'user_id' => $user->id,
+            ]);
+
+            foreach ($banTypes as $type) {
+                $field = "ban_$type";
+                if ($request->has($field)) {
+                    $userBan->$type = $request->boolean($field);
+                }
+            }
+
+            try {
+                $userBan->save();
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Cập nhật thành công'
+                ]);
+            } catch (\Exception $e) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Có lỗi xảy ra'
+                ], 500);
             }
         }
 
@@ -288,7 +287,6 @@ class UserController extends Controller
                 ], 400);
             }
 
-            // Check if IP already banned
             if (!BanIp::where('ip_address', $user->ip_address)->exists()) {
                 BanIp::create([
                     'ip_address' => $user->ip_address,
@@ -301,7 +299,6 @@ class UserController extends Controller
                 'message' => 'Đã thêm IP vào danh sách cấm'
             ]);
         } else {
-            // Remove all banned IPs for this user
             BanIp::where('user_id', $user->id)->delete();
 
             return response()->json([
@@ -330,17 +327,14 @@ class UserController extends Controller
         }
 
 
-        // Role filter
         if ($request->filled('role')) {
             $query->where('role', $request->role);
         }
 
-        // IP filter
         if ($request->filled('ip')) {
             $query->where('ip_address', 'like', '%' . $request->ip . '%');
         }
 
-        // Date filter
         if ($request->filled('date')) {
             $query->whereDate('created_at', $request->date);
         }

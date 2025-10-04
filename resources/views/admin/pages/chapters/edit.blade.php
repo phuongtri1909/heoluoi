@@ -43,6 +43,21 @@
                                 </div>
                             </div>
 
+                            @if($chapter->status === 'draft' && $chapter->scheduled_publish_at)
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="scheduled_publish_at">Thời gian hẹn đăng</label>
+                                    <input type="datetime-local" name="scheduled_publish_at" id="scheduled_publish_at" 
+                                        class="form-control" 
+                                        value="{{ old('scheduled_publish_at', $chapter->scheduled_publish_at ? $chapter->scheduled_publish_at->format('Y-m-d\TH:i') : '') }}">
+                                    <small class="text-muted">Chỉ có thể chỉnh sửa khi chương đang ở trạng thái nháp</small>
+                                    @error('scheduled_publish_at')
+                                        <div class="text-danger">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            @endif
+
                             <div class="col-12">
                                 <div class="form-group">
                                     <div class="d-flex align-items-center mb-2">
@@ -180,6 +195,23 @@
                     priceContainer.style.display = 'block';
                 }
             });
+
+            // Handle status change for scheduled_publish_at field
+            const statusSelect = document.getElementById('status');
+            const scheduledField = document.getElementById('scheduled_publish_at');
+            
+            if (scheduledField) {
+                function toggleScheduledField() {
+                    if (statusSelect.value === 'draft') {
+                        scheduledField.parentElement.parentElement.style.display = 'block';
+                    } else {
+                        scheduledField.parentElement.parentElement.style.display = 'none';
+                    }
+                }
+                
+                statusSelect.addEventListener('change', toggleScheduledField);
+                toggleScheduledField(); // Initial call
+            }
         });
     </script>
 @endpush

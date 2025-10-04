@@ -22,11 +22,17 @@ class Chapter extends Model
         'price',
         'is_free',
         'published_at',
+        'scheduled_publish_at',
     ];
+
+    const STATUS_DRAFT = 'draft';
+    const STATUS_PUBLISHED = 'published';
 
 
     protected $casts = [
         'is_free' => 'boolean',
+        'published_at' => 'datetime',
+        'scheduled_publish_at' => 'datetime',
     ];
 
     public function ratings()
@@ -62,13 +68,9 @@ class Chapter extends Model
         if ($this->is_free) {
             return true;
         }
-        
-        // Check if the user has purchased the individual chapter
         if ($this->purchases()->where('user_id', $userId)->exists()) {
             return true;
         }
-        
-        // Check if the user has purchased the story combo
         return $this->story->purchases()->where('user_id', $userId)->exists();
     }
 }
