@@ -78,5 +78,11 @@ class ConfigSeeder extends Seeder
             10,
             'Số cám thưởng khi hoàn thành nhiệm vụ theo dõi truyện'
         );
+
+        Config::setConfig(
+            'paypal_me_link',
+            'https://www.paypal.com/paypalme/minhnguyen231',
+            'Link PayPal.me để nhận thanh toán'
+        );
     }
 }

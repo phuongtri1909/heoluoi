@@ -85,17 +85,43 @@
         .show-reason-btn:hover {
             text-decoration: underline;
         }
+
+        /* Deposit table styles */
+        .deposit-table .table {
+            margin-bottom: 0;
+        }
+
+        .deposit-table .table th {
+            border-top: none;
+            border-bottom: 2px solid #495057;
+            font-size: 0.85rem;
+            padding: 0.5rem;
+        }
+
+        .deposit-table .table td {
+            border-top: 1px solid #495057;
+            padding: 0.4rem 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .deposit-table .table-primary {
+            background-color: rgba(13, 110, 253, 0.2) !important;
+        }
+
+        .deposit-table .table-primary td {
+            border-color: rgba(13, 110, 253, 0.3);
+        }
     </style>
 @endpush
 
 @section('info_content')
 
     <div class="deposit-tabs d-flex mb-4">
-        <a href="{{ route('user.deposit') }}" class="deposit-tab active">
-            <i class="fas fa-university me-2"></i>Bank
-        </a>
         <a href="{{ route('user.bank.auto.deposit') }}" class="deposit-tab">
             <i class="fas fa-robot me-2"></i>Bank auto
+        </a>
+        <a href="{{ route('user.deposit') }}" class="deposit-tab active">
+            <i class="fas fa-university me-2"></i>Bank
         </a>
         <a href="{{ route('user.card.deposit') }}" class="deposit-tab">
             <i class="fas fa-credit-card me-2"></i>Card
@@ -168,10 +194,26 @@
                                         <div class="col">
                                             <div class="small text-white opacity-75">Cám nhận được:</div>
                                             <div class="coin-preview-value">
-                                                <i class="fas fa-coins me-2"></i> <span id="coinsPreview">50</span>
+                                                <i class="fas fa-coins me-2"></i>
+                                                <span id="totalCoinsPreview">0</span>
+                                            </div>
+                                            <div class="coin-breakdown mt-2">
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <small class="text-white fw-bold">
+                                                            <i class="fas fa-coins me-1"></i>Cám cộng:
+                                                            <span id="baseCoinsPreview">0</span>
+                                                        </small>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <small class="color-text fw-bold">
+                                                            <i class="fas fa-gift me-1"></i>Cám tặng:
+                                                            <span id="bonusCoinsPreview">0</span>
+                                                        </small>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
-
                                     </div>
                                     {{-- <div class="small text-white opacity-75 mt-2">
                                         <i class="fas fa-info-circle me-1"></i> Tỷ giá:
@@ -194,18 +236,47 @@
 
             <div class="col-lg-4">
                 <div class="coins-panel">
-                    <div class="coins-balance">
-                        <i class="fas fa-coins coins-icon"></i> {{ number_format(Auth::user()->coins ?? 0) }}
-                    </div>
-                    <div class="coins-label">Số cám hiện có trong tài khoản</div>
+                    <!-- Bảng mức nạp tiền -->
+                    <div class="deposit-table">
+                        <h6 class="text-dark mb-3">
+                            Mức quy định đổi cám hiên tại:
+                        </h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">Số tiền</th>
+                                        <th class="text-center">Cám cộng</th>
+                                        <th class="text-center">Cám tặng</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php
+                                        $amounts = [50000, 100000, 200000, 300000, 400000, 500000, 1000000];
+                                    @endphp
+                                    @foreach ($amounts as $amount)
+                                        @php
+                                            // Tính toán cám cơ bản
+                                            $feeAmount = ($amount * $coinBankPercent) / 100;
+                                            $amountAfterFee = $amount - $feeAmount;
+                                            $baseCoins = floor($amountAfterFee / $coinExchangeRate);
 
-                    <div class="coins-info">
-                        <p class="mb-2"><i class="fas fa-chevron-right me-2"></i> Dùng cám để đọc truyện trả phí</p>
-                        <p class="mb-2"><i class="fas fa-chevron-right me-2"></i> Dùng cám để mở khóa các tính năng cao cấp
-                        </p>
-                        <p class="mb-0"><i class="fas fa-chevron-right me-2"></i> Thời gian xử lý nạp cám: 24h sau khi
-                            thanh toán</p>
+                                            // Tính toán bonus theo công thức hàm mũ
+                                            $bonusCoins = calculateBonusCoins($amountAfterFee, $bonusBaseAmount, $bonusBaseCam, $bonusDoubleAmount, $bonusDoubleCam);
+
+                                            $totalCoins = $baseCoins + $bonusCoins;
+                                        @endphp
+                                        <tr class="{{ $amount == 100000 ? 'table-primary' : '' }}">
+                                            <td class="text-center fw-bold">{{ number_format($amount) }}đ</td>
+                                            <td class="text-center fw-bold">{{ number_format($baseCoins) }}</td>
+                                            <td class="text-center color-7 fw-bold">+ {{ number_format($bonusCoins) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -222,12 +293,14 @@
                                 <thead>
                                     <tr>
                                         <th style="width: 15%">Mã giao dịch</th>
-                                        <th style="width: 15%">Ngân hàng</th>
-                                        <th style="width: 15%">Số tiền</th>
-                                        <th style="width: 15%">Cám</th>
-                                        <th style="width: 15%">Ngày tạo</th>
-                                        <th style="width: 10%">Trạng thái</th>
-                                        <th style="width: 15%">Biên lai</th>
+                                        <th style="width: 12%">Ngân hàng</th>
+                                        <th style="width: 12%">Số tiền</th>
+                                        <th style="width: 10%">Cám cộng</th>
+                                        <th style="width: 10%">Cám tặng</th>
+                                        <th style="width: 10%">Tổng cám</th>
+                                        <th style="width: 12%">Ngày tạo</th>
+                                        <th style="width: 8%">Trạng thái</th>
+                                        <th style="width: 11%">Biên lai</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -239,6 +312,16 @@
                                             <td class="align-middle">{{ $deposit->bank->name }}</td>
                                             <td class="align-middle">{{ number_format($deposit->amount) }} VNĐ</td>
                                             <td class="align-middle">{{ number_format($deposit->coins) }}</td>
+                                            <td class="align-middle">
+                                                @if(isset($deposit->bonus_coins) && $deposit->bonus_coins > 0)
+                                                    <span class="text-success">+{{ number_format($deposit->bonus_coins) }}</span>
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </td>
+                                            <td class="align-middle">
+                                                <strong>{{ number_format($deposit->coins) }}</strong>
+                                            </td>
                                             <td class="align-middle">
                                                 <div>{{ $deposit->created_at->format('d/m/Y H:i') }}</div>
                                                 <small
@@ -1061,6 +1144,14 @@
             });
 
             $(document).ready(function() {
+                // Global variables
+                window.coinExchangeRate = {{ $coinExchangeRate }};
+                window.coinBankPercent = {{ $coinBankPercent }};
+                window.bonusBaseAmount = {{ $bonusBaseAmount }};
+                window.bonusBaseCam = {{ $bonusBaseCam }};
+                window.bonusDoubleAmount = {{ $bonusDoubleAmount }};
+                window.bonusDoubleCam = {{ $bonusDoubleCam }};
+
                 function formatVndCurrency(value) {
                     try {
                         if (!value || value === '' || value === null || value === undefined) return '';
@@ -1134,18 +1225,43 @@
                         const amount = parseInt($('#amount').data('raw')) || 0;
 
                         if (amount > 0) {
+                            // Calculate base coins
                             const feeAmount = (amount * window.coinBankPercent) / 100;
                             const amountAfterFee = amount - feeAmount;
                             const baseCoins = Math.floor(amountAfterFee / window.coinExchangeRate);
-                            const totalCoins = baseCoins;
 
-                            $('#coinsPreview').text(totalCoins.toLocaleString('vi-VN'));
+                            // Calculate bonus theo công thức hàm mũ
+                            let bonusCoins = 0;
+
+                            if (amountAfterFee >= window.bonusBaseAmount) {
+                                // Tính số mũ b
+                                const ratioAmount = window.bonusDoubleAmount / window.bonusBaseAmount; // 200000/100000 = 2
+                                const ratioBonus = window.bonusDoubleCam / window.bonusBaseCam; // 1000/300 = 3.333...
+                                const b = Math.log(ratioBonus) / Math.log(ratioAmount); // ≈ 1.737
+
+                                // Tính hệ số a
+                                const a = window.bonusBaseCam / Math.pow(window.bonusBaseAmount, b);
+
+                                // Tính bonus theo công thức: bonus = a * (amountAfterFee)^b
+                                bonusCoins = Math.floor(a * Math.pow(amountAfterFee, b));
+                            }
+
+                            const totalCoins = baseCoins + bonusCoins;
+
+                            // Update UI
+                            $('#baseCoinsPreview').text(baseCoins.toLocaleString('vi-VN'));
+                            $('#bonusCoinsPreview').text(bonusCoins.toLocaleString('vi-VN'));
+                            $('#totalCoinsPreview').text(totalCoins.toLocaleString('vi-VN'));
                         } else {
-                            $('#coinsPreview').text('0');
+                            $('#baseCoinsPreview').text('0');
+                            $('#bonusCoinsPreview').text('0');
+                            $('#totalCoinsPreview').text('0');
                         }
                     } catch (error) {
                         console.error("Error updating coin preview:", error);
-                        $('#coinsPreview').text('0');
+                        $('#baseCoinsPreview').text('0');
+                        $('#bonusCoinsPreview').text('0');
+                        $('#totalCoinsPreview').text('0');
                     }
                 }
 

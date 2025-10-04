@@ -64,23 +64,23 @@ class BankAutoController extends Controller
      */
     public function calculateCoins($amount)
     {
-        // Tính phí giao dịch
-        $feeAmount = ($amount * $this->coinBankAutoPercent) / 100;
+        $coinExchangeRate = config('app.coin_exchange_rate', 100);
+        $coinBankAutoPercent = config('app.coin_bank_auto_percentage', 0);
+        $bonusBaseAmount = config('app.bonus_base_amount', 100000);
+        $bonusBaseCam = config('app.bonus_base_cam', 300);
+        $bonusDoubleAmount = config('app.bonus_double_amount', 200000);
+        $bonusDoubleCam = config('app.bonus_double_cam', 1000);
+
+        $result = calculateTotalCoins($amount, $coinExchangeRate, $coinBankAutoPercent, $bonusBaseAmount, $bonusBaseCam, $bonusDoubleAmount, $bonusDoubleCam);
+        
+        // Thêm thông tin phí
+        $feeAmount = ($amount * $coinBankAutoPercent) / 100;
         $amountAfterFee = $amount - $feeAmount;
         
-        // Tính cám cơ bản
-        $baseCoins = floor($amountAfterFee / $this->coinExchangeRate);
-        
-        // Tính bonus
-        $bonusCoins = $this->calculateBonus($amount);
-        
-        return [
-            'base_coins' => $baseCoins,
-            'bonus_coins' => $bonusCoins,
-            'total_coins' => $baseCoins + $bonusCoins,
+        return array_merge($result, [
             'fee_amount' => $feeAmount,
             'amount_after_fee' => $amountAfterFee
-        ];
+        ]);
     }
 
     /**
@@ -120,10 +120,10 @@ class BankAutoController extends Controller
     {
         $amount = $request->input('amount', 0);
         
-        if ($amount < 2000) {
+        if ($amount < 50000) {
             return response()->json([
                 'success' => false,
-                'message' => 'Số tiền tối thiểu là 2.000 VNĐ'
+                'message' => 'Số tiền tối thiểu là 50.000 VNĐ'
             ]);
         }
         
@@ -141,7 +141,7 @@ class BankAutoController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'amount' => 'required|integer|min:2000',
+            'amount' => 'required|integer|min:50000',
             'bank_id' => 'required|exists:bank_autos,id'
         ]);
 
@@ -211,19 +211,18 @@ class BankAutoController extends Controller
     }
 
     /**
-     * Callback từ Casso Webhook v1 khi có giao dịch mới
-     * Format: t=timestamp,v1=signature
+     * Callback từ Casso Webhook v2 khi có giao dịch mới
      */
     public function callback(Request $request)
     {
         $payload = $request->getContent();
         $signature = $request->header('X-Casso-Signature');
         
-        Log::info('Casso webhook received', [
-            'signature' => $signature,
-            'payload_length' => strlen($payload),
-            'headers' => $request->headers->all()
-        ]);
+        // Log::info('Casso webhook received', [
+        //     'signature' => $signature,
+        //     'payload_length' => strlen($payload),
+        //     'headers' => $request->headers->all()
+        // ]);
         
         if (!$signature) {
             Log::warning('Missing Casso signature header');
@@ -255,14 +254,14 @@ class BankAutoController extends Controller
         $bankName = $data['data']['bankName'] ?? '';
         $transactionDateTime = $data['data']['transactionDateTime'] ?? null;
         
-        Log::info('Casso webhook data parsed', [
-            'transaction_id' => $transactionId,
-            'reference' => $reference,
-            'amount' => $amount,
-            'account_number' => $accountNumber,
-            'bank_name' => $bankName,
-            'description' => $description
-        ]);
+        // Log::info('Casso webhook data parsed', [
+        //     'transaction_id' => $transactionId,
+        //     'reference' => $reference,
+        //     'amount' => $amount,
+        //     'account_number' => $accountNumber,
+        //     'bank_name' => $bankName,
+        //     'description' => $description
+        // ]);
         
         if (!$transactionId) {
             Log::warning('Missing transaction id in Casso webhook', ['data' => $data]);
@@ -275,7 +274,7 @@ class BankAutoController extends Controller
             ->first();
             
         if ($existingDeposit) {
-            Log::info('Transaction already processed', ['transaction_id' => $transactionId]);
+            // Log::info('Transaction already processed', ['transaction_id' => $transactionId]);
             return response()->json(['success' => true, 'message' => 'Transaction already processed']);
         }
         
@@ -286,17 +285,17 @@ class BankAutoController extends Controller
             if (preg_match_all('/(HEOLUOI[a-zA-Z0-9]{14,})/', $description, $matches)) {
                 $transactionCode = $matches[1][0];
                 
-                Log::info('Found transaction codes in description', [
-                    'description' => $description,
-                    'all_codes' => $matches[1],
-                    'selected_code' => $transactionCode
-                ]);
+                // Log::info('Found transaction codes in description', [
+                //     'description' => $description,
+                //     'all_codes' => $matches[1],
+                //     'selected_code' => $transactionCode
+                // ]);
             }
             
-            Log::info('Extracted transaction code', [
-                'description' => $description,
-                'extracted_code' => $transactionCode
-            ]);
+            // Log::info('Extracted transaction code', [
+            //     'description' => $description,
+            //     'extracted_code' => $transactionCode
+            // ]);
             
             $deposit = null;
             if ($transactionCode) {
@@ -353,7 +352,7 @@ class BankAutoController extends Controller
                     $user,
                     $deposit->total_coins,
                     \App\Models\CoinHistory::TYPE_BANK_AUTO_DEPOSIT,
-                    "Nạp bank auto thành công - Số tiền: " . number_format($deposit->amount) . " VND - Casso ID: {$transactionId}",
+                    "Nạp bank auto thành công - Số tiền: " . number_format($deposit->amount) . " VND -  Mã giao dịch: {$transactionCode}",
                     $deposit
                 );
                 
@@ -486,11 +485,11 @@ class BankAutoController extends Controller
         $filename = storage_path('app/sse_transaction_' . $transactionCode . '.json');
         file_put_contents($filename, json_encode($sseData));
         
-        Log::info('SSE transaction update broadcasted', [
-            'transaction_code' => $transactionCode,
-            'status' => $status,
-            'filename' => $filename
-        ]);
+            // Log::info('SSE transaction update broadcasted', [
+            //     'transaction_code' => $transactionCode,
+            //     'status' => $status,
+            //     'filename' => $filename
+            // ]);
     }
     
     /**
@@ -545,21 +544,5 @@ class BankAutoController extends Controller
             'Access-Control-Allow-Origin' => '*',
             'Access-Control-Allow-Headers' => 'Cache-Control',
         ]);
-    }
-
-    /**
-     * Trang thành công
-     */
-    public function success()
-    {
-        return view('pages.information.deposit.bank_auto_success');
-    }
-
-    /**
-     * Trang hủy
-     */
-    public function cancel()
-    {
-        return view('pages.information.deposit.bank_auto_cancel');
     }
 }

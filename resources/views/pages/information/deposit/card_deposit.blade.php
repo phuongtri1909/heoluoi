@@ -14,6 +14,32 @@
             border-radius: 10px;
             padding: 20px;
         }
+
+        /* Deposit table styles */
+        .deposit-table .table {
+            margin-bottom: 0;
+        }
+
+        .deposit-table .table th {
+            border-top: none;
+            border-bottom: 2px solid #495057;
+            font-size: 0.85rem;
+            padding: 0.5rem;
+        }
+
+        .deposit-table .table td {
+            border-top: 1px solid #495057;
+            padding: 0.4rem 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .deposit-table .table-primary {
+            background-color: rgba(13, 110, 253, 0.2) !important;
+        }
+
+        .deposit-table .table-primary td {
+            border-color: rgba(13, 110, 253, 0.3);
+        }
     </style>
 @endpush
 
@@ -21,11 +47,11 @@
 
     <!-- Deposit Tabs -->
     <div class="deposit-tabs d-flex mb-4">
-        <a href="{{ route('user.deposit') }}" class="deposit-tab ">
-            <i class="fas fa-university me-2"></i>Bank
+        <a href="{{ route('user.bank.auto.deposit') }}" class="deposit-tab">
+            <i class="fas fa-robot me-2"></i>Bank auto
         </a>
-        <a href="" class="deposit-tab">
-            <i class="fas fa-university me-2"></i>Bank auto
+        <a href="{{ route('user.deposit') }}" class="deposit-tab">
+            <i class="fas fa-university me-2"></i>Bank
         </a>
         <a href="{{ route('user.card.deposit') }}" class="deposit-tab active">
             <i class="fas fa-credit-card me-2"></i>Card
@@ -89,7 +115,23 @@
                                     <div class="small opacity-75">Cám nhận được:</div>
                                     <div class="h4 mb-0">
                                         <i class="fas fa-coins me-2"></i>
-                                        <span id="coinsPreview">0</span> cám
+                                        <span id="totalCoinsPreview">0</span> cám
+                                    </div>
+                                    <div class="coin-breakdown mt-2">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <small class="text-white fw-bold">
+                                                    <i class="fas fa-coins me-1"></i>Cám cộng:
+                                                    <span id="baseCoinsPreview">0</span>
+                                                </small>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="color-text fw-bold">
+                                                    <i class="fas fa-gift me-1"></i>Cám tặng:
+                                                    <span id="bonusCoinsPreview">0</span>
+                                                </small>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -168,28 +210,46 @@
         <!-- Sidebar -->
         <div class="col-lg-4">
             <div class="coins-panel">
-                <div class="coins-balance">
-                    <i class="fas fa-coins coins-icon"></i>{{ number_format(Auth::user()->coins ?? 0) }}
-                </div>
-                <div class="coins-label">Số cám hiện có trong tài khoản</div>
+                    <!-- Bảng mức nạp tiền -->
+                    <div class="deposit-table">
+                        <h6 class="text-dark mb-3">
+                            Mức quy định đổi cám hiên tại:
+                        </h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">Mệnh giá thẻ</th>
+                                        <th class="text-center">Cám cộng</th>
+                                        <th class="text-center">Cám tặng</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php
+                                        $cardAmounts = [50000, 100000, 200000, 300000, 400000, 500000, 1000000];
+                                    @endphp
+                                    @foreach ($cardAmounts as $cardAmount)
+                                        @php
+                                            // Tính toán cám cơ bản
+                                            $feeAmount = ($cardAmount * $coinCardPercent) / 100;
+                                            $amountAfterFee = $cardAmount - $feeAmount;
+                                            $baseCoins = floor($amountAfterFee / $coinExchangeRate);
 
-                <div class="coins-info">
-                    <h6 class="text-white mb-3">
-                        <i class="fas fa-star me-2"></i>Ưu điểm nạp thẻ
-                    </h6>
-                    <p class="mb-2">
-                        <i class="fas fa-check-circle me-2 text-success"></i>Nhanh chóng và tiện lợi
-                    </p>
-                    <p class="mb-2">
-                        <i class="fas fa-check-circle me-2 text-success"></i>Hỗ trợ nhiều loại thẻ
-                    </p>
-                    <p class="mb-2">
-                        <i class="fas fa-check-circle me-2 text-success"></i>Xử lý tự động 24/7
-                    </p>
-                    <p class="mb-0">
-                        <i class="fas fa-check-circle me-2 text-success"></i>Bảo mật cao
-                    </p>
-                </div>
+                                            // Tính toán bonus theo công thức hàm mũ
+                                            $bonusCoins = calculateBonusCoins($amountAfterFee, $bonusBaseAmount, $bonusBaseCam, $bonusDoubleAmount, $bonusDoubleCam);
+
+                                            $totalCoins = $baseCoins + $bonusCoins;
+                                        @endphp
+                                        <tr class="{{ $cardAmount == 100000 ? 'table-primary' : '' }}">
+                                            <td class="text-center fw-bold">{{ number_format($cardAmount) }}đ</td>
+                                            <td class="text-center fw-bold">{{ number_format($baseCoins) }}</td>
+                                            <td class="text-center color-7 fw-bold">+ {{ number_format($bonusCoins) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
             </div>
         </div>
     </div>
@@ -219,7 +279,13 @@
                                             <i class="fas fa-money-bill me-1"></i>Mệnh giá
                                         </th>
                                         <th>
-                                            <i class="fas fa-coins me-1"></i>Cám nhận được
+                                            <i class="fas fa-coins me-1"></i>Cám cộng
+                                        </th>
+                                        <th>
+                                            <i class="fas fa-gift me-1"></i>Cám tặng
+                                        </th>
+                                        <th>
+                                            <i class="fas fa-coins me-1"></i>Tổng cám
                                         </th>
                                         <th>
                                             <i class="fas fa-clock me-1"></i>Thời gian
@@ -240,7 +306,7 @@
                                             <td>{{ $deposit->card_type_text }}</td>
                                             <td>{{ $deposit->amount_formatted }}</td>
 
-                                            {{-- Cột cám nhận được với thông tin penalty --}}
+                                            {{-- Cột cám cộng --}}
                                             <td>
                                                 <strong>{{ number_format($deposit->coins) }} cám</strong>
 
@@ -258,6 +324,20 @@
                                                         @endif
                                                     </small>
                                                 @endif
+                                            </td>
+
+                                            {{-- Cột cám tặng --}}
+                                            <td>
+                                                @if(isset($deposit->bonus_coins) && $deposit->bonus_coins > 0)
+                                                    <span class="text-success">+{{ number_format($deposit->bonus_coins) }} cám</span>
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </td>
+
+                                            {{-- Cột tổng cám --}}
+                                            <td>
+                                                <strong>{{ number_format($deposit->coins) }} cám</strong>
                                             </td>
 
                                             <td>
@@ -342,6 +422,10 @@
         $(document).ready(function() {
             const coinExchangeRate = {{ $coinExchangeRate }};
             const coinCardPercent = {{ $coinCardPercent }};
+            const bonusBaseAmount = {{ $bonusBaseAmount }};
+            const bonusBaseCam = {{ $bonusBaseCam }};
+            const bonusDoubleAmount = {{ $bonusDoubleAmount }};
+            const bonusDoubleCam = {{ $bonusDoubleCam }};
 
             // **Tự động load preview khi page load với default values**
             updateCoinsPreview();
@@ -365,12 +449,37 @@
             function updateCoinsPreview() {
                 const amount = parseInt($('#cardAmount').val()) || 0;
                 if (amount > 0) {
+                    // Calculate base coins
                     const feeAmount = (amount * coinCardPercent) / 100;
                     const amountAfterFee = amount - feeAmount;
-                    const coins = Math.floor(amountAfterFee / coinExchangeRate);
-                    $('#coinsPreview').text(coins.toLocaleString());
+                    const baseCoins = Math.floor(amountAfterFee / coinExchangeRate);
+
+                    // Calculate bonus theo công thức hàm mũ
+                    let bonusCoins = 0;
+
+                    if (amountAfterFee >= bonusBaseAmount) {
+                        // Tính số mũ b
+                        const ratioAmount = bonusDoubleAmount / bonusBaseAmount; // 200000/100000 = 2
+                        const ratioBonus = bonusDoubleCam / bonusBaseCam; // 1000/300 = 3.333...
+                        const b = Math.log(ratioBonus) / Math.log(ratioAmount); // ≈ 1.737
+
+                        // Tính hệ số a
+                        const a = bonusBaseCam / Math.pow(bonusBaseAmount, b);
+
+                        // Tính bonus theo công thức: bonus = a * (amountAfterFee)^b
+                        bonusCoins = Math.floor(a * Math.pow(amountAfterFee, b));
+                    }
+
+                    const totalCoins = baseCoins + bonusCoins;
+
+                    // Update UI
+                    $('#baseCoinsPreview').text(baseCoins.toLocaleString());
+                    $('#bonusCoinsPreview').text(bonusCoins.toLocaleString());
+                    $('#totalCoinsPreview').text(totalCoins.toLocaleString());
                 } else {
-                    $('#coinsPreview').text('0');
+                    $('#baseCoinsPreview').text('0');
+                    $('#bonusCoinsPreview').text('0');
+                    $('#totalCoinsPreview').text('0');
                 }
             }
 

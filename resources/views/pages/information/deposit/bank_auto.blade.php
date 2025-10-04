@@ -1,10 +1,10 @@
 @extends('layouts.information')
 
 @section('info_title', 'Nạp cám tự động')
-@section('info_description', 'Nạp cám tự động qua Casso trên ' . request()->getHost())
+@section('info_description', 'Nạp cám tự động qua trên ' . request()->getHost())
 @section('info_keyword', 'nạp cám, thanh toán tự động, Casso, ' . request()->getHost())
 @section('info_section_title', 'Nạp cám tự động')
-@section('info_section_desc', 'Nạp cám tự động qua Casso với nhiều ưu đãi hấp dẫn')
+@section('info_section_desc', 'Nạp cám tự động với nhiều ưu đãi hấp dẫn')
 
 @push('styles')
     <style>
@@ -148,11 +148,11 @@
 @section('info_content')
 
     <div class="deposit-tabs d-flex mb-4">
-        <a href="{{ route('user.deposit') }}" class="deposit-tab ">
-            <i class="fas fa-university me-2"></i>Bank
-        </a>
         <a href="{{ route('user.bank.auto.deposit') }}" class="deposit-tab active">
-            <i class="fas fa-university me-2"></i>Bank auto
+            <i class="fas fa-robot me-2"></i>Bank auto
+        </a>
+        <a href="{{ route('user.deposit') }}" class="deposit-tab">
+            <i class="fas fa-university me-2"></i>Bank
         </a>
         <a href="{{ route('user.card.deposit') }}" class="deposit-tab">
             <i class="fas fa-credit-card me-2"></i>Card
@@ -168,9 +168,6 @@
                 <!-- Bank Auto Info Section -->
                 <div class="card-info-section mb-3">
                     <div class="deposit-card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-robot me-2"></i>Nạp cám tự động qua Casso
-                        </h5>
                         <p class="text-muted mt-2 mb-0">
                             <i class="fas fa-info-circle me-1"></i>
                             Thanh toán tự động, nhận cám ngay lập tức với nhiều ưu đãi hấp dẫn
@@ -221,15 +218,13 @@
                                 </label>
                                 <div class="input-group">
                                     <input type="text" class="form-control deposit-amount-input" id="amount"
-                                        name="amount"                                         value="{{ old('amount', '2.000') }}"
-                                        data-raw="{{ old('amount', 2000) }}"
-                                        placeholder="Nhập số tiền (ví dụ: 100.000)"
-                                        pattern="[0-9.,]+"
-                                        inputmode="numeric">
+                                        name="amount" value="{{ old('amount', '50.000') }}"
+                                        data-raw="{{ old('amount', 50000) }}" placeholder="Nhập số tiền (ví dụ: 100.000)"
+                                        pattern="[0-9.,]+" inputmode="numeric">
 
                                     <span class="input-group-text">VNĐ</span>
                                 </div>
-                                <div class="form-text">Số tiền tối thiểu: 2.000 VNĐ (tạm thời tắt validation bội số để test)</div>
+                                <div class="form-text">Số tiền tối thiểu: 50.000 VNĐ, phải là bội số của 10.000</div>
                                 <div class="invalid-feedback amount-error">Vui lòng nhập số tiền hợp lệ</div>
 
                                 <!-- Coin Preview với Bonus -->
@@ -238,20 +233,20 @@
                                         <div class="col">
                                             <div class="small text-white opacity-75">Cám nhận được:</div>
                                             <div class="coin-preview-value">
-                                                <i class="fas fa-coins me-2"></i> 
+                                                <i class="fas fa-coins me-2"></i>
                                                 <span id="totalCoinsPreview">0</span>
                                             </div>
                                             <div class="coin-breakdown mt-2">
                                                 <div class="row">
                                                     <div class="col-6">
-                                                        <small class="text-white opacity-75">
-                                                            <i class="fas fa-coins me-1"></i>Cám cơ bản: 
+                                                        <small class="text-white fw-bold">
+                                                            <i class="fas fa-coins me-1"></i>Cám cộng:
                                                             <span id="baseCoinsPreview">0</span>
                                                         </small>
                                                     </div>
                                                     <div class="col-6">
-                                                        <small class="text-success">
-                                                            <i class="fas fa-gift me-1"></i>Bonus: 
+                                                        <small class="color-text fw-bold">
+                                                            <i class="fas fa-gift me-1"></i>Cám tặng:
                                                             <span id="bonusCoinsPreview">0</span>
                                                         </small>
                                                     </div>
@@ -261,37 +256,8 @@
                                     </div>
                                 </div>
 
-                                <!-- Bonus Information -->
-                                <div class="bonus-info mt-3">
-                                    <div class="alert alert-success border-0">
-                                        <h6 class="alert-heading">
-                                            <i class="fas fa-gift me-2"></i>Chương trình khuyến mãi
-                                        </h6>
-                                        <div class="row mt-2">
-                                            <div class="col-md-6">
-                                                <p class="small mb-1">
-                                                    <strong>Nạp {{ number_format($bonusBaseAmount) }}đ:</strong> 
-                                                    Tặng {{ number_format($bonusBaseCam) }} cám
-                                                </p>
-                                                <p class="small mb-1">
-                                                    <strong>Nạp {{ number_format($bonusDoubleAmount) }}đ:</strong> 
-                                                    Tặng {{ number_format($bonusDoubleCam) }} cám
-                                                </p>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <p class="small mb-1">
-                                                    <strong>Nạp càng nhiều:</strong> Bonus càng cao
-                                                </p>
-                                                <p class="small mb-0">
-                                                    <strong>Ví dụ:</strong> 1 triệu = ~15.100 cám
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <button type="button" id="proceedToPaymentBtn" class="btn payment-btn w-100">
-                                    <i class="fas fa-robot"></i> Thanh toán tự động với Casso
+                                    <i class="fas fa-robot"></i> Thanh toán tự động
                                 </button>
                             </div>
                         </form>
@@ -301,75 +267,57 @@
 
             <div class="col-lg-4">
                 <div class="coins-panel">
-                   
+
                     <!-- Bảng mức nạp tiền -->
-                    <div class="deposit-table mt-4">
-                        <h6 class="text-white mb-3">
-                            <i class="fas fa-table me-2"></i>Bảng mức nạp tiền
+                    <div class="deposit-table">
+                        <h6 class="text-dark mb-3">
+                            Mức quy định đổi cám hiên tại:
                         </h6>
                         <div class="table-responsive">
-                            <table class="table table-dark table-sm">
+                            <table class="table table-sm">
                                 <thead>
                                     <tr>
                                         <th class="text-center">Số tiền</th>
-                                        <th class="text-center">Cám cơ bản</th>
-                                        <th class="text-center">Cám bonus</th>
+                                        <th class="text-center">Cám cộng</th>
+                                        <th class="text-center">Cám tặng</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @php
-                                        $amounts = [2000, 10000, 50000, 100000, 200000, 300000, 500000, 1000000];
+                                        $amounts = [50000, 100000, 200000, 300000, 400000, 500000, 1000000];
                                     @endphp
-                                    @foreach($amounts as $amount)
+                                    @foreach ($amounts as $amount)
                                         @php
                                             // Tính toán cám cơ bản
                                             $feeAmount = ($amount * $coinBankAutoPercent) / 100;
                                             $amountAfterFee = $amount - $feeAmount;
                                             $baseCoins = floor($amountAfterFee / $coinExchangeRate);
-                                            
+
                                             // Tính toán bonus theo công thức hàm mũ
                                             $bonusCoins = 0;
-                                            if ($amount >= $bonusBaseAmount) {
+                                            if ($amountAfterFee >= $bonusBaseAmount) {
                                                 // Tính số mũ b
-                                                $ratioAmount = $bonusDoubleAmount / $bonusBaseAmount; // 300000/100000 = 3
+                                                $ratioAmount = $bonusDoubleAmount / $bonusBaseAmount; // 200000/100000 = 2
                                                 $ratioBonus = $bonusDoubleCam / $bonusBaseCam; // 1000/300 = 3.333...
-                                                $b = log($ratioBonus) / log($ratioAmount); // ≈ 1.096
-                                                
+                                                $b = log($ratioBonus) / log($ratioAmount); // ≈ 1.737
+
                                                 // Tính hệ số a
                                                 $a = $bonusBaseCam / pow($bonusBaseAmount, $b);
-                                                
-                                                // Tính bonus theo công thức: bonus = a * (amount)^b
-                                                $bonusCoins = floor($a * pow($amount, $b));
+
+                                                // Tính bonus theo công thức: bonus = a * (amountAfterFee)^b
+                                                $bonusCoins = floor($a * pow($amountAfterFee, $b));
                                             }
-                                            
+
                                             $totalCoins = $baseCoins + $bonusCoins;
                                         @endphp
                                         <tr class="{{ $amount == 100000 ? 'table-primary' : '' }}">
                                             <td class="text-center fw-bold">{{ number_format($amount) }}đ</td>
-                                            <td class="text-center">{{ number_format($baseCoins) }}</td>
-                                            <td class="text-center text-success">{{ number_format($bonusCoins) }}</td>
+                                            <td class="text-center fw-bold">{{ number_format($baseCoins) }}</td>
+                                            <td class="text-center color-7 fw-bold">+ {{ number_format($bonusCoins) }}</td>
                                         </tr>
                                     @endforeach
                                 </tbody>
                             </table>
-                        </div>
-                        <div class="mt-2">
-                            <small class="text-muted">
-                                <i class="fas fa-info-circle me-1"></i>
-                                Tổng cám = Cám cơ bản + Cám bonus
-                            </small>
-                        </div>
-                    </div>
-
-                    <!-- Casso Info -->
-                    <div class="casso-info mt-4">
-                        <div class="alert alert-info border-0">
-                            <h6 class="alert-heading">
-                                <i class="fas fa-shield-alt me-2"></i>Được bảo vệ bởi Casso
-                            </h6>
-                            <p class="small mb-0">
-                                Casso là đối tác tin cậy với hơn 1000+ khách hàng và 90% sự hài lòng
-                            </p>
                         </div>
                     </div>
                 </div>
@@ -417,28 +365,29 @@
                     try {
                         const input = $(this);
                         const currentValue = input.val();
-                        
+
                         if (currentValue && currentValue.trim() !== '') {
                             // Remove all non-numeric characters except dots
                             const cleanValue = currentValue.replace(/[^\d.]/g, '');
-                            
+
                             // Format with dots
                             const formatted = formatVndCurrency(cleanValue);
-                            
+
                             // Only update if different to avoid cursor jumping
                             if (formatted !== currentValue) {
                                 const cursorPos = input.prop('selectionStart');
                                 input.val(formatted);
-                                
+
                                 // Try to maintain cursor position
                                 setTimeout(() => {
                                     const newLength = formatted.length;
-                                    const newPos = Math.min(cursorPos + (formatted.length - currentValue.length), newLength);
+                                    const newPos = Math.min(cursorPos + (formatted.length - currentValue
+                                        .length), newLength);
                                     input.prop('selectionStart', newPos);
                                     input.prop('selectionEnd', newPos);
                                 }, 0);
                             }
-                            
+
                             const rawValue = parseVndCurrency(formatted);
                             input.data('raw', rawValue);
                             updateCoinPreview();
@@ -457,12 +406,12 @@
                     try {
                         const input = $(this);
                         let rawValue = input.data('raw') || 0;
-                        
+
                         // Round to nearest 10,000
                         if (rawValue > 0) {
                             rawValue = Math.round(rawValue / 10000) * 10000;
                             if (rawValue < 2000) rawValue = 2000;
-                            
+
                             const formatted = formatVndCurrency(rawValue.toString());
                             input.val(formatted);
                             input.data('raw', rawValue);
@@ -490,22 +439,23 @@
                             const baseCoins = Math.floor(amountAfterFee / window.coinExchangeRate);
 
                             // Calculate bonus theo công thức hàm mũ
-                            // Công thức: bonus = a * (amount)^b
+                            // Công thức: bonus = a * (amountAfterFee)^b
                             let bonusCoins = 0;
-                            
-                            if (amount >= window.bonusBaseAmount) {
+
+                            if (amountAfterFee >= window.bonusBaseAmount) {
                                 // Tính số mũ b
-                                // b = log(300000/100000)(1000/300) = log3(3.333...) ≈ 1.096
-                                const ratioAmount = window.bonusDoubleAmount / window.bonusBaseAmount; // 300000/100000 = 3
+                                // b = log(200000/100000)(1000/300) = log2(3.333...) ≈ 1.737
+                                const ratioAmount = window.bonusDoubleAmount / window
+                                .bonusBaseAmount; // 200000/100000 = 2
                                 const ratioBonus = window.bonusDoubleCam / window.bonusBaseCam; // 1000/300 = 3.333...
-                                const b = Math.log(ratioBonus) / Math.log(ratioAmount); // ≈ 1.096
-                                
+                                const b = Math.log(ratioBonus) / Math.log(ratioAmount); // ≈ 1.737
+
                                 // Tính hệ số a
                                 // a = 300/(100000)^b
                                 const a = window.bonusBaseCam / Math.pow(window.bonusBaseAmount, b);
-                                
-                                // Tính bonus theo công thức: bonus = a * (amount)^b
-                                bonusCoins = Math.floor(a * Math.pow(amount, b));
+
+                                // Tính bonus theo công thức: bonus = a * (amountAfterFee)^b
+                                bonusCoins = Math.floor(a * Math.pow(amountAfterFee, b));
                             }
 
                             const totalCoins = baseCoins + bonusCoins;
@@ -542,7 +492,7 @@
                     }
 
                     const amount = parseInt($('#amount').data('raw')) || 0;
-                    
+
                     // Debug logging
                     console.log('Validation check:', {
                         amount: amount,
@@ -550,17 +500,16 @@
                         amountRaw: $('#amount').data('raw'),
                         amountMod10000: amount % 10000
                     });
-                    
-                    if (amount < 2000) {
-                        $('.amount-error').show().text('Số tiền tối thiểu là 2.000 VNĐ');
+
+                    if (amount < 50000) {
+                        $('.amount-error').show().text('Số tiền tối thiểu là 50.000 VNĐ');
                         valid = false;
-                    } 
-                    // Tạm thời tắt validation bội số của 10.000 để test
-                    // else if (amount % 10000 !== 0) {
-                    //     $('.amount-error').show().text('Số tiền phải là bội số của 10.000 VNĐ (ví dụ: 10.000, 20.000, 50.000, 100.000, 1.000.000...)');
-                    //     valid = false;
-                    // } 
-                    else if (amount > 99999999) {
+                    } else if (amount % 10000 !== 0) {
+                        $('.amount-error').show().text(
+                            'Số tiền phải là bội số của 10.000 VNĐ (ví dụ: 50.000, 100.000, 200.000, 500.000, 1.000.000...)'
+                            );
+                        valid = false;
+                    } else if (amount > 99999999) {
                         $('.amount-error').show().text('Số tiền tối đa là 99.999.999 VNĐ');
                         valid = false;
                     } else {
@@ -586,7 +535,8 @@
                                 if (response.success) {
                                     showBankTransferInfo(response);
                                 } else {
-                                    showToast('Có lỗi xảy ra: ' + (response.message || 'Không thể xử lý thanh toán'), 'error');
+                                    showToast('Có lỗi xảy ra: ' + (response.message ||
+                                        'Không thể xử lý thanh toán'), 'error');
                                 }
                             },
                             error: function(xhr, status, error) {
@@ -597,7 +547,7 @@
                                     responseJSON: xhr.responseJSON,
                                     error: error
                                 });
-                                
+
                                 let errorMessage = 'Đã xảy ra lỗi khi xử lý yêu cầu';
 
                                 if (xhr.responseJSON) {
@@ -727,13 +677,13 @@
                                 </div>
                                 
                                 ${bankInfo.qr_code ? `
-                                <div class="text-center mb-3">
-                                    <div class="payment-qr-code mb-3">
-                                        <img src="${bankInfo.qr_code}" alt="QR Code" class="img-fluid" style="max-height: 200px;">
-                                    </div>
-                                    <p class="text-muted">Quét mã QR để thực hiện thanh toán</p>
-                                </div>
-                                ` : ''}
+                                        <div class="text-center mb-3">
+                                            <div class="payment-qr-code mb-3">
+                                                <img src="${bankInfo.qr_code}" alt="QR Code" class="img-fluid" style="max-height: 200px;">
+                                            </div>
+                                            <p class="text-muted">Quét mã QR để thực hiện thanh toán</p>
+                                        </div>
+                                        ` : ''}
                                 
                                 <div class="alert alert-warning mt-3">
                                     <h6><i class="fas fa-exclamation-triangle me-2"></i>Lưu ý quan trọng:</h6>
@@ -757,7 +707,7 @@
 
                 // Thay thế nội dung form
                 $('#depositContainer').html(transferInfoHtml);
-                
+
                 // Start SSE connection để listen updates
                 startSSEConnection(transactionCode);
             }
@@ -814,7 +764,7 @@
             // Hiển thị thành công
             function showCopySuccess($button, originalText) {
                 $button.innerHTML = '<i class="fas fa-check"></i>';
-                
+
                 // Khôi phục nút sau 1 giây
                 setTimeout(() => $button.innerHTML = originalText, 1000);
             }
@@ -822,44 +772,44 @@
             // Hiển thị thất bại
             function showCopyFailure($button, originalText) {
                 $button.innerHTML = '<i class="fas fa-times"></i>';
-                
+
                 // Khôi phục nút sau 1 giây
                 setTimeout(() => $button.innerHTML = originalText, 1000);
             }
-            
+
             // SSE để listen transaction updates
             let currentTransactionCode = null;
             let sseConnection = null;
-            
+
             // Start SSE connection khi có transaction code
             function startSSEConnection(transactionCode) {
                 if (sseConnection) {
                     sseConnection.close();
                 }
-                
+
                 currentTransactionCode = transactionCode;
-                const sseUrl = '{{ route("user.bank.auto.sse") }}?transaction_code=' + encodeURIComponent(transactionCode);
-                
+                const sseUrl = '{{ route('user.bank.auto.sse') }}?transaction_code=' + encodeURIComponent(transactionCode);
+
                 sseConnection = new EventSource(sseUrl);
-                
+
                 sseConnection.onmessage = function(event) {
                     try {
                         const data = JSON.parse(event.data);
-                        
+
                         if (data.type === 'close') {
                             sseConnection.close();
                             return;
                         }
-                        
+
                         if (data.status === 'success') {
                             // Hiển thị thông báo thành công
                             showSuccessNotification(data);
-                            
+
                             // Reload trang sau 2 giây
                             setTimeout(() => {
                                 window.location.reload();
                             }, 2000);
-                            
+
                             // Close SSE connection
                             sseConnection.close();
                         }
@@ -867,7 +817,7 @@
                         console.error('SSE parsing error:', error);
                     }
                 };
-                
+
                 sseConnection.onerror = function(event) {
                     console.error('SSE connection error:', event);
                     // Retry connection sau 5 giây
@@ -878,7 +828,7 @@
                     }, 5000);
                 };
             }
-            
+
             // Hiển thị thông báo thành công
             function showSuccessNotification(data) {
                 // Tạo toast notification
@@ -893,14 +843,14 @@
                         </div>
                     </div>
                 `;
-                
+
                 // Thêm toast vào container
                 if (!$('#toast-container').length) {
                     $('body').append('<div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3"></div>');
                 }
-                
+
                 $('#toast-container').append(toast);
-                
+
                 // Show toast
                 const toastElement = $('#toast-container .toast').last();
                 const toastInstance = new bootstrap.Toast(toastElement[0]);

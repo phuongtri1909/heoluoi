@@ -16,6 +16,9 @@ class RequestPaymentPaypal extends Model
         'payment_method',
         'vnd_amount',
         'coins',
+        'base_coins',
+        'bonus_coins',
+        'total_coins',
         'exchange_rate',
         'fee_percent',
         'fee_amount',
@@ -31,7 +34,9 @@ class RequestPaymentPaypal extends Model
     ];
 
     protected $casts = [
+        'base_usd_amount' => 'decimal:2',
         'usd_amount' => 'decimal:2',
+        'payment_method' => 'string',
         'vnd_amount' => 'decimal:0',
         'exchange_rate' => 'decimal:2',
         'fee_percent' => 'decimal:2',
@@ -155,7 +160,10 @@ class RequestPaymentPaypal extends Model
             'base_usd_amount' => $this->base_usd_amount,
             'payment_method' => $this->payment_method,
             'vnd_amount' => $this->vnd_amount,
-            'coins' => $this->coins,
+            'coins' => $this->total_coins ?? $this->coins,
+            'base_coins' => $this->base_coins,
+            'bonus_coins' => $this->bonus_coins,
+            'total_coins' => $this->total_coins ?? $this->coins,
             'exchange_rate' => $this->exchange_rate,
             'fee_percent' => $this->fee_percent,
             'fee_amount' => $this->fee_amount,

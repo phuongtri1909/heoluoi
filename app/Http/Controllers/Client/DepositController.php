@@ -42,12 +42,22 @@ class DepositController extends Controller
         
         $coinExchangeRate = $this->coinExchangeRate;
         $coinBankPercent = $this->coinBankPercent;
+        
+        // Bonus config
+        $bonusBaseAmount = Config::getConfig('bonus_base_amount', 100000);
+        $bonusBaseCam = Config::getConfig('bonus_base_cam', 300);
+        $bonusDoubleAmount = Config::getConfig('bonus_double_amount', 200000);
+        $bonusDoubleCam = Config::getConfig('bonus_double_cam', 1000);
 
         return view('pages.information.deposit.deposit', compact(
             'banks', 
             'deposits',
             'coinExchangeRate',
-            'coinBankPercent'
+            'coinBankPercent',
+            'bonusBaseAmount',
+            'bonusBaseCam',
+            'bonusDoubleAmount',
+            'bonusDoubleCam'
         ));
     }
 }

@@ -27,6 +27,12 @@ class RequestPaymentController extends Controller
     public $coinExchangeRate;
     public $coinPayPalRate;
 
+    // Bonus config
+    public $bonusBaseAmount;
+    public $bonusBaseCam;
+    public $bonusDoubleAmount;
+    public $bonusDoubleCam;
+
     public function __construct()
     {
         $this->coinBankPercent = Config::getConfig('coin_bank_percentage', 15);
@@ -35,6 +41,12 @@ class RequestPaymentController extends Controller
 
         $this->coinExchangeRate = Config::getConfig('coin_exchange_rate', 100);
         $this->coinPayPalRate = Config::getConfig('coin_paypal_rate', 20000);
+
+        // Bonus config
+        $this->bonusBaseAmount = Config::getConfig('bonus_base_amount', 100000);
+        $this->bonusBaseCam = Config::getConfig('bonus_base_cam', 300);
+        $this->bonusDoubleAmount = Config::getConfig('bonus_double_amount', 200000);
+        $this->bonusDoubleCam = Config::getConfig('bonus_double_cam', 1000);
     }
 
     public function store(Request $request)
@@ -63,10 +75,12 @@ class RequestPaymentController extends Controller
             $amount = $request->amount;
 
             $feeAmount = ($amount * $this->coinBankPercent) / 100;
-
             $amountAfterFee = $amount - $feeAmount;
+            $baseCoins = floor($amountAfterFee / $this->coinExchangeRate);
 
-            $coins = floor($amountAfterFee / $this->coinExchangeRate);
+            // Calculate bonus coins
+            $bonusCoins = calculateBonusCoins($amountAfterFee, $this->bonusBaseAmount, $this->bonusBaseCam, $this->bonusDoubleAmount, $this->bonusDoubleCam);
+            $totalCoins = $baseCoins + $bonusCoins;
 
             $transactionCode = $this->generateUniqueTransactionCode();
 
@@ -77,7 +91,10 @@ class RequestPaymentController extends Controller
                 'bank_id' => $request->bank_id,
                 'transaction_code' => $transactionCode,
                 'amount' => $amount,
-                'coins' => $coins,
+                'coins' => $totalCoins,
+                'base_coins' => $baseCoins,
+                'bonus_coins' => $bonusCoins,
+                'total_coins' => $totalCoins,
                 'fee' => $feeAmount,
                 'expired_at' => $expiredAt
             ]);
@@ -97,7 +114,10 @@ class RequestPaymentController extends Controller
                 ],
                 'payment' => [
                     'amount' => $amount,
-                    'coins' => $coins,
+                    'coins' => $totalCoins,
+                    'base_coins' => $baseCoins,
+                    'bonus_coins' => $bonusCoins,
+                    'total_coins' => $totalCoins,
                     'fee' => $feeAmount,
                     'transaction_code' => $transactionCode,
                     'expired_at' => $expiredAt->toIso8601String()
@@ -187,7 +207,10 @@ class RequestPaymentController extends Controller
                 'bank_id' => $requestPayment->bank_id,
                 'transaction_code' => $requestPayment->transaction_code,
                 'amount' => $requestPayment->amount,
-                'coins' => $requestPayment->coins,
+                'coins' => $requestPayment->total_coins,
+                'base_coins' => $requestPayment->base_coins,
+                'bonus_coins' => $requestPayment->bonus_coins,
+                'total_coins' => $requestPayment->total_coins,
                 'fee' => $requestPayment->fee,
                 'image' => $imagePath,
                 'status' => 'pending',

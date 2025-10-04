@@ -136,17 +136,14 @@
 
 /* Content Area */
 .user-content {
-  background-color: #fff;
+ 
   border-radius: 0.75rem;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+ 
   transition: all 0.3s ease;
   overflow: hidden;
   animation: slideUp 0.5s ease-in-out;
 }
 
-.user-content:hover {
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-}
 
 .content-header {
   position: relative;
@@ -1452,28 +1449,14 @@ label.form-label {
 
 /* Coins display panel */
 .coins-panel {
-    background: linear-gradient(135deg, var(--primary-color-2), var(--primary-color-3));
+    background: white;
     border-radius: 16px;
-    padding: 24px;
-    color: white;
+    padding: 10px;
     box-shadow: 0 6px 16px rgba(var(--primary-rgb), 0.2);
     animation: fadeInUp 0.5s ease-out;
     position: relative;
     overflow: hidden;
     height: auto;
-}
-
-.coins-panel::after {
-    content: '';
-    position: absolute;
-    bottom: -30px;
-    right: -30px;
-    width: 150px;
-    height: 150px;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" opacity="0.1"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></svg>');
-    background-repeat: no-repeat;
-    transform: rotate(30deg);
-    opacity: 0.1;
 }
 
 .coins-balance {

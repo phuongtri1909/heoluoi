@@ -60,7 +60,7 @@ class DepositController extends Controller
             $coinService = new \App\Services\CoinService();
             $coinService->addCoins(
                 $user,
-                $deposit->coins,
+                $deposit->total_coins ?? $deposit->coins,
                 \App\Models\CoinHistory::TYPE_BANK_DEPOSIT,
                 "Nạp chuyển khoản thành công - Số tiền: " . number_format($deposit->amount) . " VND",
                 $deposit
@@ -68,7 +68,7 @@ class DepositController extends Controller
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'Đã phê duyệt giao dịch và cộng ' . $deposit->coins . ' cám vào tài khoản người dùng.');
+            return redirect()->back()->with('success', 'Đã phê duyệt giao dịch và cộng ' . ($deposit->total_coins ?? $deposit->coins) . ' cám vào tài khoản người dùng.');
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Error approving deposit: ' . $e->getMessage());

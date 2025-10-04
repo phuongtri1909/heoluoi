@@ -18,17 +18,43 @@
         #paymentMethodFeeRow.show {
             display: flex;
         }
+
+        /* Deposit table styles */
+        .deposit-table .table {
+            margin-bottom: 0;
+        }
+
+        .deposit-table .table th {
+            border-top: none;
+            border-bottom: 2px solid #495057;
+            font-size: 0.85rem;
+            padding: 0.5rem;
+        }
+
+        .deposit-table .table td {
+            border-top: 1px solid #495057;
+            padding: 0.4rem 0.5rem;
+            font-size: 0.8rem;
+        }
+
+        .deposit-table .table-primary {
+            background-color: rgba(13, 110, 253, 0.2) !important;
+        }
+
+        .deposit-table .table-primary td {
+            border-color: rgba(13, 110, 253, 0.3);
+        }
     </style>
 @endpush
 
 @section('info_content')
     <!-- Deposit Tabs -->
     <div class="deposit-tabs d-flex">
+        <a href="{{ route('user.bank.auto.deposit') }}" class="deposit-tab">
+            <i class="fas fa-robot me-2"></i>Bank auto
+        </a>
         <a href="{{ route('user.deposit') }}" class="deposit-tab">
             <i class="fas fa-university me-2"></i>Bank
-        </a>
-        <a href="" class="deposit-tab">
-            <i class="fas fa-university me-2"></i>Bank auto
         </a>
         <a href="{{ route('user.card.deposit') }}" class="deposit-tab">
             <i class="fas fa-credit-card me-2"></i>Card
@@ -146,7 +172,15 @@
                         </div>
                         <div class="preview-item">
                             <span>Cám nhận được:</span>
-                            <span id="previewCoins">1,000 cám</span>
+                            <span id="previewTotalCoins">1,000 cám</span>
+                        </div>
+                        <div class="preview-item">
+                            <span>Cám cộng:</span>
+                            <span id="previewBaseCoins">1,000 cám</span>
+                        </div>
+                        <div class="preview-item">
+                            <span>Cám tặng:</span>
+                            <span id="previewBonusCoins">0 cám</span>
                         </div>
                         <div class="preview-item">
                             <span>Loại thanh toán:</span>
@@ -165,28 +199,47 @@
 
         <div class="col-lg-4">
             <div class="coins-panel">
-                <div class="coins-balance">
-                    <i class="fas fa-coins coins-icon"></i>{{ number_format(Auth::user()->coins ?? 0) }}
-                </div>
-                <div class="coins-label">Số cám hiện có trong tài khoản</div>
+                    <!-- Bảng mức nạp tiền -->
+                    <div class="deposit-table">
+                        <h6 class="text-dark mb-3">
+                            Mức quy định đổi cám hiên tại:
+                        </h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">Số tiền USD</th>
+                                        <th class="text-center">Cám cộng</th>
+                                        <th class="text-center">Cám tặng</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @php
+                                        $usdAmounts = [5, 10, 15, 20, 25, 50];
+                                    @endphp
+                                    @foreach ($usdAmounts as $usdAmount)
+                                        @php
+                                            $vndAmount = $usdAmount * $coinPaypalRate;
+                                            // Tính toán cám cơ bản
+                                            $feeAmount = ($vndAmount * $coinPaypalPercent) / 100;
+                                            $amountAfterFee = $vndAmount - $feeAmount;
+                                            $baseCoins = floor($amountAfterFee / $coinExchangeRate);
 
-                <div class="coins-info">
-                    <h6 class="text-white mb-3">
-                        <i class="fab fa-paypal me-2"></i>Ưu điểm PayPal
-                    </h6>
-                    <p class="mb-2">
-                        <i class="fas fa-check-circle me-2 text-success"></i>Thanh toán quốc tế
-                    </p>
-                    <p class="mb-2">
-                        <i class="fas fa-check-circle me-2 text-success"></i>Bảo mật cao
-                    </p>
-                    <p class="mb-2">
-                        <i class="fas fa-check-circle me-2 text-success"></i>Hỗ trợ nhiều loại thẻ
-                    </p>
-                    <p class="mb-0">
-                        <i class="fas fa-check-circle me-2 text-success"></i>Xử lý trong 24h
-                    </p>
-                </div>
+                                            // Tính toán bonus theo công thức hàm mũ
+                                            $bonusCoins = calculateBonusCoins($amountAfterFee, $bonusBaseAmount, $bonusBaseCam, $bonusDoubleAmount, $bonusDoubleCam);
+
+                                            $totalCoins = $baseCoins + $bonusCoins;
+                                        @endphp
+                                        <tr class="{{ $usdAmount == 10 ? 'table-primary' : '' }}">
+                                            <td class="text-center fw-bold">${{ $usdAmount }}</td>
+                                            <td class="text-center fw-bold">{{ number_format($baseCoins) }}</td>
+                                            <td class="text-center color-7 fw-bold">+ {{ number_format($bonusCoins) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
             </div>
         </div>
     </div>
@@ -268,7 +321,9 @@
                                     <tr>
                                         <th>Mã giao dịch</th>
                                         <th>Số tiền USD</th>
-                                        <th>Cám nhận được</th>
+                                        <th>Cám cộng</th>
+                                        <th>Cám tặng</th>
+                                        <th>Tổng cám</th>
                                         <th>Thời gian</th>
                                         <th>Trạng thái</th>
                                         <th>Thao tác</th>
@@ -292,6 +347,16 @@
                                                 <strong class="text-success">
                                                     <i class="fas fa-coins me-1"></i>{{ number_format($deposit->coins) }}
                                                 </strong>
+                                            </td>
+                                            <td>
+                                                @if(isset($deposit->bonus_coins) && $deposit->bonus_coins > 0)
+                                                    <span class="text-success">+{{ number_format($deposit->bonus_coins) }}</span>
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <strong>{{ number_format($deposit->coins) }}</strong>
                                             </td>
                                             <td>
                                                 <div>{{ $deposit->created_at->format('d/m/Y H:i') }}</div>
@@ -511,6 +576,10 @@
             const coinExchangeRate = {{ $coinExchangeRate }};
             const coinPaypalRate = {{ $coinPaypalRate }};
             const coinPaypalPercent = {{ $coinPaypalPercent }};
+            const bonusBaseAmount = {{ $bonusBaseAmount }};
+            const bonusBaseCam = {{ $bonusBaseCam }};
+            const bonusDoubleAmount = {{ $bonusDoubleAmount }};
+            const bonusDoubleCam = {{ $bonusDoubleCam }};
 
             let currentPaymentData = null;
 
@@ -551,13 +620,33 @@
                 const vndAmount = baseUsdAmount * coinPaypalRate;
                 const feeAmount = (vndAmount * coinPaypalPercent) / 100;
                 const amountAfterFee = vndAmount - feeAmount;
-                const coins = Math.floor(amountAfterFee / coinExchangeRate);
+                const baseCoins = Math.floor(amountAfterFee / coinExchangeRate);
+
+                // Calculate bonus theo công thức hàm mũ
+                let bonusCoins = 0;
+
+                if (amountAfterFee >= bonusBaseAmount) {
+                    // Tính số mũ b
+                    const ratioAmount = bonusDoubleAmount / bonusBaseAmount; // 200000/100000 = 2
+                    const ratioBonus = bonusDoubleCam / bonusBaseCam; // 1000/300 = 3.333...
+                    const b = Math.log(ratioBonus) / Math.log(ratioAmount); // ≈ 1.737
+
+                    // Tính hệ số a
+                    const a = bonusBaseCam / Math.pow(bonusBaseAmount, b);
+
+                    // Tính bonus theo công thức: bonus = a * (amountAfterFee)^b
+                    bonusCoins = Math.floor(a * Math.pow(amountAfterFee, b));
+                }
+
+                const totalCoins = baseCoins + bonusCoins;
 
                 // Update preview
                 $('#previewBaseUSD').text('$' + baseUsdAmount.toFixed(2));
                 $('#previewMethodFee').text('$' + methodFee.toFixed(2));
                 $('#previewTotalUSD').text('$' + totalUsdAmount.toFixed(2));
-                $('#previewCoins').text(coins.toLocaleString('vi-VN') + ' cám');
+                $('#previewBaseCoins').text(baseCoins.toLocaleString('vi-VN') + ' cám');
+                $('#previewBonusCoins').text(bonusCoins.toLocaleString('vi-VN') + ' cám');
+                $('#previewTotalCoins').text(totalCoins.toLocaleString('vi-VN') + ' cám');
                 $('#previewPaymentMethod').text(paymentMethodText);
 
                 // Highlight total amount if there's a method fee

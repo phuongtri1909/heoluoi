@@ -24,13 +24,25 @@ class CardDepositController extends Controller
     public $tsrPartnerKey;
     public $tsrPartnerId;
 
+    // Bonus config
+    public $bonusBaseAmount;
+    public $bonusBaseCam;
+    public $bonusDoubleAmount;
+    public $bonusDoubleCam;
+
     public function __construct()
     {
         $this->coinExchangeRate = Config::getConfig('coin_exchange_rate', 100);
-        $this->coinCardPercent = Config::getConfig('coin_card_percent', 30);
+        $this->coinCardPercent = Config::getConfig('coin_card_percentage', 20);
         $this->cardWrongAmountPenalty = Config::getConfig('card_wrong_amount_penalty', 50);
         $this->tsrPartnerKey = env('TSR_PARTNER_KEY', '');
         $this->tsrPartnerId = env('TSR_PARTNER_ID', '');
+
+        // Bonus config
+        $this->bonusBaseAmount = Config::getConfig('bonus_base_amount', 100000);
+        $this->bonusBaseCam = Config::getConfig('bonus_base_cam', 300);
+        $this->bonusDoubleAmount = Config::getConfig('bonus_double_amount', 200000);
+        $this->bonusDoubleCam = Config::getConfig('bonus_double_cam', 1000);
     }
 
     public function index()
@@ -43,12 +55,22 @@ class CardDepositController extends Controller
 
         $coinCardPercent = $this->coinCardPercent;
         $coinExchangeRate = $this->coinExchangeRate;
+        
+        // Bonus config
+        $bonusBaseAmount = Config::getConfig('bonus_base_amount', 100000);
+        $bonusBaseCam = Config::getConfig('bonus_base_cam', 300);
+        $bonusDoubleAmount = Config::getConfig('bonus_double_amount', 200000);
+        $bonusDoubleCam = Config::getConfig('bonus_double_cam', 1000);
 
         return view('pages.information.deposit.card_deposit', compact(
             'user',
             'cardDeposits',
             'coinCardPercent',
-            'coinExchangeRate'
+            'coinExchangeRate',
+            'bonusBaseAmount',
+            'bonusBaseCam',
+            'bonusDoubleAmount',
+            'bonusDoubleCam'
         ));
     }
 
@@ -137,7 +159,11 @@ class CardDepositController extends Controller
             $feePercent = $this->coinCardPercent;
             $feeAmount = ($amount * $feePercent) / 100;
             $amountAfterFee = $amount - $feeAmount;
-            $coins = floor($amountAfterFee / $this->coinExchangeRate);
+            $baseCoins = floor($amountAfterFee / $this->coinExchangeRate);
+
+            // Calculate bonus coins
+            $bonusCoins = calculateBonusCoins($amountAfterFee, $this->bonusBaseAmount, $this->bonusBaseCam, $this->bonusDoubleAmount, $this->bonusDoubleCam);
+            $totalCoins = $baseCoins + $bonusCoins;
 
             $requestId = $this->generateUniqueRequestId();
 
@@ -147,7 +173,10 @@ class CardDepositController extends Controller
                 'serial' => $request->serial,
                 'pin' => $request->code,
                 'amount' => $amount,
-                'coins' => $coins,
+                'coins' => $totalCoins,
+                'base_coins' => $baseCoins,
+                'bonus_coins' => $bonusCoins,
+                'total_coins' => $totalCoins,
                 'fee_percent' => $feePercent,
                 'fee_amount' => $feeAmount,
                 'request_id' => $requestId,
@@ -173,7 +202,7 @@ class CardDepositController extends Controller
                     'request_id' => $requestId,
                     'status' => $apiResponse['status'],
                     'response_message' => $apiResponse['message'],
-                    'expected_coins' => $coins,
+                    'expected_coins' => $totalCoins,
                     'estimated_time' => '1-5 phút'
                 ]);
             } else {
@@ -562,14 +591,22 @@ class CardDepositController extends Controller
 
             $feeAmount = ($amountAfterPenalty * $cardDeposit->fee_percent) / 100;
             $amountAfterFee = $amountAfterPenalty - $feeAmount;
-            $coins = floor($amountAfterFee / $this->coinExchangeRate);
+            $baseCoins = floor($amountAfterFee / $this->coinExchangeRate);
+
+            // Calculate bonus coins
+            $bonusCoins = calculateBonusCoins($amountAfterFee, $this->bonusBaseAmount, $this->bonusBaseCam, $this->bonusDoubleAmount, $this->bonusDoubleCam);
+            $totalCoins = $baseCoins + $bonusCoins;
 
             $note .= ". Phí phạt sai mệnh giá: " . number_format($penaltyAmount) . "đ (-{$penaltyPercent}%)";
 
         } else {
             $feeAmount = ($realAmount * $cardDeposit->fee_percent) / 100;
             $amountAfterFee = $realAmount - $feeAmount;
-            $coins = floor($amountAfterFee / $this->coinExchangeRate);
+            $baseCoins = floor($amountAfterFee / $this->coinExchangeRate);
+
+            // Calculate bonus coins
+            $bonusCoins = calculateBonusCoins($amountAfterFee, $this->bonusBaseAmount, $this->bonusBaseCam, $this->bonusDoubleAmount, $this->bonusDoubleCam);
+            $totalCoins = $baseCoins + $bonusCoins;
             $penaltyAmount = 0;
         }
 
@@ -577,7 +614,10 @@ class CardDepositController extends Controller
             'status' => CardDeposit::STATUS_SUCCESS,
             'transaction_id' => $callbackData['trans_id'],
             'amount' => $realAmount,
-            'coins' => $coins,
+            'coins' => $totalCoins,
+            'base_coins' => $baseCoins,
+            'bonus_coins' => $bonusCoins,
+            'total_coins' => $totalCoins,
             'fee_amount' => $feeAmount,
             'response_data' => $callbackData,
             'processed_at' => now(),
@@ -602,7 +642,7 @@ class CardDepositController extends Controller
             
             $coinService->addCoins(
                 $user,
-                $coins,
+                $totalCoins,
                 \App\Models\CoinHistory::TYPE_CARD_DEPOSIT,
                 $description,
                 $cardDeposit

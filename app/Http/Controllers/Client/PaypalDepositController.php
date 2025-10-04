@@ -20,12 +20,24 @@ class PaypalDepositController extends Controller
     public $coinPaypalPercent;
     public $paypalMeLink;
 
+    // Bonus config
+    public $bonusBaseAmount;
+    public $bonusBaseCam;
+    public $bonusDoubleAmount;
+    public $bonusDoubleCam;
+
     public function __construct()
     {
         $this->coinExchangeRate = Config::getConfig('coin_exchange_rate', 100);
         $this->coinPaypalRate = Config::getConfig('coin_paypal_rate', 20000);
         $this->coinPaypalPercent = Config::getConfig('coin_paypal_percentage', 0);
         $this->paypalMeLink = Config::getConfig('paypal_me_link', 'https://www.paypal.com/paypalme/minhnguyen231');
+
+        // Bonus config
+        $this->bonusBaseAmount = Config::getConfig('bonus_base_amount', 100000);
+        $this->bonusBaseCam = Config::getConfig('bonus_base_cam', 300);
+        $this->bonusDoubleAmount = Config::getConfig('bonus_double_amount', 200000);
+        $this->bonusDoubleCam = Config::getConfig('bonus_double_cam', 1000);
     }
 
     /**
@@ -58,10 +70,20 @@ class PaypalDepositController extends Controller
             ->take(1)
             ->get();
 
+        // Bonus config
+        $bonusBaseAmount = Config::getConfig('bonus_base_amount', 100000);
+        $bonusBaseCam = Config::getConfig('bonus_base_cam', 300);
+        $bonusDoubleAmount = Config::getConfig('bonus_double_amount', 200000);
+        $bonusDoubleCam = Config::getConfig('bonus_double_cam', 1000);
+
         return view('pages.information.deposit.paypal_deposit', compact(
             'user',
             'paypalDeposits',
-            'pendingRequests'
+            'pendingRequests',
+            'bonusBaseAmount',
+            'bonusBaseCam',
+            'bonusDoubleAmount',
+            'bonusDoubleCam'
         ))->with([
             'coinExchangeRate' => $this->coinExchangeRate,
             'coinPaypalRate' => $this->coinPaypalRate,
@@ -142,7 +164,11 @@ class PaypalDepositController extends Controller
             $vndAmount = $baseUsdAmount * $this->coinPaypalRate;
             $feeAmount = ($vndAmount * $this->coinPaypalPercent) / 100;
             $amountAfterFee = $vndAmount - $feeAmount;
-            $coins = floor($amountAfterFee / $this->coinExchangeRate);
+            $baseCoins = floor($amountAfterFee / $this->coinExchangeRate);
+
+            // Calculate bonus coins
+            $bonusCoins = calculateBonusCoins($amountAfterFee, $this->bonusBaseAmount, $this->bonusBaseCam, $this->bonusDoubleAmount, $this->bonusDoubleCam);
+            $totalCoins = $baseCoins + $bonusCoins;
 
             // Generate transaction code
             $transactionCode = RequestPaymentPaypal::generateTransactionCode('PP');
@@ -161,7 +187,10 @@ class PaypalDepositController extends Controller
                 'base_usd_amount' => $baseUsdAmount,
                 'payment_method' => $paymentMethod,
                 'vnd_amount' => $vndAmount,
-                'coins' => $coins,
+                'coins' => $totalCoins,
+                'base_coins' => $baseCoins,
+                'bonus_coins' => $bonusCoins,
+                'total_coins' => $totalCoins,
                 'exchange_rate' => $this->coinPaypalRate,
                 'fee_percent' => $this->coinPaypalPercent,
                 'fee_amount' => $feeAmount,
@@ -190,7 +219,10 @@ class PaypalDepositController extends Controller
                 'base_usd_amount_formatted' => '$' . number_format($baseUsdAmount, 2),
                 'payment_method' => $paymentMethod,
                 'vnd_amount' => $vndAmount,
-                'coins' => $coins,
+                'coins' => $totalCoins,
+                'base_coins' => $baseCoins,
+                'bonus_coins' => $bonusCoins,
+                'total_coins' => $totalCoins,
                 'fee_amount' => $feeAmount,
                 'paypal_email' => $request->paypal_email,
                 'expired_at' => $requestPayment->expired_at->toISOString()

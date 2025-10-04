@@ -19,6 +19,9 @@ class PaypalDeposit extends Model
         'payment_method',
         'vnd_amount',
         'coins',
+        'base_coins',
+        'bonus_coins',
+        'total_coins',
         'exchange_rate',
         'fee_percent',
         'fee_amount',
@@ -34,7 +37,9 @@ class PaypalDeposit extends Model
     ];
 
     protected $casts = [
+        'base_usd_amount' => 'decimal:2',
         'usd_amount' => 'decimal:2',
+        'payment_method' => 'string',
         'vnd_amount' => 'decimal:0',
         'exchange_rate' => 'decimal:2',
         'fee_percent' => 'decimal:2',
@@ -157,7 +162,7 @@ class PaypalDeposit extends Model
         $coinService = new \App\Services\CoinService();
         $coinService->addCoins(
             $this->user,
-            $this->coins,
+            $this->total_coins ?? $this->coins,
             \App\Models\CoinHistory::TYPE_PAYPAL_DEPOSIT,
             "Nạp PayPal thành công - Số tiền: {$this->usd_amount} USD",
             $this

@@ -77,4 +77,63 @@ if (!function_exists('format_number_short')) {
         }
         return $otp;
     }
+
+    /**
+     * Tính cám tặng theo công thức hàm mũ
+     * 
+     * @param int $amount Số tiền nạp
+     * @param int $bonusBaseAmount Mốc cơ bản (100000)
+     * @param int $bonusBaseCam Cám tặng mốc cơ bản (300)
+     * @param int $bonusDoubleAmount Mốc gấp đôi (300000)
+     * @param int $bonusDoubleCam Cám tặng mốc gấp đôi (1000)
+     * @return int Số cám tặng
+     */
+    function calculateBonusCoins($amount, $bonusBaseAmount, $bonusBaseCam, $bonusDoubleAmount, $bonusDoubleCam)
+    {
+        if ($amount < $bonusBaseAmount) {
+            return 0;
+        }
+
+        // Tính số mũ b
+        // b = log(300000/100000)(1000/300) = log3(3.333...) ≈ 1.096
+        $ratioAmount = $bonusDoubleAmount / $bonusBaseAmount; // 300000/100000 = 3
+        $ratioBonus = $bonusDoubleCam / $bonusBaseCam; // 1000/300 = 3.333...
+        $b = log($ratioBonus) / log($ratioAmount); // ≈ 1.096
+
+        // Tính hệ số a
+        // a = 300/(100000)^b
+        $a = $bonusBaseCam / pow($bonusBaseAmount, $b);
+
+        // Tính bonus theo công thức: bonus = a * (amount)^b
+        return floor($a * pow($amount, $b));
+    }
+
+    /**
+     * Tính tổng cám nhận được (cám cộng + cám tặng)
+     * 
+     * @param int $amount Số tiền nạp
+     * @param int $coinExchangeRate Tỷ giá (100)
+     * @param int $coinPercent Phí giao dịch (%)
+     * @param int $bonusBaseAmount Mốc cơ bản bonus
+     * @param int $bonusBaseCam Cám tặng mốc cơ bản
+     * @param int $bonusDoubleAmount Mốc gấp đôi bonus
+     * @param int $bonusDoubleCam Cám tặng mốc gấp đôi
+     * @return array ['base_coins' => int, 'bonus_coins' => int, 'total_coins' => int]
+     */
+    function calculateTotalCoins($amount, $coinExchangeRate, $coinPercent, $bonusBaseAmount, $bonusBaseCam, $bonusDoubleAmount, $bonusDoubleCam)
+    {
+        // Tính cám cơ bản
+        $feeAmount = ($amount * $coinPercent) / 100;
+        $amountAfterFee = $amount - $feeAmount;
+        $baseCoins = floor($amountAfterFee / $coinExchangeRate);
+
+        // Tính cám tặng
+        $bonusCoins = calculateBonusCoins($amount, $bonusBaseAmount, $bonusBaseCam, $bonusDoubleAmount, $bonusDoubleCam);
+
+        return [
+            'base_coins' => $baseCoins,
+            'bonus_coins' => $bonusCoins,
+            'total_coins' => $baseCoins + $bonusCoins
+        ];
+    }
 }
