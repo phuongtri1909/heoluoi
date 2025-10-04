@@ -229,7 +229,7 @@
 
                                     <span class="input-group-text">VNĐ</span>
                                 </div>
-                                <div class="form-text">Số tiền tối thiểu: 2.000 VNĐ, phải là bội số của 10.000</div>
+                                <div class="form-text">Số tiền tối thiểu: 2.000 VNĐ (tạm thời tắt validation bội số để test)</div>
                                 <div class="invalid-feedback amount-error">Vui lòng nhập số tiền hợp lệ</div>
 
                                 <!-- Coin Preview với Bonus -->
@@ -554,10 +554,13 @@
                     if (amount < 2000) {
                         $('.amount-error').show().text('Số tiền tối thiểu là 2.000 VNĐ');
                         valid = false;
-                    } else if (amount % 10000 !== 0) {
-                        $('.amount-error').show().text('Số tiền phải là bội số của 10.000 VNĐ (ví dụ: 10.000, 20.000, 50.000, 100.000, 1.000.000...)');
-                        valid = false;
-                    } else if (amount > 99999999) {
+                    } 
+                    // Tạm thời tắt validation bội số của 10.000 để test
+                    // else if (amount % 10000 !== 0) {
+                    //     $('.amount-error').show().text('Số tiền phải là bội số của 10.000 VNĐ (ví dụ: 10.000, 20.000, 50.000, 100.000, 1.000.000...)');
+                    //     valid = false;
+                    // } 
+                    else if (amount > 99999999) {
                         $('.amount-error').show().text('Số tiền tối đa là 99.999.999 VNĐ');
                         valid = false;
                     } else {
