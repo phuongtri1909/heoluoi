@@ -1,11 +1,11 @@
-# Casso Webhook v2 Integration Guide
+# Casso Webhook v1 Integration Guide
 
 ## Tổng quan
 
-Hệ thống đã được cập nhật để sử dụng **Casso Webhook v2** theo tài liệu chính thức từ:
-- [developer.casso.vn](https://developer.casso.vn/webhook/thiet-lap-webhook-thu-cong) - Hướng dẫn thiết lập webhook
-- [CassoHQ/casso-webhook-v2-verify-signature](https://github.com/CassoHQ/casso-webhook-v2-verify-signature/blob/main/php.php) - Xác thực chữ ký số
-- [CassoHQ/casso-webhook-handler-sample](https://github.com/CassoHQ/casso-webhook-handler-sample/blob/main/webhook_handler.php) - Sample webhook handler
+Hệ thống đã được cập nhật để sử dụng **Casso Webhook v1** với signature format:
+- **Format**: `t=timestamp,v1=signature`
+- **Algorithm**: HMAC-SHA256
+- **Timestamp**: Kiểm tra trong vòng 5 phút
 
 Casso sử dụng webhook để thông báo khi có giao dịch mới thay vì tạo payment URL trực tiếp.
 
@@ -92,7 +92,7 @@ public function callback(Request $request)
 
 ### 3. Signature Verification
 
-Theo tài liệu chính thức từ [CassoHQ/casso-webhook-v2-verify-signature](https://github.com/CassoHQ/casso-webhook-v2-verify-signature/blob/main/php.php):
+Casso Webhook v1 sử dụng format: `t=timestamp,v1=signature`
 
 ```php
 private function verifyCassoSignature($payload, $signature)
@@ -104,30 +104,48 @@ private function verifyCassoSignature($payload, $signature)
         return false;
     }
     
-    // Casso Webhook v2 sử dụng HMAC-SHA256
-    // Signature format: sha256=calculated_signature
-    $expectedSignature = 'sha256=' . hash_hmac('sha256', $payload, $secret);
+    // Parse signature format: t=timestamp,v1=signature
+    if (!preg_match('/t=(\d+),v1=(.+)/', $signature, $matches)) {
+        Log::warning('Invalid signature format', ['signature' => $signature]);
+        return false;
+    }
     
-    // Sử dụng hash_equals để tránh timing attack
-    return hash_equals($expectedSignature, $signature);
+    $timestamp = $matches[1];
+    $receivedSignature = $matches[2];
+    
+    // Check timestamp (within 5 minutes)
+    $currentTime = time() * 1000; // Convert to milliseconds
+    $signatureTime = (int)$timestamp;
+    $timeDiff = abs($currentTime - $signatureTime);
+    
+    if ($timeDiff > 300000) { // 5 minutes in milliseconds
+        Log::warning('Signature timestamp too old');
+        return false;
+    }
+    
+    // Calculate expected signature
+    $expectedSignature = hash_hmac('sha256', $timestamp . '.' . $payload, $secret);
+    
+    // Use hash_equals to prevent timing attacks
+    return hash_equals($expectedSignature, $receivedSignature);
 }
 ```
 
 **Lưu ý quan trọng:**
-- Sử dụng raw payload content để verify signature
-- Signature header: `X-Casso-Signature`
-- Algorithm: HMAC-SHA256
-- Format: `sha256=calculated_signature`
+- Signature format: `t=timestamp,v1=signature`
+- Timestamp: Kiểm tra trong vòng 5 phút
+- Algorithm: HMAC-SHA256 với `timestamp.payload`
+- Header: `X-Casso-Signature`
 
 ## Webhook Format
 
 ### Headers
 ```
-X-Casso-Signature: sha256=calculated_signature
+X-Casso-Signature: t=1759591587165,v1=474bfb8435db50db4ee35495364ab759eefdda5a3e296c7365335036761d0ea32e16c9c9967dc44dd93350f5c30530397e5b640f851fe76d51e91c2dc199eb2c
 Content-Type: application/json
 ```
 
-### Payload (Casso Webhook v2)
+### Payload (Casso Webhook v1)
 ```json
 {
     "error": 0,

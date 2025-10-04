@@ -214,8 +214,8 @@ class BankAutoController extends Controller
     }
 
     /**
-     * Callback từ Casso Webhook v2 khi có giao dịch mới
-     * Reference: https://github.com/CassoHQ/casso-webhook-handler-sample/blob/main/webhook_handler.php
+     * Callback từ Casso Webhook v1 khi có giao dịch mới
+     * Format: t=timestamp,v1=signature
      */
     public function callback(Request $request)
     {
@@ -251,7 +251,7 @@ class BankAutoController extends Controller
             return response()->json(['success' => false, 'message' => 'Invalid JSON payload'], 400);
         }
         
-        // Casso Webhook v2 format theo tài liệu chính thức
+        // Casso Webhook v1 format
         $transactionId = $data['data']['id'] ?? null;
         $reference = $data['data']['reference'] ?? null;
         $description = $data['data']['description'] ?? '';
@@ -366,8 +366,8 @@ class BankAutoController extends Controller
 
 
     /**
-     * Verify signature từ Casso Webhook v2 theo tài liệu chính thức
-     * Reference: https://github.com/CassoHQ/casso-webhook-v2-verify-signature/blob/main/php.php
+     * Verify signature từ Casso Webhook v1
+     * Format: t=timestamp,v1=signature
      */
     private function verifyCassoSignature($payload, $signature)
     {
@@ -378,12 +378,34 @@ class BankAutoController extends Controller
             return false;
         }
         
-        // Casso Webhook v2 sử dụng HMAC-SHA256
-        // Signature format: sha256=calculated_signature
-        $expectedSignature = 'sha256=' . hash_hmac('sha256', $payload, $secret);
+        // Parse signature format: t=timestamp,v1=signature
+        if (!preg_match('/t=(\d+),v1=(.+)/', $signature, $matches)) {
+            Log::warning('Invalid signature format', ['signature' => $signature]);
+            return false;
+        }
         
-        // Sử dụng hash_equals để tránh timing attack
-        return hash_equals($expectedSignature, $signature);
+        $timestamp = $matches[1];
+        $receivedSignature = $matches[2];
+        
+        // Check timestamp (within 5 minutes)
+        $currentTime = time() * 1000; // Convert to milliseconds
+        $signatureTime = (int)$timestamp;
+        $timeDiff = abs($currentTime - $signatureTime);
+        
+        if ($timeDiff > 300000) { // 5 minutes in milliseconds
+            Log::warning('Signature timestamp too old', [
+                'current_time' => $currentTime,
+                'signature_time' => $signatureTime,
+                'time_diff' => $timeDiff
+            ]);
+            return false;
+        }
+        
+        // Calculate expected signature
+        $expectedSignature = hash_hmac('sha256', $timestamp . '.' . $payload, $secret);
+        
+        // Use hash_equals to prevent timing attacks
+        return hash_equals($expectedSignature, $receivedSignature);
     }
 
     /**
