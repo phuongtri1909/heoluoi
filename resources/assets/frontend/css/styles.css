@@ -1866,6 +1866,17 @@ body.dark-mode .font-family-dropdown button:hover {
     background-color: #404040 !important;
 }
 
+body.dark-mode .btn-outline-dark{
+    border-color: #404040 !important;
+    color: #e0e0e0 !important;
+}
+
+body.dark-mode .btn-outline-dark:hover{
+    background-color: #404040 !important;
+    border-color: #404040 !important;
+    color: #ffffff !important;
+}
+
 /* ===== READING SETTINGS STYLES ===== */
 .reading-settings-container {
     z-index: 1000;
