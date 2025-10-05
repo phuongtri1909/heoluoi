@@ -3,16 +3,8 @@
         @foreach ($stories as $index => $story)
             <div class="d-flex align-items-center mb-2">
                 <div class="d-flex align-items-center mt-2">
-                    <span class="story-rank">
-                        @if ($index + 1 == 1)
-                            <img src="/images/ranks/level1.png" alt="Level 1" class="rank-icon">
-                        @elseif($index + 1 == 2)
-                            <img src="/images/ranks/level2.png" alt="Level 2" class="rank-icon">
-                        @elseif($index + 1 == 3)
-                            <img src="/images/ranks/level3.png" alt="Level 3" class="rank-icon">
-                        @else
-                            {{ $index + 1 }}
-                        @endif
+                    <span class="story-rank {{ $index + 1 == 1 ? 'rank-gold' : ($index + 1 == 2 ? 'rank-silver' : ($index + 1 == 3 ? 'rank-bronze' : '')) }}">
+                        {{ $index + 1 }}
                     </span>
                 </div>
 
@@ -59,6 +51,27 @@
     <style>
         body.dark-mode .eye-icon {
             filter: invert(1);
+        }
+          
+        .story-rank.rank-gold {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            box-shadow: 0 2px 4px rgba(255, 215, 0, 0.3);
+            border: 1px solid #FFD700;
+            color: #000;
+        }
+        
+        .story-rank.rank-silver {
+            background: linear-gradient(135deg, #C0C0C0, #A8A8A8);
+            box-shadow: 0 2px 4px rgba(192, 192, 192, 0.3);
+            border: 1px solid #C0C0C0;
+            color: #000;
+        }
+        
+        .story-rank.rank-bronze {
+            background: linear-gradient(135deg, #CD7F32, #B8860B);
+            box-shadow: 0 2px 4px rgba(205, 127, 50, 0.3);
+            border: 1px solid #CD7F32;
+            color: #000;
         }
     </style>
 @endpush

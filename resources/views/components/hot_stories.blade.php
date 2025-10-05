@@ -56,10 +56,6 @@
                 transition: background-color 0.2s;
             }
 
-            .hot-stories-list:hover {
-                background-color: rgba(0, 0, 0, 0.03);
-            }
-
             .story-rank {
                 min-width: 40px;
                 min-height: 40px;
@@ -70,7 +66,7 @@
                 align-items: center;
                 justify-content: center;
                 font-weight: bold;
-                border-radius: 4px;
+                border-radius: 15px;
                 margin-right: 10px;
                 color: var(--primary-color-3);
                 border: 1px solid var(--primary-color-4);

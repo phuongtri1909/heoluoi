@@ -242,6 +242,17 @@
                 </a>
             </li>
 
+            <li class="nav-item">
+                <a class="nav-link {{ Route::currentRouteNamed('admin.ban-ips.*') ? 'active' : '' }}"
+                    href="{{ route('admin.ban-ips.index') }}">
+                    <div
+                        class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="fa-solid fa-ban text-dark icon-sidebar"></i>
+                    </div>
+                    <span class="nav-link-text ms-1">Ban IP</span>
+                </a>
+            </li>
+
             @if (Auth::user()->role === 'admin_main')
                 <li class="nav-item">
                     <a class="nav-link {{ Route::currentRouteNamed('admin.coins.*') ? 'active' : '' }}"

@@ -39,6 +39,8 @@
                                 <li>Báo cáo phải chính xác và có cơ sở</li>
                                 <li>Không spam báo cáo không đúng</li>
                                 <li>Admin sẽ xem xét và xử lý trong thời gian sớm nhất</li>
+                                <li>Mỗi báo lỗi chương được chấp thuận bạn sẽ được tặng 20 cám. Phần này admin sẽ cộng thủ công sau khi duyệt lỗi, nếu bạn thấy cộng sót nhắn facebook để báo tụi mình nhé. Cảm ơn mọi người rất nhiều vì đã hỗ trợ tụi mình cải thiện bản dịch.
+                                </li>
                             </ul>
                         </div>
                     </div>

@@ -22,7 +22,11 @@
                                 ({{ $stats['admin_main'] }} Admin / {{ $stats['admin_sub'] }} Admin Sub / {{ $stats['user'] }} User)
                             </p>
                         </div>
-
+                        <div class="d-flex gap-2">
+                            <a href="{{ route('admin.ban-ips.index') }}" class="btn btn-danger btn-sm">
+                                <i class="fas fa-ban me-1"></i> Quản lý Ban IP
+                            </a>
+                        </div>
                     </div>
                     <form action="{{ route('admin.users.index') }}" method="GET" class="mt-3 d-flex flex-column flex-md-row gap-2">
                         <div class="d-flex flex-column flex-md-row gap-2 mb-2 mb-md-0">
