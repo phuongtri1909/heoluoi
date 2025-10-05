@@ -614,7 +614,23 @@
                 const bankInfo = response.bank_info;
                 const transactionCode = response.transaction_code;
                 const amount = response.amount;
-                const coins = response.coins;
+                
+                // Tính toán lại cám theo công thức bonus (giống như updateCoinPreview)
+                const feeAmount = (amount * window.coinBankAutoPercent) / 100;
+                const amountAfterFee = amount - feeAmount;
+                const baseCoins = Math.floor(amountAfterFee / window.coinExchangeRate);
+                
+                // Tính bonus theo công thức hàm mũ
+                let bonusCoins = 0;
+                if (amountAfterFee >= window.bonusBaseAmount) {
+                    const ratioAmount = window.bonusDoubleAmount / window.bonusBaseAmount;
+                    const ratioBonus = window.bonusDoubleCam / window.bonusBaseCam;
+                    const b = Math.log(ratioBonus) / Math.log(ratioAmount);
+                    const a = window.bonusBaseCam / Math.pow(window.bonusBaseAmount, b);
+                    bonusCoins = Math.floor(a * Math.pow(amountAfterFee, b));
+                }
+                
+                const totalCoins = baseCoins + bonusCoins;
 
                 const transferInfoHtml = `
                     <div class="bank-transfer-info">
@@ -671,7 +687,10 @@
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label">Cám nhận được:</label>
-                                            <div class="fw-bold text-info">${coins.toLocaleString('vi-VN')} cám</div>
+                                            <div class="fw-bold text-info">${totalCoins.toLocaleString('vi-VN')} cám</div>
+                                            <div class="small text-muted">
+                                                Cám cộng: ${baseCoins.toLocaleString('vi-VN')} + Cám tặng: ${bonusCoins.toLocaleString('vi-VN')}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -837,7 +856,7 @@
                         <div class="d-flex">
                             <div class="toast-body">
                                 <i class="fas fa-check-circle me-2"></i>
-                                Giao dịch thành công! Bạn đã nhận được ${data.total_coins.toLocaleString('vi-VN')} cám.
+                                Giao dịch thành công! Bạn đã nhận được ${data.total_coins ? data.total_coins.toLocaleString('vi-VN') : 'cám'} cám.
                             </div>
                             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
                         </div>

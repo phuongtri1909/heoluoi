@@ -68,7 +68,7 @@
     <header>
         <nav
             class="navbar navbar-expand-lg fixed-top transition-header chapter-header scrolled bg-site shadow-sm py-0 d-block">
-            <div class="container-fluid">
+            <div class="container">
                 <div class="d-flex align-items-center justify-content-between w-100">
                     <a class="navbar-brand p-0" href="{{ route('home') }}">
                         <img height="100" src="{{ $logoPath }}" alt="{{ config('app.name') }} logo">
