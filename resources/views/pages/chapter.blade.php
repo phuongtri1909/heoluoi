@@ -43,7 +43,7 @@
 
     <section id="chapter" class="mt-80 mb-5 py-5">
         <div class="container">
-            <div class="bg-white p-2 p-md-5 pt-md-0 pb-1">
+            <div class="p-2 p-md-5 pt-md-0 pb-1">
 
                 <div class="p-2 p-md-5">
                     <div class="p-0 p-md-5 pt-md-0">
