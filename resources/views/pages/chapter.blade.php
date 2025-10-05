@@ -43,10 +43,25 @@
 
     <section id="chapter" class="mt-80 mb-5 py-5">
         <div class="container">
+
             <div class="p-2 p-md-5 pt-md-0 pb-1">
 
                 <div class="p-2 p-md-5">
                     <div class="p-0 p-md-5 pt-md-0">
+                        <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);"
+                            aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a class="color-7 text-decoration-none" href="{{ route('home') }}">Trang chủ</a></li>
+                                <li class="breadcrumb-item d-none d-sm-block"><a
+                                        class="color-7 text-decoration-none" href="{{ route('show.page.story', $story->slug) }}">{{ $story->title }}</a>
+                                </li>
+                                <li class="breadcrumb-item d-block d-sm-none"><a
+                                        class="color-7 text-decoration-none" href="{{ route('show.page.story', $story->slug) }}" title="{{ $story->title }}">{{ Str::limit($story->title, 15) }}</a>
+                                </li>
+                                <li class="breadcrumb-item active color-7 d-none d-sm-block" aria-current="page">Chương {{ $chapter->number }}</li>
+                                <li class="breadcrumb-item active color-7 d-block d-sm-none" aria-current="page" title="{{ $chapter->number }}">Chương {{ Str::limit($chapter->number, 18) }}</li>
+                            </ol>
+                        </nav>
                         <div class="chapter-header text-center mb-4 animate__animated animate__fadeIn">
                             <h1 class="chapter-title fw-bold color-7">
 
@@ -128,18 +143,18 @@
                                     <!-- Hiển thị thông báo mua chương -->
                                     <div class="purchase-notice p-4 rounded-3 text-center my-4">
                                         <div class="mb-3">
-                                            <p class="fw-semibold mb-0">Bạn cần ủng hộ {{ $story->price }} Cám để đọc
+                                            <p class="mb-0">Bạn cần ủng hộ <span class="fw-semibold color-7">{{ $chapter->price }} Cám</span>  để đọc
                                                 chương
                                                 này</p>
                                             @auth
-                                                <p class="mb-0 fw-semibold">
-                                                    Hiện bạn đang có {{ auth()->user()->coins }} Cám
+                                                <p class="mb-0">
+                                                    Hiện bạn đang có <span class="fw-semibold color-7">{{ auth()->user()->coins }} Cám</span>
                                                 </p>
                                             @endauth
 
                                             @guest
-                                                <p class="mb-0 fw-semibold">
-                                                    Bạn cần <a href="{{ route('login') }}" class="color-7">Đăng nhập</a> để
+                                                <p class="mb-0">
+                                                    Bạn cần <a class="fw-semibold color-7" href="{{ route('login') }}">Đăng nhập</a> để
                                                     đọc
                                                     truyện
                                                 </p>
@@ -152,28 +167,23 @@
                                             </div>
 
                                             <div class="d-flex justify-content-center">
-                                                <ul class="text-start fw-semibold">
+                                                <ul class="text-start">
                                                     <li>
-                                                        Sau khi mua, bạn có thể [Đọc chương] này không giới hạn số lần.
+                                                        Sau khi mua, bạn có thể <span class="fw-semibold color-7">[Đọc chương]</span> này không giới hạn số lần.
                                                     </li>
                                                     <li>
-                                                        Bạn chỉ bị trừ Cám khi [Đọc chương] này lần đầu tiên.
-                                                    </li>
-                                                    <li>
-                                                        Chọn [Tự động mở chương] để tự động hiển thị nội dung chương khóa
-                                                        khi
-                                                        chuyển chương mới.
+                                                        Bạn chỉ bị trừ Cám khi <span class="fw-semibold color-7">[Đọc chương]</span> này lần đầu tiên.
                                                     </li>
                                                     <li>
                                                         Kiểm tra Cám hiện tại <a href="{{ route('user.profile') }}"
-                                                            class="color-7">Tài khoản</a>. Nạp thêm Cám tại <a
-                                                            href="{{ route('user.deposit') }}" class="color-7">Nạp
+                                                            class="fw-semibold color-7">Tài khoản</a>. Nạp thêm <span class="fw-semibold color-7">Cám</span> tại <a
+                                                            href="{{ route('user.deposit') }}" class="fw-semibold color-7">Nạp
                                                             Cám</a>.
                                                     </li>
                                                     <li>
                                                         Nếu có thắc mắc hoặc cần hỗ trợ nạp liên hệ <a
                                                             href="https://www.facebook.com/profile.php?id=61572454674711"
-                                                            class="color-7">Facebook</a>.
+                                                            class="fw-semibold color-7">Facebook</a>.
                                                     </li>
                                                 </ul>
                                             </div>
@@ -344,28 +354,6 @@
             background: var(--primary-color-7);
             border-radius: 50%;
             display: inline-block;
-            animation: blink 1.2s infinite ease-in-out;
-        }
-
-        .dots span:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .dots span:nth-child(3) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes blink {
-
-            0%,
-            80%,
-            100% {
-                opacity: 0.3;
-            }
-
-            40% {
-                opacity: 1;
-            }
         }
 
         .story-title-breadcrumb {
@@ -514,8 +502,6 @@
 
         /* Purchase notice styles */
         .purchase-notice {
-            border: 1px solid #e9ecef;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             transition: all 0.3s ease;
         }
 
@@ -639,8 +625,6 @@
         }
 
         body.dark-mode .purchase-notice {
-            background-color: #404040 !important;
-            border-color: #555 !important;
             color: #e0e0e0 !important;
         }
 

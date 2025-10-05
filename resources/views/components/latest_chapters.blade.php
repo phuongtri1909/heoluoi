@@ -7,9 +7,6 @@
                     @foreach ($latestChapters as $chapter)
                         <li class="latest-chapter-item mb-2">
                             <div class="latest-chapter-name">
-                                <span class="latest-chapter-icon text-dark">
-                                    <img src="{{ asset('images/d/play.png') }}" alt="Chapter Icon" class="" height="10">
-                                </span>
                                 <a class="fw-semibold text-decoration-none color-text" href="{{ route('chapter', ['storySlug' => $chapter->story->slug, 'chapterSlug' => $chapter->slug]) }}">
                                     Chương {{ $chapter->number }}
                                     @if($chapter->title && $chapter->title !== 'Chương ' . $chapter->number)

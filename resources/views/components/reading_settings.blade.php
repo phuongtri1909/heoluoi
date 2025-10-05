@@ -211,6 +211,10 @@ document.addEventListener('DOMContentLoaded', function() {
             const backgroundColorDropdown = document.createElement('div');
             backgroundColorDropdown.className = 'background-color-dropdown';
             backgroundColorDropdown.innerHTML = `
+                <button data-bg="default">
+                    <div class="color-preview" style="background-color: transparent; border: 2px solid #e5e7eb;"></div>
+                    <span>Mặc định</span>
+                </button>
                 <button data-bg="bg-white">
                     <div class="color-preview" style="background-color: #fff; border: 2px solid #e5e7eb;"></div>
                     <span>Trắng</span>
@@ -273,8 +277,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     chapterContent.classList.remove('bg-white', 'bg-sepia', 'bg-warm', 'bg-cream', 'bg-mint',
                         'bg-gray-dark', 'bg-black', 'bg-navy', 'bg-forest', 'bg-midnight');
 
-                    // Add selected background class to chapter-content
-                    chapterContent.classList.add(bgClass);
+                    // Add selected background class to chapter-content (skip if default)
+                    if (bgClass !== 'default') {
+                        chapterContent.classList.add(bgClass);
+                    }
 
                     // Save preference
                     localStorage.setItem('chapter-background-color', bgClass);
@@ -308,7 +314,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Load background color
             const savedBackgroundColor = localStorage.getItem('chapter-background-color');
-            if (savedBackgroundColor && chapterContent) {
+            if (savedBackgroundColor && savedBackgroundColor !== 'default' && chapterContent) {
                 chapterContent.classList.add(savedBackgroundColor);
             }
         }
