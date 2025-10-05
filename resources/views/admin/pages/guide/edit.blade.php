@@ -69,7 +69,7 @@
 <script src="{{ asset('ckeditor/ckeditor.js') }}"></script>
 <script>
     CKEDITOR.replace('content', {
-        
+        extraPlugins: 'image2',
         filebrowserUploadMethod: 'form',
         height: 500,
         toolbarGroups: [

@@ -16,9 +16,7 @@ class GuideController extends Controller
      */
     public function show()
     {
-        $guide = Cache::remember('guide', 3600, function () {
-            return Guide::published()->latest()->first();
-        });
+        return Guide::published()->latest()->first();
 
         return view('pages.guide.show', compact('guide'));
     }
