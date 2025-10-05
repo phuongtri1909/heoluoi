@@ -464,7 +464,7 @@
             color: #000;
             text-decoration: none;
             padding: 2px 15px;
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.39);
             transition: all 0.3s ease;
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
         }
