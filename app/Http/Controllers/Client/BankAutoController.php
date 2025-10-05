@@ -64,53 +64,22 @@ class BankAutoController extends Controller
      */
     public function calculateCoins($amount)
     {
-        $coinExchangeRate = config('app.coin_exchange_rate', 100);
-        $coinBankAutoPercent = config('app.coin_bank_auto_percentage', 0);
-        $bonusBaseAmount = config('app.bonus_base_amount', 100000);
-        $bonusBaseCam = config('app.bonus_base_cam', 300);
-        $bonusDoubleAmount = config('app.bonus_double_amount', 200000);
-        $bonusDoubleCam = config('app.bonus_double_cam', 1000);
+        $coinExchangeRate = Config::getConfig('coin_exchange_rate', 100);
+        $coinBankAutoPercent = Config::getConfig('coin_bank_auto_percentage', 0);
+        $bonusBaseAmount = Config::getConfig('bonus_base_amount', 100000);
+        $bonusBaseCam = Config::getConfig('bonus_base_cam', 300);
+        $bonusDoubleAmount = Config::getConfig('bonus_double_amount', 200000);
+        $bonusDoubleCam = Config::getConfig('bonus_double_cam', 1000);
 
         $result = calculateTotalCoins($amount, $coinExchangeRate, $coinBankAutoPercent, $bonusBaseAmount, $bonusBaseCam, $bonusDoubleAmount, $bonusDoubleCam);
         
-        // Thêm thông tin phí
         $feeAmount = ($amount * $coinBankAutoPercent) / 100;
         $amountAfterFee = $amount - $feeAmount;
         
         return array_merge($result, [
-            'fee_amount' => $feeAmount,
-            'amount_after_fee' => $amountAfterFee
+            'fee_amount' => (int) $feeAmount,
+            'amount_after_fee' => (int) $amountAfterFee
         ]);
-    }
-
-    /**
-     * Tính toán bonus theo công thức hàm mũ
-     * Công thức: bonus = a * (amount)^b
-     * Trong đó:
-     * - b = log(300000/100000)(1000/300) = log3(3.333...) ≈ 1.096
-     * - a = 300/(100000)^b
-     */
-    private function calculateBonus($amount)
-    {
-        // Không có bonus dưới mốc cơ bản
-        if ($amount < $this->bonusBaseAmount) {
-            return 0;
-        }
-        
-        // Tính số mũ b
-        // b = log(300000/100000)(1000/300) = log3(3.333...) ≈ 1.096
-        $ratioAmount = $this->bonusDoubleAmount / $this->bonusBaseAmount; // 300000/100000 = 3
-        $ratioBonus = $this->bonusDoubleCam / $this->bonusBaseCam; // 1000/300 = 3.333...
-        $b = log($ratioBonus) / log($ratioAmount); // ≈ 1.096
-        
-        // Tính hệ số a
-        // a = 300/(100000)^b
-        $a = $this->bonusBaseCam / pow($this->bonusBaseAmount, $b);
-        
-        // Tính bonus theo công thức: bonus = a * (amount)^b
-        $bonus = $a * pow($amount, $b);
-        
-        return floor($bonus);
     }
 
     /**
@@ -126,6 +95,7 @@ class BankAutoController extends Controller
                 'message' => 'Số tiền tối thiểu là 50.000 VNĐ'
             ]);
         }
+        
         
         $calculation = $this->calculateCoins($amount);
         
@@ -341,10 +311,8 @@ class BankAutoController extends Controller
                 'casso_response' => $data
             ]);
             
-            // Broadcast SSE event để notify frontend
             $this->broadcastTransactionUpdate($transactionCode, 'success', $deposit);
             
-            // Cộng coins cho user
             $user = $deposit->user;
             if ($user) {
                 $coinService = new CoinService();
@@ -356,15 +324,15 @@ class BankAutoController extends Controller
                     $deposit
                 );
                 
-                Log::info('Bank auto deposit successful', [
-                    'user_id' => $user->id,
-                    'transaction_code' => $reference,
-                    'casso_transaction_id' => $transactionId,
-                    'coins_added' => $deposit->total_coins,
-                    'amount_received' => $amount,
-                    'bank_name' => $bankName,
-                    'description' => $description
-                ]);
+                // Log::info('Bank auto deposit successful', [
+                //     'user_id' => $user->id,
+                //     'transaction_code' => $reference,
+                //     'casso_transaction_id' => $transactionId,
+                //     'coins_added' => $deposit->total_coins,
+                //     'amount_received' => $amount,
+                //     'bank_name' => $bankName,
+                //     'description' => $description
+                // ]);
             }
             
             DB::commit();

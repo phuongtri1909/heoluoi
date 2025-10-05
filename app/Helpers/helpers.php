@@ -81,16 +81,16 @@ if (!function_exists('format_number_short')) {
     /**
      * Tính cám tặng theo công thức hàm mũ
      * 
-     * @param int $amount Số tiền nạp
+     * @param int $amountAfterFee Số tiền sau phí
      * @param int $bonusBaseAmount Mốc cơ bản (100000)
      * @param int $bonusBaseCam Cám tặng mốc cơ bản (300)
      * @param int $bonusDoubleAmount Mốc gấp đôi (300000)
      * @param int $bonusDoubleCam Cám tặng mốc gấp đôi (1000)
      * @return int Số cám tặng
      */
-    function calculateBonusCoins($amount, $bonusBaseAmount, $bonusBaseCam, $bonusDoubleAmount, $bonusDoubleCam)
+    function calculateBonusCoins($amountAfterFee, $bonusBaseAmount, $bonusBaseCam, $bonusDoubleAmount, $bonusDoubleCam)
     {
-        if ($amount < $bonusBaseAmount) {
+        if ($amountAfterFee < $bonusBaseAmount) {
             return 0;
         }
 
@@ -104,8 +104,8 @@ if (!function_exists('format_number_short')) {
         // a = 300/(100000)^b
         $a = $bonusBaseCam / pow($bonusBaseAmount, $b);
 
-        // Tính bonus theo công thức: bonus = a * (amount)^b
-        return floor($a * pow($amount, $b));
+        // Tính bonus theo công thức: bonus = a * (amountAfterFee)^b
+        return (int) floor($a * pow($amountAfterFee, $b));
     }
 
     /**
@@ -128,12 +128,12 @@ if (!function_exists('format_number_short')) {
         $baseCoins = floor($amountAfterFee / $coinExchangeRate);
 
         // Tính cám tặng
-        $bonusCoins = calculateBonusCoins($amount, $bonusBaseAmount, $bonusBaseCam, $bonusDoubleAmount, $bonusDoubleCam);
+        $bonusCoins = calculateBonusCoins($amountAfterFee, $bonusBaseAmount, $bonusBaseCam, $bonusDoubleAmount, $bonusDoubleCam);
 
         return [
-            'base_coins' => $baseCoins,
-            'bonus_coins' => $bonusCoins,
-            'total_coins' => $baseCoins + $bonusCoins
+            'base_coins' => (int) $baseCoins,
+            'bonus_coins' => (int) $bonusCoins,
+            'total_coins' => (int) ($baseCoins + $bonusCoins)
         ];
     }
 }

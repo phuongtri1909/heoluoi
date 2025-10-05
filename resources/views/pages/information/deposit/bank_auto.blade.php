@@ -330,15 +330,6 @@
     @push('info_scripts')
         <script>
             $(document).ready(function() {
-                // Global variables
-                window.coinExchangeRate = {{ $coinExchangeRate }};
-                window.coinBankAutoPercent = {{ $coinBankAutoPercent }};
-                window.bonusBaseAmount = {{ $bonusBaseAmount }};
-                window.bonusBaseCam = {{ $bonusBaseCam }};
-                window.bonusDoubleAmount = {{ $bonusDoubleAmount }};
-                window.bonusDoubleCam = {{ $bonusDoubleCam }};
-
-                // Auto select first bank
                 const firstBank = $('.bank-option').first();
                 if (firstBank.length > 0) {
                     firstBank.addClass('selected');
@@ -346,7 +337,6 @@
                     $('.bank-error').hide();
                 }
 
-                // Bank selection
                 $(document).on('click', '.bank-option', function() {
                     $('.bank-option').removeClass('selected');
                     $(this).addClass('selected');
@@ -360,25 +350,21 @@
                     }, 100);
                 });
 
-                // Amount input formatting
                 $('.deposit-amount-input').on('input', function() {
                     try {
                         const input = $(this);
                         const currentValue = input.val();
 
                         if (currentValue && currentValue.trim() !== '') {
-                            // Remove all non-numeric characters except dots
                             const cleanValue = currentValue.replace(/[^\d.]/g, '');
 
                             // Format with dots
                             const formatted = formatVndCurrency(cleanValue);
 
-                            // Only update if different to avoid cursor jumping
                             if (formatted !== currentValue) {
                                 const cursorPos = input.prop('selectionStart');
                                 input.val(formatted);
 
-                                // Try to maintain cursor position
                                 setTimeout(() => {
                                     const newLength = formatted.length;
                                     const newPos = Math.min(cursorPos + (formatted.length - currentValue
@@ -417,7 +403,6 @@
                             input.data('raw', rawValue);
                             updateCoinPreview();
                         } else {
-                            // If empty or invalid, set to minimum
                             input.val('2.000');
                             input.data('raw', 2000);
                             updateCoinPreview();
@@ -427,43 +412,37 @@
                     }
                 });
 
-                // Calculate coin preview with bonus
                 function updateCoinPreview() {
                     try {
                         const amount = parseInt($('#amount').data('raw')) || 0;
 
-                        if (amount > 0) {
-                            // Calculate base coins
-                            const feeAmount = (amount * window.coinBankAutoPercent) / 100;
-                            const amountAfterFee = amount - feeAmount;
-                            const baseCoins = Math.floor(amountAfterFee / window.coinExchangeRate);
-
-                            // Calculate bonus theo công thức hàm mũ
-                            // Công thức: bonus = a * (amountAfterFee)^b
-                            let bonusCoins = 0;
-
-                            if (amountAfterFee >= window.bonusBaseAmount) {
-                                // Tính số mũ b
-                                // b = log(200000/100000)(1000/300) = log2(3.333...) ≈ 1.737
-                                const ratioAmount = window.bonusDoubleAmount / window
-                                .bonusBaseAmount; // 200000/100000 = 2
-                                const ratioBonus = window.bonusDoubleCam / window.bonusBaseCam; // 1000/300 = 3.333...
-                                const b = Math.log(ratioBonus) / Math.log(ratioAmount); // ≈ 1.737
-
-                                // Tính hệ số a
-                                // a = 300/(100000)^b
-                                const a = window.bonusBaseCam / Math.pow(window.bonusBaseAmount, b);
-
-                                // Tính bonus theo công thức: bonus = a * (amountAfterFee)^b
-                                bonusCoins = Math.floor(a * Math.pow(amountAfterFee, b));
-                            }
-
-                            const totalCoins = baseCoins + bonusCoins;
-
-                            // Update UI
-                            $('#baseCoinsPreview').text(baseCoins.toLocaleString('vi-VN'));
-                            $('#bonusCoinsPreview').text(bonusCoins.toLocaleString('vi-VN'));
-                            $('#totalCoinsPreview').text(totalCoins.toLocaleString('vi-VN'));
+                        if (amount > 0 && amount >= 50000) {
+                            $.ajax({
+                                url: '{{ route('user.bank.auto.deposit.calculate') }}',
+                                type: 'POST',
+                                data: {
+                                    amount: amount,
+                                    _token: $('input[name="_token"]').val()
+                                },
+                                dataType: 'json',
+                                success: function(response) {
+                                    if (response.success) {
+                                        const data = response.data;
+                                        $('#baseCoinsPreview').text(data.base_coins.toLocaleString('vi-VN'));
+                                        $('#bonusCoinsPreview').text(data.bonus_coins.toLocaleString('vi-VN'));
+                                        $('#totalCoinsPreview').text(data.total_coins.toLocaleString('vi-VN'));
+                                    } else {
+                                        $('#baseCoinsPreview').text('0');
+                                        $('#bonusCoinsPreview').text('0');
+                                        $('#totalCoinsPreview').text('0');
+                                    }
+                                },
+                                error: function() {
+                                    $('#baseCoinsPreview').text('0');
+                                    $('#bonusCoinsPreview').text('0');
+                                    $('#totalCoinsPreview').text('0');
+                                }
+                            });
                         } else {
                             $('#baseCoinsPreview').text('0');
                             $('#bonusCoinsPreview').text('0');
@@ -477,10 +456,8 @@
                     }
                 }
 
-                // Initialize coin preview
                 updateCoinPreview();
 
-                // Proceed to payment
                 $('#proceedToPaymentBtn').off('click').on('click', function() {
                     let valid = true;
 
@@ -570,7 +547,6 @@
                     }
                 });
 
-                // Utility functions
                 function formatVndCurrency(value) {
                     try {
                         if (!value || value === '' || value === null || value === undefined) return '';
@@ -593,7 +569,6 @@
                     }
                 }
 
-                // Initialize with default values
                 $('.deposit-amount-input').each(function() {
                     const input = $(this);
                     let raw = input.data('raw');
@@ -605,32 +580,14 @@
                     }
                 });
 
-                // Initial calculation
                 updateCoinPreview();
             });
 
-            // Function to show bank transfer info
             function showBankTransferInfo(response) {
                 const bankInfo = response.bank_info;
                 const transactionCode = response.transaction_code;
                 const amount = response.amount;
-                
-                // Tính toán lại cám theo công thức bonus (giống như updateCoinPreview)
-                const feeAmount = (amount * window.coinBankAutoPercent) / 100;
-                const amountAfterFee = amount - feeAmount;
-                const baseCoins = Math.floor(amountAfterFee / window.coinExchangeRate);
-                
-                // Tính bonus theo công thức hàm mũ
-                let bonusCoins = 0;
-                if (amountAfterFee >= window.bonusBaseAmount) {
-                    const ratioAmount = window.bonusDoubleAmount / window.bonusBaseAmount;
-                    const ratioBonus = window.bonusDoubleCam / window.bonusBaseCam;
-                    const b = Math.log(ratioBonus) / Math.log(ratioAmount);
-                    const a = window.bonusBaseCam / Math.pow(window.bonusBaseAmount, b);
-                    bonusCoins = Math.floor(a * Math.pow(amountAfterFee, b));
-                }
-                
-                const totalCoins = baseCoins + bonusCoins;
+                const coins = response.coins;
 
                 const transferInfoHtml = `
                     <div class="bank-transfer-info">
@@ -687,10 +644,7 @@
                                         </div>
                                         <div class="mb-3">
                                             <label class="form-label">Cám nhận được:</label>
-                                            <div class="fw-bold text-info">${totalCoins.toLocaleString('vi-VN')} cám</div>
-                                            <div class="small text-muted">
-                                                Cám cộng: ${baseCoins.toLocaleString('vi-VN')} + Cám tặng: ${bonusCoins.toLocaleString('vi-VN')}
-                                            </div>
+                                            <div class="fw-bold text-info">${coins.toLocaleString('vi-VN')} cám</div>
                                         </div>
                                     </div>
                                 </div>
@@ -724,50 +678,39 @@
                     </div>
                 `;
 
-                // Thay thế nội dung form
                 $('#depositContainer').html(transferInfoHtml);
 
-                // Start SSE connection để listen updates
                 startSSEConnection(transactionCode);
             }
 
-            // Function to copy text to clipboard
             function copyToClipboard(text) {
                 const $button = event.target.closest('.copy-button');
                 const originalText = $button.innerHTML;
 
-                // Hiển thị trạng thái đang xử lý
                 $button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
-                // Phương pháp 1: Clipboard API (chỉ hoạt động trên HTTPS hoặc localhost)
                 if (navigator.clipboard && window.isSecureContext) {
                     navigator.clipboard.writeText(text)
                         .then(() => {
                             showCopySuccess($button, originalText);
                         })
                         .catch(() => {
-                            // Nếu phương pháp 1 thất bại, thử phương pháp 2
                             copyUsingExecCommand(text, $button, originalText);
                         });
                 }
-                // Phương pháp 2: document.execCommand (hỗ trợ cũ)
                 else {
                     copyUsingExecCommand(text, $button, originalText);
                 }
             }
 
-            // Phương pháp sao chép bằng execCommand
             function copyUsingExecCommand(text, $button, originalText) {
                 try {
-                    // Tạo phần tử input tạm thời
                     const $temp = $("<input>");
                     $("body").append($temp);
                     $temp.val(text).select();
 
-                    // Thực hiện lệnh sao chép
                     const successful = document.execCommand('copy');
 
-                    // Dọn dẹp
                     $temp.remove();
 
                     if (successful) {
@@ -780,27 +723,19 @@
                 }
             }
 
-            // Hiển thị thành công
             function showCopySuccess($button, originalText) {
                 $button.innerHTML = '<i class="fas fa-check"></i>';
-
-                // Khôi phục nút sau 1 giây
                 setTimeout(() => $button.innerHTML = originalText, 1000);
             }
-
-            // Hiển thị thất bại
             function showCopyFailure($button, originalText) {
                 $button.innerHTML = '<i class="fas fa-times"></i>';
 
-                // Khôi phục nút sau 1 giây
                 setTimeout(() => $button.innerHTML = originalText, 1000);
             }
 
-            // SSE để listen transaction updates
             let currentTransactionCode = null;
             let sseConnection = null;
 
-            // Start SSE connection khi có transaction code
             function startSSEConnection(transactionCode) {
                 if (sseConnection) {
                     sseConnection.close();
@@ -821,15 +756,11 @@
                         }
 
                         if (data.status === 'success') {
-                            // Hiển thị thông báo thành công
                             showSuccessNotification(data);
-
-                            // Reload trang sau 2 giây
                             setTimeout(() => {
                                 window.location.reload();
                             }, 2000);
 
-                            // Close SSE connection
                             sseConnection.close();
                         }
                     } catch (error) {
@@ -839,7 +770,6 @@
 
                 sseConnection.onerror = function(event) {
                     console.error('SSE connection error:', event);
-                    // Retry connection sau 5 giây
                     setTimeout(() => {
                         if (currentTransactionCode) {
                             startSSEConnection(currentTransactionCode);
@@ -848,9 +778,7 @@
                 };
             }
 
-            // Hiển thị thông báo thành công
             function showSuccessNotification(data) {
-                // Tạo toast notification
                 const toast = `
                     <div class="toast align-items-center text-white bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
                         <div class="d-flex">
@@ -863,14 +791,12 @@
                     </div>
                 `;
 
-                // Thêm toast vào container
                 if (!$('#toast-container').length) {
                     $('body').append('<div id="toast-container" class="toast-container position-fixed top-0 end-0 p-3"></div>');
                 }
 
                 $('#toast-container').append(toast);
 
-                // Show toast
                 const toastElement = $('#toast-container .toast').last();
                 const toastInstance = new bootstrap.Toast(toastElement[0]);
                 toastInstance.show();
