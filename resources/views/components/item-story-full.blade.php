@@ -28,8 +28,8 @@
                 @endif
             @endif
         </a>
-        @if($story->completed == true)
-            <span class="full-label-full"></span>
+        @if ($story->completed == true)
+            <span class="badge-full-full">Full</span>
         @endif
     </div>
 
@@ -53,17 +53,18 @@
 @once
     @push('styles')
         <style>
-            .full-label-full {
-                width: 34px;
-                height: 50px;
+            .badge-full-full {
                 position: absolute;
-                display: block;
-                top: 83%;
-                left: -6px;
-                z-index: 15;
-                background: transparent url(/images/defaults/full-label.png) no-repeat;
-                pointer-events: none;
-                transform: translateY(-50%);
+                top: 6px;
+                left: 6px;
+                background-color: #28a745 !important;
+                color: white;
+                padding: 3px 8px;
+                border-radius: 12px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                z-index: 2;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             }
 
             .story-item-full {

@@ -23,8 +23,8 @@
     </div>
     <div class="story-info text-sm text-gray-600 fw-semibold">
         <div>
-            <h5 class="story-title mb-0 text-sm fw-semibold lh-base">
-                <a href="{{ route('show.page.story', $story->slug) }}" class="text-decoration-none text-dark fw-bold fs-6">
+            <h5 class="story-title mb-0 text-sm fw-semibold lh-base text-center">
+                <a href="{{ route('show.page.story', $story->slug) }}" class="text-decoration-none text-dark fw-bold fs-6 text-center">
                     {{ $story->title }}
                 </a>
             </h5>
@@ -54,6 +54,15 @@
 @once
     @push('styles')
         <style>
+
+            .story-title {
+                height: 3em !important;
+                overflow: hidden !important;               
+                display: -webkit-box !important;           
+                -webkit-line-clamp: 2 !important;          
+                -webkit-box-orient: vertical !important;   
+            }
+
             .story-thumbnail {
                 position: relative;
                 padding-top: 140%;

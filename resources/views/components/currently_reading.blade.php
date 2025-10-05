@@ -12,17 +12,17 @@
                     <div class="reading-icon me-2">
                         <i class="fas fa-chevron-right text-muted"></i>
                     </div>
-                    <div class="reading-content flex-grow-1 d-flex justify-content-between ">
-                        <h6 class="reading-title mb-1">
+                    <div class="reading-content flex-grow-1 d-flex align-items-center">
+                        <h6 class="reading-title mb-0 me-2">
                             <a href="{{ route('show.page.story', $reading->story->slug) }}" 
                                class="text-decoration-none text-dark fs-6 fw-semibold">
                                 {{ $reading->story->title }}
                             </a>
                         </h6>
-                        <div class="reading-chapter">
+                        <div class="reading-chapter flex-shrink-0">
                             <a href="{{ route('chapter', ['storySlug' => $reading->story->slug, 'chapterSlug' => $reading->chapter->slug]) }}" 
                                class="text-decoration-none text-primary fs-6">
-                                Đọc tiếp C {{ $reading->chapter->number }}
+                                C {{ $reading->chapter->number }}
                             </a>
                         </div>
                     </div>
@@ -47,20 +47,29 @@
             .reading-title {
                 font-size: 0.9rem;
                 line-height: 1.3;
-                max-height: 2.6rem;
+                white-space: nowrap;
                 overflow: hidden;
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                -webkit-box-orient: vertical;
+                text-overflow: ellipsis;
+                flex: 1;
+                min-width: 0;
+                max-width: calc(100% - 50px);
+                display: block;
             }
 
             .reading-chapter {
                 font-size: 0.8rem;
+                white-space: nowrap;
+                flex-shrink: 0;
             }
 
             .reading-icon {
                 width: 20px;
                 text-align: center;
+            }
+
+            .reading-content {
+                overflow: hidden;
+                width: 100%;
             }
 
             /* Dark mode styles */

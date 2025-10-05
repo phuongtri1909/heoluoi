@@ -60,7 +60,7 @@
                                             </div>
 
                                             @if (!auth()->check())
-                                                <div class="rating-login-message mt-2 text-muted small">
+                                                <div class="rating-login-message mt-2 small">
                                                     <a href="{{ route('login') }}">Đăng nhập</a> để đánh giá truyện!
                                                 </div>
                                             @endif
@@ -102,20 +102,20 @@
                                         <a href="{{ route('search.author', ['query' => $story->status]) }}"
                                             class="text-decoration-none text-dark fw-semibold">
                                             @if ($story->completed)
-                                                <span class="text-success fw-bold">Hoàn Thành</span>
+                                                <span class="fw-bold">Hoàn Thành</span>
                                             @else
-                                                <span class="text-primary fw-bold">Đang tiến hành</span>
+                                                <span class="fw-bold">Đang tiến hành</span>
                                             @endif
 
                                         </a>
                                     </div>
                                 </div>
 
-
                                 <!-- Thể loại -->
                                 <div class="info-row d-flex mt-2">
-
-                                    <span class="text-dark fw-semibold me-2">Thể Loại: </span>
+                                    <div class="info-label">
+                                        <span class="text-muted fw-semibold">Thể Loại</span>
+                                    </div>
 
                                     <div class="info-content">
                                         <div class="d-flex flex-wrap gap-2">
@@ -138,12 +138,12 @@
 
                         <div class="d-flex">
                             <a href="#all-chapter"
-                                class="btn btn-sm bg-7 text-decoration-none fw-semibold rounded-0 me-3">
+                                class="btn btn-md bg-7 text-decoration-none fw-semibold rounded-0 me-3">
                                 Đọc truyện
                             </a>
 
                             <button
-                                class="btn btn-sm btn-outline-dark rounded-0 text-decoration-none fw-semibold bookmark-toggle-btn"
+                                class="btn btn-md btn-outline-dark rounded-0 text-decoration-none fw-semibold bookmark-toggle-btn"
                                 data-story-id="{{ $story->id }}"
                                 title="@auth @if ($isBookmarked) Bỏ theo dõi @else Theo dõi @endif @else Đăng nhập để theo dõi @endauth">
                                 <span class="bookmark-label">
@@ -189,12 +189,12 @@
 @push('styles')
     <style>
         .tag-category {
-            color: #1fcad7;
+            color: var(--primary-color-7);
             text-decoration: none;
         }
 
         .tag-category:hover {
-            color: #1fcad7;
+            color: var(--primary-color-2);
             text-decoration: underline !important;
         }
 
@@ -407,11 +407,11 @@
         }
 
         .rating-star.full {
-            color: #ffe371;
+            color: #ffb64a;
         }
 
         .rating-star.hover {
-            color: #ffe371;
+            color: #ffb64a;
             transform: scale(1.2);
         }
 
@@ -704,15 +704,15 @@
                 }
 
                 function submitRating(rating) {
-                    const existingIndicator = ratingMessage.querySelector('.rating-loading');
-                    if (existingIndicator) {
-                        ratingMessage.removeChild(existingIndicator);
+                    // Clear existing messages safely
+                    if (ratingMessage) {
+                        ratingMessage.innerHTML = '';
+                        
+                        const loadingIndicator = document.createElement('div');
+                        loadingIndicator.className = 'rating-loading';
+                        loadingIndicator.textContent = 'Đang gửi...';
+                        ratingMessage.appendChild(loadingIndicator);
                     }
-
-                    const loadingIndicator = document.createElement('div');
-                    loadingIndicator.className = 'rating-loading';
-                    loadingIndicator.textContent = 'Đang gửi...';
-                    ratingMessage.appendChild(loadingIndicator);
 
                     ratingStars.forEach(star => {
                         star.style.pointerEvents = 'none';
@@ -732,7 +732,11 @@
                         })
                         .then(response => response.json())
                         .then(data => {
-                            ratingMessage.removeChild(loadingIndicator);
+                            
+                            // Clear loading indicator safely
+                            if (ratingMessage) {
+                                ratingMessage.innerHTML = '';
+                            }
 
                             ratingStars.forEach(star => {
                                 star.style.pointerEvents = 'auto';
@@ -748,12 +752,14 @@
 
                                 let userRatingElement = document.getElementById('user-rating');
                                 if (!userRatingElement) {
-                                    const ratingStats = document.querySelector('.rating-stats');
-                                    const userRatingDiv = document.createElement('div');
-                                    userRatingDiv.className = 'mt-1 small text-muted';
-                                    userRatingDiv.innerHTML = 'Đánh giá của bạn: <span id="user-rating">' + data
-                                        .user_rating + '</span>/5';
-                                    ratingStats.appendChild(userRatingDiv);
+                                    const starsContainer = document.querySelector('.stars-container');
+                                    if (starsContainer) {
+                                        const userRatingDiv = document.createElement('div');
+                                        userRatingDiv.className = 'mt-1 small text-muted';
+                                        userRatingDiv.innerHTML = 'Đánh giá của bạn: <span id="user-rating">' + data
+                                            .user_rating + '</span>/5';
+                                        starsContainer.appendChild(userRatingDiv);
+                                    }
                                 } else {
                                     userRatingElement.textContent = data.user_rating;
                                 }
@@ -775,14 +781,16 @@
                             }
                         })
                         .catch(error => {
-                            ratingMessage.removeChild(loadingIndicator);
+                            // Clear loading indicator safely
+                            if (ratingMessage) {
+                                ratingMessage.innerHTML = '';
+                            }
 
                             ratingStars.forEach(star => {
                                 star.style.pointerEvents = 'auto';
                             });
 
                             showToast('Đã xảy ra lỗi khi gửi đánh giá', 'error');
-
                         });
                 }
             }

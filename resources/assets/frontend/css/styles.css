@@ -697,17 +697,17 @@ a.color-7:hover {
 .stars i {
     font-size: 24px;
     color: transparent;
-    -webkit-text-stroke: 1px #ffe371;
+    -webkit-text-stroke: 1px #ffb64a;
 }
 
 .stars i.full {
-    background: #ffe371;
+    background: #ffb64a;
     -webkit-background-clip: text;
     background-clip: text;
 }
 
 .stars i.half {
-    background: linear-gradient(to right, #ffe371 50%, transparent 50%);
+    background: linear-gradient(to right, #ffb64a 50%, transparent 50%);
     -webkit-background-clip: text;
     background-clip: text;
 }

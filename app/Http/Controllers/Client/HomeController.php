@@ -1321,10 +1321,12 @@ class HomeController extends Controller
             })
             ->where('id', '!=', $story->id)
             ->where('status', 'published')
+            ->whereHas('chapters', function ($query) {
+                $query->where('status', 'published');
+            })
             ->withCount(['chapters' => function ($query) {
                 $query->where('status', 'published');
             }])
-            ->select('id', 'title', 'slug', 'cover')
             ->withSum('chapters', 'views')
             ->orderByDesc('chapters_sum_views')
             ->take(8)

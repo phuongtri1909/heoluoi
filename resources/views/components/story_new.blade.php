@@ -4,7 +4,7 @@
         <img src="{{ Storage::url($story->cover) }}" class="story-image-new rounded-2 me-3" alt="{{ $story->title }}">
        
         @if($story->completed == true)
-            <span class="full-label"></span>
+            <span class="badge-full-new">Full</span>
         @endif
     </a>
     <div class="story-info-section">
@@ -69,17 +69,19 @@
 @once
     @push('styles')
         <style>
-            .full-label {
-                width: 34px;
-                height: 50px;
+            .badge-full-new {
                 position: absolute;
-                display: block;
-                top: 55%;
-                left: -6%;
-                z-index: 1;
-                background: transparent url(/images/defaults/full-label.png) no-repeat;
+                top: 6px;
+                left: 6px;
+                background-color: #28a745 !important;
+                color: white;
+                padding: 3px 8px;
+                border-radius: 12px;
+                font-size: 0.75rem;
+                font-weight: 600;
+                z-index: 2;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             }
-
             .chapter-number {
                 color: #5e44ef;
             }

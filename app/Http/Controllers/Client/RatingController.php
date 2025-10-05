@@ -14,17 +14,18 @@ class RatingController extends Controller
 
     public function storeClient(Request $request)
     {
-        // Validate input
-        $validated = $request->validate([
-            'story_id' => 'required|exists:stories,id',
-            'rating' => 'required|integer|min:1|max:5',
-        ], [
-            'rating.min' => 'Đánh giá phải từ 1 đến 5 sao.',
-            'rating.max' => 'Đánh giá phải từ 1 đến 5 sao.',
-            'story_id.exists' => 'Truyện không tồn tại.',
-            'rating.required' => 'Vui lòng chọn số sao.',
-            'story_id.required' => 'Truyện không tồn tại.'
-        ]);
+        try {
+            // Validate input
+            $validated = $request->validate([
+                'story_id' => 'required|exists:stories,id',
+                'rating' => 'required|integer|min:1|max:5',
+            ], [
+                'rating.min' => 'Đánh giá phải từ 1 đến 5 sao.',
+                'rating.max' => 'Đánh giá phải từ 1 đến 5 sao.',
+                'story_id.exists' => 'Truyện không tồn tại.',
+                'rating.required' => 'Vui lòng chọn số sao.',
+                'story_id.required' => 'Truyện không tồn tại.'
+            ]);
         
         if (!Auth::check()) {
             return response()->json([
@@ -53,12 +54,25 @@ class RatingController extends Controller
         $averageRating = $story->ratings()->avg('rating');
         $ratingsCount = $story->ratings()->count();
         
-        return response()->json([
-            'success' => true,
-            'message' => 'Đánh giá của bạn đã được ghi nhận!',
-            'average' => round($averageRating, 1),
-            'count' => $ratingsCount,
-            'user_rating' => $ratingValue
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Đánh giá của bạn đã được ghi nhận!',
+                'average' => round($averageRating, 1),
+                'count' => $ratingsCount,
+                'user_rating' => $ratingValue
+            ]);
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dữ liệu không hợp lệ: ' . implode(', ', collect($e->errors())->flatten()->toArray())
+            ], 422);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Đã xảy ra lỗi khi gửi đánh giá'
+            ], 500);
+        }
     }
 }
