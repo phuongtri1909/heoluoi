@@ -150,7 +150,7 @@
                                             class="rounded-circle" width="40" height="40" alt="avatar"
                                             style="object-fit: cover;">
 
-                                        <span class="ms-2 font-svn-apple">{{ auth()->user()->name }}</span>
+                                        {{-- <span class="ms-2 font-svn-apple">{{ auth()->user()->name }}</span> --}}
                                     </a>
 
                                     <ul class="dropdown-menu dropdown-menu-end animate slideIn border-cl-shopee">
@@ -166,7 +166,7 @@
                                         <li>
                                             <a class="dropdown-item fw-semibold color-2"
                                                 href="{{ route('user.profile') }}">
-                                                <i class="fa-regular fa-circle-user me-2 color-2"></i> Trang cá nhân
+                                                <i class="fa-regular fa-circle-user me-2 color-2"></i> {{ auth()->user()->name }}</span>
                                             </a>
                                         </li>
 

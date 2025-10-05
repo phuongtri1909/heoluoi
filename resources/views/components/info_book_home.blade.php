@@ -171,7 +171,7 @@
 </section>
 
 <section id="description" class="mt-5">
-    <div class="section-title d-flex align-items-baseline bg-1 px-3 py-1">
+    <div class="color-text d-flex align-items-baseline bg-1 px-3 py-1">
         <h5 class="mb-0">Giới Thiệu</h5>
     </div>
 
