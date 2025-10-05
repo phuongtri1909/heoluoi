@@ -112,11 +112,9 @@
                         @if (isset($isSearch) && $isSearch)
                             @if (isset($searchType))
                                 @if ($searchType === 'author')
-                                    <i class="fa-solid fa-user-pen fa-lg text-primary"></i>
                                     Tác giả: "{{ $query }}"
                                 @elseif($searchType === 'translator')
-                                    <i class="fa-solid fa-language fa-lg text-success"></i>
-                                    Chuyển ngữ: "{{ $query }}"
+                                    Dịch giả: "{{ $query }}"
                                 @else
                                     <i class="fa-solid fa-magnifying-glass fa-lg text-warning"></i>
                                     Kết quả tìm kiếm: "{{ $query }}"

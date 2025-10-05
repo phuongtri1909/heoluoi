@@ -146,8 +146,8 @@ class HomeController extends Controller
             ->withSum('chapters', 'views')
             ->withAvg('ratings as average_rating', 'rating');
 
-        // Apply advanced search filters
-        $storiesQuery = $this->applyAdvancedFilters($storiesQuery, $request);
+        // Apply advanced search filters (skip query filter since we already applied translator search)
+        $storiesQuery = $this->applyAdvancedFilters($storiesQuery, $request, true);
 
         $stories = $storiesQuery->paginate(20);
 
@@ -502,7 +502,6 @@ class HomeController extends Controller
                 'cover',
                 'status',
                 'completed',
-                'cover',
                 'author_name',
                 'description'
             ])
@@ -644,7 +643,6 @@ class HomeController extends Controller
                 'cover',
                 'completed',
                 'updated_at',
-                'cover',
                 'author_name',
                 'description',
             ])
@@ -964,7 +962,6 @@ class HomeController extends Controller
                 'status',
                 'completed',
                 'is_18_plus',
-                'cover',
                 'author_name',
                 'description'
             ])
@@ -1053,7 +1050,6 @@ class HomeController extends Controller
             'slug',
             'description',
             'cover',
-            'cover',
             'author_name',
             'completed',
             'is_18_plus',
@@ -1108,7 +1104,6 @@ class HomeController extends Controller
             'stories.title',
             'stories.slug',
             'stories.cover',
-            'stories.cover',
             'stories.author_name',
             'stories.completed',
             'stories.is_18_plus',
@@ -1152,7 +1147,6 @@ class HomeController extends Controller
             'id',
             'title',
             'slug',
-            'cover',
             'cover',
             'author_name',
             'completed',
@@ -1680,25 +1674,36 @@ class HomeController extends Controller
         if ($request->filled('chapters') && trim($request->input('chapters')) !== '') {
             $chaptersFilter = $request->chapters;
 
-            // Add chapters count if not already added
-            if (!$query->getQuery()->columns || !in_array('chapters_count', $query->getQuery()->columns)) {
-                $query->withCount(['chapters' => function ($q) {
-                    $q->where('status', 'published');
-                }]);
-            }
-
+            // Use whereHas instead of withCount to avoid duplicate columns
             switch ($chaptersFilter) {
                 case '1-10':
-                    $query->having('chapters_count', '>=', 1)->having('chapters_count', '<=', 10);
+                    $query->whereHas('chapters', function ($q) {
+                        $q->where('status', 'published');
+                    }, '>=', 1)
+                    ->whereHas('chapters', function ($q) {
+                        $q->where('status', 'published');
+                    }, '<=', 10);
                     break;
                 case '11-50':
-                    $query->having('chapters_count', '>=', 11)->having('chapters_count', '<=', 50);
+                    $query->whereHas('chapters', function ($q) {
+                        $q->where('status', 'published');
+                    }, '>=', 11)
+                    ->whereHas('chapters', function ($q) {
+                        $q->where('status', 'published');
+                    }, '<=', 50);
                     break;
                 case '51-100':
-                    $query->having('chapters_count', '>=', 51)->having('chapters_count', '<=', 100);
+                    $query->whereHas('chapters', function ($q) {
+                        $q->where('status', 'published');
+                    }, '>=', 51)
+                    ->whereHas('chapters', function ($q) {
+                        $q->where('status', 'published');
+                    }, '<=', 100);
                     break;
                 case '100+':
-                    $query->having('chapters_count', '>', 100);
+                    $query->whereHas('chapters', function ($q) {
+                        $q->where('status', 'published');
+                    }, '>', 100);
                     break;
             }
         }
@@ -1713,19 +1718,31 @@ class HomeController extends Controller
                     $query->orderBy('created_at', 'asc');
                     break;
                 case 'most_chapters':
-                    $query->withCount(['chapters' => function ($q) {
-                        $q->where('status', 'published');
-                    }])->orderBy('chapters_count', 'desc');
+                    // Check if chapters_count already exists
+                    if (!$query->getQuery()->columns || !in_array('chapters_count', $query->getQuery()->columns)) {
+                        $query->withCount(['chapters' => function ($q) {
+                            $q->where('status', 'published');
+                        }]);
+                    }
+                    $query->orderBy('chapters_count', 'desc');
                     break;
                 case 'least_chapters':
-                    $query->withCount(['chapters' => function ($q) {
-                        $q->where('status', 'published');
-                    }])->orderBy('chapters_count', 'asc');
+                    // Check if chapters_count already exists
+                    if (!$query->getQuery()->columns || !in_array('chapters_count', $query->getQuery()->columns)) {
+                        $query->withCount(['chapters' => function ($q) {
+                            $q->where('status', 'published');
+                        }]);
+                    }
+                    $query->orderBy('chapters_count', 'asc');
                     break;
                 case 'most_views':
-                    $query->withCount(['chapters' => function ($q) {
-                        $q->where('status', 'published');
-                    }])->withSum('chapters', 'views')->orderBy('chapters_sum_views', 'desc');
+                    // Check if chapters_count already exists
+                    if (!$query->getQuery()->columns || !in_array('chapters_count', $query->getQuery()->columns)) {
+                        $query->withCount(['chapters' => function ($q) {
+                            $q->where('status', 'published');
+                        }]);
+                    }
+                    $query->withSum('chapters', 'views')->orderBy('chapters_sum_views', 'desc');
                     break;
                 case 'highest_rating':
                     $query->withAvg('ratings as average_rating', 'rating')->orderBy('average_rating', 'desc');

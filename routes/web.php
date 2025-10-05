@@ -41,7 +41,7 @@ Route::middleware(['ban:login'])->group(function () {
 
     Route::get('/search', [HomeController::class, 'searchHeader'])->name('searchHeader');
     Route::get('/tac-gia', [HomeController::class, 'searchAuthor'])->name('search.author');
-    Route::get('/chuyen-ngu', [HomeController::class, 'searchTranslator'])->name('search.translator');
+    Route::get('/dich-gia', [HomeController::class, 'searchTranslator'])->name('search.translator');
     Route::get('story-new-chapter', [HomeController::class, 'showStoryNewChapter'])->name('story.new.chapter');
     Route::get('story-hot', [HomeController::class, 'showStoryHot'])->name('story.hot');
     Route::get('story-rating', [HomeController::class, 'showRatingStories'])->name('story.rating');
