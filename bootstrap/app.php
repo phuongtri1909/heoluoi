@@ -27,11 +27,13 @@ return Application::configure(basePath: dirname(__DIR__))
             'ban' => \App\Http\Middleware\CheckBan::class,
             'role' => \App\Http\Middleware\CheckRole::class,
             'check.active' => \App\Http\Middleware\CheckActive::class,
+            'block.devtools' => \App\Http\Middleware\BlockDevTools::class,
         ]);
 
         $middleware->web([
             \App\Http\Middleware\SecureFileUpload::class,
             \App\Http\Middleware\CheckActive::class,
+            \App\Http\Middleware\BlockDevTools::class,
         ]);
 
         $middleware->validateCsrfTokens(except: [
