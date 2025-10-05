@@ -2148,3 +2148,26 @@ body.dark-mode .color-preview {
     background-color: #0d1224 !important;
     color: #e2e8f0 !important;
 }
+
+.category-menu {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-color-2) var(--primary-bg-3);
+}
+
+.category-menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.category-menu::-webkit-scrollbar-track {
+    background: var(--primary-bg-3);
+    border-radius: 3px;
+}
+
+.category-menu::-webkit-scrollbar-thumb {
+    background: var(--primary-color-2);
+    border-radius: 3px;
+}
+
+.category-menu::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color-3);
+}

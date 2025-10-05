@@ -74,20 +74,20 @@
                         <img height="100" src="{{ $logoPath }}" alt="{{ config('app.name') }} logo">
                     </a>
 
-                    <div class="list-menu d-none d-lg-block font-svn-apple">
+                    <div class="list-menu d-none d-lg-block">
                         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
                             <li class="nav-item">
-                                <a class="color-2 nav-link fw-bold fs-3" href="{{ route('home') }}">
+                                <a class="color-2 nav-link fw-bold fs-3 font-svn-apple" href="{{ route('home') }}">
                                     Trang chủ
                                 </a>
                             </li>
                             <li class="nav-item dropdown">
-                                <a class="color-2 nav-link dropdown-toggle fw-bold fs-3 d-flex align-items-baseline"
+                                <a class="color-2 nav-link dropdown-toggle fw-bold fs-3 d-flex align-items-baseline font-svn-apple"
                                     href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     Thể loại
                                 </a>
-                                <ul class="dropdown-menu category-menu">
+                                <ul class="dropdown-menu category-menu" style="max-height: 400px; overflow-y: auto;">
                                     <div class="row px-2">
                                         @foreach ($categories->chunk(ceil($categories->count() / 3)) as $categoryGroup)
                                             <div class="col-4">
@@ -107,12 +107,12 @@
                                 </ul>
                             </li>
                             <li class="nav-item">
-                                <a class="color-2 nav-link fw-bold fs-3" href="{{ route('story.completed') }}">
+                                <a class="color-2 nav-link fw-bold fs-3 font-svn-apple" href="{{ route('story.completed') }}">
                                     Truyện Full
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="color-2 nav-link fw-bold fs-3" href="{{ route('guide.show') }}">
+                                <a class="color-2 nav-link fw-bold fs-3 font-svn-apple" href="{{ route('guide.show') }}">
                                     Hướng dẫn nạp
                                 </a>
                             </li>
@@ -229,7 +229,7 @@
 
                         <hr class="divider my-3">
 
-                        <a href="{{ route('home') }}" class="mobile-menu-item fw-semibold fs-3 color-2">
+                        <a href="{{ route('home') }}" class="mobile-menu-item fw-semibold fs-3 color-2 font-svn-apple">
                             Trang chủ
                         </a>
 
@@ -239,7 +239,7 @@
                             <div class="accordion-item border-0">
                                 <h2 class="accordion-header" id="categoryHeading">
                                     <button
-                                        class="accordion-button collapsed mobile-menu-item p-0 fw-semibold fs-3 color-2"
+                                        class="accordion-button collapsed mobile-menu-item p-0 fw-semibold fs-3 color-2 font-svn-apple"
                                         type="button" data-bs-toggle="collapse" data-bs-target="#categoryCollapse">
                                         Thể loại
                                     </button>
@@ -251,7 +251,7 @@
                                             @foreach ($categories->chunk(ceil($categories->count() / 2)) as $categoryGroup)
                                                 <div class="col-6">
                                                     @foreach ($categoryGroup as $category)
-                                                        <a class="mobile-menu-item ps-3 py-2 d-block color-2 fs-4"
+                                                        <a class="mobile-menu-item ps-3 py-2 d-block color-2 fs-6"
                                                             href="{{ route('categories.story.show', $category->slug) }}">
                                                             {{ $category->name }}
                                                         </a>
@@ -266,13 +266,13 @@
 
                         <hr class="divider my-3">
 
-                        <a href="{{ route('story.completed') }}" class="mobile-menu-item fw-semibold fs-3 color-2">
+                        <a href="{{ route('story.completed') }}" class="mobile-menu-item fw-semibold fs-3 color-2 font-svn-apple">
                             Truyện Full
                         </a>
 
                         <hr class="divider my-3">
 
-                        <a href="{{ route('guide.show') }}" class="mobile-menu-item fw-semibold fs-3 color-2">
+                        <a href="{{ route('guide.show') }}" class="mobile-menu-item fw-semibold fs-3 color-2 font-svn-apple">
                             Hướng dẫn nạp
                         </a>
 
@@ -287,7 +287,7 @@
                                             <img src="{{ auth()->user()->avatar ? Storage::url(auth()->user()->avatar) : asset('images/defaults/avatar_default.jpg') }}"
                                                 class="rounded-circle me-2" width="40" height="40" alt="avatar"
                                                 style="object-fit: cover;">
-                                            <span class="fw-semibold fs-3">{{ auth()->user()->name }}</span>
+                                            <span class="fw-semibold fs-3 font-svn-apple">{{ auth()->user()->name }}</span>
                                         </button>
                                     </h2>
                                     <div id="userCollapse" class="accordion-collapse collapse"
