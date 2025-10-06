@@ -52,17 +52,17 @@ class BlockDevTools
             }
             
             // Kiểm tra kích thước cửa sổ
-            function checkWindowSize() {
-                if (window.outerWidth - window.innerWidth > threshold || 
-                    window.outerHeight - window.innerHeight > threshold) {
-                    if (!devtoolsOpen) {
-                        devtoolsOpen = true;
-                        handleDevTools();
-                    }
-                } else {
-                    devtoolsOpen = false;
-                }
-            }
+            // function checkWindowSize() {
+            //     if (window.outerWidth - window.innerWidth > threshold || 
+            //         window.outerHeight - window.innerHeight > threshold) {
+            //         if (!devtoolsOpen) {
+            //             devtoolsOpen = true;
+            //             handleDevTools();
+            //         }
+            //     } else {
+            //         devtoolsOpen = false;
+            //     }
+            // }
             
             // Kiểm tra bằng console
             function checkConsole() {
@@ -95,7 +95,7 @@ class BlockDevTools
             }
             
             // Chạy kiểm tra
-            setInterval(checkWindowSize, 500);
+            // setInterval(checkWindowSize, 500);
             setInterval(checkConsole, 1000);
             setInterval(checkDebugger, 2000);
             

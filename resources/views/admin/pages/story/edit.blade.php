@@ -203,15 +203,6 @@
                                     </select>
                                 </div>
 
-                                <div class="form-group mt-3">
-                                    <div class="d-flex align-items-center">
-                                        <label class="mb-0 me-3" for="completed">Truyện đã hoàn thành <span class="text-danger">*</span></label>
-                                        <div class="form-check form-switch">
-                                            <input type="checkbox" name="completed" class="form-check-input" id="completed"
-                                                role="switch" {{ $story->completed ? 'checked' : '' }}>
-                                        </div>
-                                    </div>
-                                </div>
 
                                 <div class="form-group mt-3">
                                     <div class="d-flex align-items-center">

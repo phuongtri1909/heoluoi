@@ -1,6 +1,6 @@
 @if($relatedStories && $relatedStories->count() > 0)
 <div class="related-stories-section">
-    <h3 class="related-stories-title fs-5 font-svn-apple">TRUYỆN CÙNG THỂ LOẠI</h3>
+    <h3 class="related-stories-title fs-4">TRUYỆN CÙNG THỂ LOẠI</h3>
     <div class="related-stories-list">
         @foreach($relatedStories as $relatedStory)
         <a href="{{ route('show.page.story', $relatedStory->slug) }}" class="related-story-item text-decoration-none">
@@ -25,7 +25,6 @@
 
 .related-stories-title {
     text-align: center;
-    font-weight: bold;
     color: #333;
     margin-bottom: 20px;
     font-size: 16px;
@@ -73,7 +72,6 @@
 }
 
 .story-title {
-    font-weight: bold;
     color: #333;
     font-size: 14px;
     line-height: 1.3;

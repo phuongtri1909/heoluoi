@@ -159,6 +159,16 @@ class StoryController extends Controller
             'editor_id.exists' => 'Biên tập viên không hợp lệ.',
         ]);
 
+        // Validate editor_id if provided
+        if ($request->editor_id) {
+            $editor = User::find($request->editor_id);
+            if (!$editor || !in_array($editor->role, ['admin_main', 'admin_sub'])) {
+                return redirect()->route('admin.stories.create')
+                    ->with('error', 'Editor được chọn phải có quyền admin_main hoặc admin_sub.')
+                    ->withInput();
+            }
+        }
+
         DB::beginTransaction();
         try {
             $coverPaths = $this->processAndSaveImage($request->file('cover'));
@@ -194,7 +204,7 @@ class StoryController extends Controller
                 $counter++;
             }
 
-            $editorId = User::where('role', 'admin_main' || 'admin_sub')->first()->id;
+            $editorId = $request->editor_id;
 
             $story = Story::create([
                 'user_id' => Auth::id(),
@@ -278,6 +288,16 @@ class StoryController extends Controller
             'editor_id.exists' => 'Biên tập viên không hợp lệ.',
         ]);
 
+        // Validate editor_id if provided
+        if ($request->editor_id) {
+            $editor = User::find($request->editor_id);
+            if (!$editor || !in_array($editor->role, ['admin_main', 'admin_sub'])) {
+                return redirect()->route('admin.stories.edit', $story)
+                    ->with('error', 'Editor được chọn phải có quyền admin_main hoặc admin_sub.')
+                    ->withInput();
+            }
+        }
+
         DB::beginTransaction();
         try {
             $hasCombo = $request->has('has_combo');
@@ -314,7 +334,7 @@ class StoryController extends Controller
                 $counter++;
             }
 
-            $editorId = User::where('role', 'admin_main' || 'admin_sub')->first()->id;
+            $editorId = $request->editor_id;
 
             $data = [
                 'title' => $request->title,
