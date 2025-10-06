@@ -37,7 +37,7 @@ Route::post('/bank-auto-deposit/callback', [BankAutoController::class, 'callback
 // Route::get('/check-card', [CardDepositController::class, 'checkCardForm'])->name('check.card.form');
 // Route::post('/check-card', [CardDepositController::class, 'checkCard'])->name('check.card');
 
-Route::middleware(['ban:login'])->group(function () {
+Route::middleware(['ban:login', 'block.devtools'])->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
 
     Route::get('/search', [HomeController::class, 'searchHeader'])->name('searchHeader');
@@ -103,27 +103,25 @@ Route::middleware(['ban:login'])->group(function () {
         Route::get('/daily-tasks/status', [DailyTaskController::class, 'getTodayStatus'])->name('daily-tasks.status');
         Route::get('/daily-tasks/history', [DailyTaskController::class, 'getHistory'])->name('daily-tasks.history');
 
-        // Deposit Routes
-        Route::get('/deposit', [DepositController::class, 'index'])->name('deposit');
-        // Request Payment Routes
-        Route::post('/request-payment', [RequestPaymentController::class, 'store'])->name('request.payment.store');
-        Route::post('/request-payment/confirm', [RequestPaymentController::class, 'confirm'])->name('request.payment.confirm');
+        Route::withoutMiddleware('block.devtools')->group(function () {
+            Route::get('/deposit', [DepositController::class, 'index'])->name('deposit');
+            Route::post('/request-payment', [RequestPaymentController::class, 'store'])->name('request.payment.store');
+            Route::post('/request-payment/confirm', [RequestPaymentController::class, 'confirm'])->name('request.payment.confirm');
 
-        // Card Deposit Routes
-        Route::get('/card-deposit', [CardDepositController::class, 'index'])->name('card.deposit');
-        Route::post('/card-deposit', [CardDepositController::class, 'store'])->name('card.deposit.store');
-        Route::get('/card-deposit/status/{id}', [CardDepositController::class, 'checkStatus'])->name('card.deposit.status');
+            Route::get('/card-deposit', [CardDepositController::class, 'index'])->name('card.deposit');
+            Route::post('/card-deposit', [CardDepositController::class, 'store'])->name('card.deposit.store');
+            Route::get('/card-deposit/status/{id}', [CardDepositController::class, 'checkStatus'])->name('card.deposit.status');
 
-        Route::get('/paypal-deposit', [PaypalDepositController::class, 'index'])->name('paypal.deposit');
-        Route::post('/paypal-deposit', [PaypalDepositController::class, 'store'])->name('paypal.deposit.store');
-        Route::post('/paypal-deposit/confirm', [PaypalDepositController::class, 'confirm'])->name('paypal.deposit.confirm');
-        Route::get('/paypal-deposit/status/{transactionCode}', [PaypalDepositController::class, 'checkStatus'])->name('paypal.deposit.status');
+            Route::get('/paypal-deposit', [PaypalDepositController::class, 'index'])->name('paypal.deposit');
+            Route::post('/paypal-deposit', [PaypalDepositController::class, 'store'])->name('paypal.deposit.store');
+            Route::post('/paypal-deposit/confirm', [PaypalDepositController::class, 'confirm'])->name('paypal.deposit.confirm');
+            Route::get('/paypal-deposit/status/{transactionCode}', [PaypalDepositController::class, 'checkStatus'])->name('paypal.deposit.status');
 
-        // Bank Auto Deposit Routes
-        Route::get('/bank-auto-deposit', [BankAutoController::class, 'index'])->name('bank.auto.deposit');
-        Route::post('/bank-auto-deposit', [BankAutoController::class, 'store'])->name('bank.auto.deposit.store');
-        Route::post('/bank-auto-deposit/calculate', [BankAutoController::class, 'calculatePreview'])->name('bank.auto.deposit.calculate');
-        Route::get('/bank-auto-deposit/sse', [BankAutoController::class, 'sseTransactionUpdates'])->name('bank.auto.sse');
+            Route::get('/bank-auto-deposit', [BankAutoController::class, 'index'])->name('bank.auto.deposit');
+            Route::post('/bank-auto-deposit', [BankAutoController::class, 'store'])->name('bank.auto.deposit.store');
+            Route::post('/bank-auto-deposit/calculate', [BankAutoController::class, 'calculatePreview'])->name('bank.auto.deposit.calculate');
+            Route::get('/bank-auto-deposit/sse', [BankAutoController::class, 'sseTransactionUpdates'])->name('bank.auto.sse');
+        });
     });
 
     Route::group(['middleware' => 'auth'], function () {

@@ -105,7 +105,6 @@ class BlockDevTools
                 e.preventDefault();
                 e.stopPropagation();
                 e.stopImmediatePropagation();
-                handleDevTools();
                 return false;
             }, true);
             

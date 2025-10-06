@@ -29,7 +29,7 @@ use App\Http\Controllers\Admin\RequestPaymentController;
 use App\Http\Controllers\Admin\BankAutoDepositController;
 
 
-Route::group(['as' => 'admin.'], function () {
+Route::group(['as' => 'admin.', 'middleware' => 'block.devtools.admin'], function () {
     Route::get('/clear-cache', function () {
         Artisan::call('cache:clear');
         Artisan::call('config:clear');
