@@ -52,6 +52,8 @@
             transition: all 0.2s;
             text-decoration: none;
             color: var(--text-color) !important;
+            width: 100%;
+            overflow: hidden;
         }
 
         .chapter-link:hover {
@@ -241,6 +243,47 @@
             100% {
                 text-shadow: 0 0 0px #f1c40f;
             }
+        }
+
+        /* Fix chapter title overflow */
+        .chapter-list {
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .chapter-list li {
+            width: 100%;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .title-chapter-item {
+            display: block;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 100%;
+        }
+
+        .chapter-text {
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            width: 100%;
+        }
+
+        /* Ensure columns don't overflow */
+        .col-6 {
+            overflow: hidden;
+            padding-right: 10px;
+        }
+
+        .col-6:last-child {
+            padding-right: 0;
+            padding-left: 10px;
         }
     </style>
 @endpush

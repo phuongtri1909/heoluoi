@@ -14,12 +14,22 @@
             text-decoration: underline;
         }
         
+        .title-chapter-item {
+            display: block;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 100%;
+        }
+        
         .chapter-text {
             display: block;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 100%;
+            width: 100%;
         }
     </style>
 @endpush
