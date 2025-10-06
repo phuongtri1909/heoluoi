@@ -3,8 +3,7 @@
 namespace App\Http\Controllers\Client;
 
 use App\Models\Guide;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Http\Request;    
 use App\Http\Controllers\Controller;
 
 class GuideController extends Controller
@@ -16,7 +15,7 @@ class GuideController extends Controller
      */
     public function show()
     {
-        return Guide::published()->latest()->first();
+        $guide = Guide::published()->latest()->first();
 
         return view('pages.guide.show', compact('guide'));
     }

@@ -29,10 +29,6 @@ Route::get('/sitemap-stories.xml', [SitemapController::class, 'stories'])->name(
 Route::get('/sitemap-chapters.xml', [SitemapController::class, 'chapters'])->name('sitemap.chapters');
 Route::get('/sitemap-categories.xml', [SitemapController::class, 'categories'])->name('sitemap.categories');
 
-// DevTools blocked page
-Route::get('/devtools-blocked', function () {
-    return view('errors.devtools-blocked');
-})->name('devtools.blocked');
 
 Route::post('/card-deposit/callback', [CardDepositController::class, 'callback'])->name('card.deposit.callback');
 Route::post('/bank-auto-deposit/callback', [BankAutoController::class, 'callback'])->name('user.bank.auto.deposit.callback');
