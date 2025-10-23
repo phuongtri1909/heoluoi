@@ -20,12 +20,12 @@ return new class extends Migration
             $table->integer('coin_reward')->default(0)->comment('Số cám thưởng tại thời điểm hoàn thành nhiệm vụ');
             $table->timestamp('last_completed_at')->nullable();
             $table->string('ip_address')->nullable();
-            $table->string('user_agent')->nullable();
+            $table->text('user_agent')->nullable();
             $table->json('metadata')->nullable();
             $table->timestamps();
-            
+
             $table->unique(['user_id', 'daily_task_id', 'task_date']);
-            
+
             $table->index(['user_id', 'task_date']);
             $table->index(['daily_task_id', 'task_date']);
         });
