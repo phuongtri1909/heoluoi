@@ -15,6 +15,7 @@ use App\Models\Socials;
 use App\Models\Category;
 use App\Models\StoryPurchase;
 use App\Models\ChapterPurchase;
+use App\Models\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Schema;
@@ -116,6 +117,7 @@ class AppServiceProvider extends ServiceProvider
 
         $stories = Story::whereIn('id', $allStoryIds)
             ->where('status', 'published')
+            ->hide18Plus()
             ->withCount(['chapters' => function ($query) {
                 $query->where('status', 'published');
             }])
@@ -178,12 +180,22 @@ class AppServiceProvider extends ServiceProvider
     private function getBanners()
     {
         if (self::$banners === null) {
-            self::$banners = Banner::active()
+            $hide18Plus = Config::getConfig('hide_story_18_plus', 0);
+            
+            $query = Banner::active()
                 ->with(['story' => function ($query) {
                     $query->select('id', 'slug', 'is_18_plus', 'title');
                 }])
-                ->select('id', 'image', 'link', 'story_id')
-                ->get();
+                ->select('id', 'image', 'link', 'story_id');
+            
+            // Filter 18+ stories if config is enabled
+            if ($hide18Plus == 1) {
+                $query->whereHas('story', function ($q) {
+                    $q->where('is_18_plus', false);
+                })->orWhereNull('story_id');
+            }
+            
+            self::$banners = $query->get();
         }
         return self::$banners;
     }

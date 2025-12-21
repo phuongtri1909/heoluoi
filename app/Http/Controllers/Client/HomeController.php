@@ -34,6 +34,7 @@ class HomeController extends Controller
 
         $storiesQuery = Story::query()
             ->published()
+            ->hide18Plus()
             ->where(function ($q) use ($query) {
                 $q->where('title', 'LIKE', "%{$query}%")
                     ->orWhere('author_name', 'LIKE', "%{$query}%");
@@ -80,6 +81,7 @@ class HomeController extends Controller
         // Search in stories by author name
         $storiesQuery = Story::query()
             ->published()
+            ->hide18Plus()
             ->where('author_name', 'LIKE', "%{$query}%")
             ->whereHas('chapters', function ($query) {
                 $query->where('status', 'published');
@@ -123,6 +125,7 @@ class HomeController extends Controller
         // Search in stories by translator name
         $storiesQuery = Story::query()
             ->published()
+            ->hide18Plus()
             ->where(function ($outer) use ($query) {
                 $outer->whereHas('user', function ($q) use ($query) {
                     $q->where('name', 'LIKE', "%{$query}%");
@@ -169,6 +172,7 @@ class HomeController extends Controller
 
         $storiesQuery = $category->stories()
             ->published()
+            ->hide18Plus()
             ->whereHas('chapters', function ($query) {
                 $query->where('status', 'published');
             })
@@ -215,6 +219,7 @@ class HomeController extends Controller
         if ($hasActiveFilters) {
             $storiesQuery = Story::query()
                 ->published()
+                ->hide18Plus()
                 ->where('is_featured', true)
                 ->whereHas('chapters', function ($query) {
                     $query->where('status', 'published');
@@ -279,6 +284,7 @@ class HomeController extends Controller
             }
         ])
             ->published()
+            ->hide18Plus()
             ->where('is_featured', true)
             ->whereHas('chapters', function ($query) {
                 $query->where('status', 'published');
@@ -384,6 +390,7 @@ class HomeController extends Controller
     {
         $storiesQuery = Story::select('stories.*')
             ->where('status', 'published')
+            ->hide18Plus()
             ->whereHas('chapters', function ($query) {
                 $query->where('status', 'published');
             })
@@ -439,6 +446,7 @@ class HomeController extends Controller
         // Use withSubquery to avoid GROUP BY issues
         $storiesQuery = Story::select('stories.*')
             ->where('stories.status', 'published')
+            ->hide18Plus()
             ->whereHas('chapters', function ($query) {
                 $query->where('status', 'published');
             })
@@ -492,6 +500,7 @@ class HomeController extends Controller
             }
         ])
             ->published()
+            ->hide18Plus()
             ->whereHas('chapters', function ($query) {
                 $query->where('status', 'published');
             })
@@ -542,6 +551,7 @@ class HomeController extends Controller
 
         $storiesQuery = Story::select('stories.*')
             ->where('stories.status', 'published')
+            ->hide18Plus()
             ->whereHas('chapters', function ($query) {
                 $query->where('status', 'published');
             })
@@ -584,6 +594,7 @@ class HomeController extends Controller
     {
         $storiesQuery = Story::withCount('bookmarks')
             ->published()
+            ->hide18Plus()
             ->whereHas('chapters', function ($query) {
                 $query->where('status', 'published');
             })
@@ -632,6 +643,7 @@ class HomeController extends Controller
             }
         ])
             ->published()
+            ->hide18Plus()
             ->where('completed', true)
             ->whereHas('chapters', function ($query) {
                 $query->where('status', 'published');
@@ -742,6 +754,7 @@ class HomeController extends Controller
             }
         ])
             ->published()
+            ->hide18Plus()
             ->where('completed', true)
             ->whereHas('chapters', function ($query) {
                 $query->where('status', 'published');
@@ -809,6 +822,7 @@ class HomeController extends Controller
             },
         ])
             ->published()
+            ->hide18Plus()
             ->where(function ($q) {
                 $q->where('is_featured', true);
             })
@@ -889,6 +903,7 @@ class HomeController extends Controller
             }
         ])
             ->published()
+            ->hide18Plus()
             ->whereHas('chapters', function ($query) {
                 $query->where('status', 'published');
             })
@@ -953,6 +968,7 @@ class HomeController extends Controller
                 ->where('status', 'published');
         }, 'categories', 'user:id,name'])
             ->published()
+            ->hide18Plus()
             ->select([
                 'id',
                 'user_id',
@@ -1028,6 +1044,7 @@ class HomeController extends Controller
             'stories.completed'
         )
             ->where('stories.status', 'published')
+            ->hide18Plus()
             ->withAvg('ratings as average_rating', 'rating')
             ->with(['latestChapter' => function ($query) {
                 $query->select('id', 'story_id', 'number', 'slug', 'created_at','title')
@@ -1057,6 +1074,7 @@ class HomeController extends Controller
             'updated_at'
         ])
             ->where('status', 'published')
+            ->hide18Plus()
             ->whereExists(function ($query) {
                 $query->select(DB::raw(1))
                     ->from('ratings')
@@ -1111,6 +1129,7 @@ class HomeController extends Controller
             'stories.updated_at'
         ])
             ->where('stories.status', 'published')
+            ->hide18Plus()
             ->withCount([
                 'chapters' => function ($query) {
                     $query->where('status', 'published');
@@ -1155,6 +1174,7 @@ class HomeController extends Controller
             'updated_at'
         ])
             ->where('status', 'published')
+            ->hide18Plus()
             ->withCount([
                 'bookmarks',
                 'chapters' => function ($query) {
@@ -1252,6 +1272,7 @@ class HomeController extends Controller
         if ($story->author_name) {
             $authorStories = Story::query()
                 ->published()
+                ->hide18Plus()
                 ->where('author_name', 'LIKE', "%{$story->author_name}%")
                 ->where('id', '!=', $story->id)
                 ->with(['categories' => function ($query) {
@@ -1266,6 +1287,7 @@ class HomeController extends Controller
         if ($story->user_id) {
             $translatorStories = Story::query()
                 ->published()
+                ->hide18Plus()
                 ->where('user_id', $story->user_id)
                 ->where('id', '!=', $story->id)
                 ->with(['categories' => function ($query) {
@@ -1321,6 +1343,7 @@ class HomeController extends Controller
             })
             ->where('id', '!=', $story->id)
             ->where('status', 'published')
+            ->hide18Plus()
             ->whereHas('chapters', function ($query) {
                 $query->where('status', 'published');
             })

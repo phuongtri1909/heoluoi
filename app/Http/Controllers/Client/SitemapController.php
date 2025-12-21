@@ -11,6 +11,17 @@ class SitemapController extends Controller
 {
     public function index()
     {
+        $hide18Plus = \App\Models\Config::getConfig('hide_story_18_plus', 0);
+        $chaptersQuery = Chapter::where('status', 'published');
+        if ($hide18Plus == 1) {
+            $chaptersQuery->whereHas('story', function ($q) {
+                $q->where('is_18_plus', false);
+            });
+        }
+        $chaptersLastmod = $chaptersQuery->latest('updated_at')
+            ->first()
+            ?->updated_at?->toAtomString() ?? Carbon::now()->toAtomString();
+        
         $sitemaps = [
             [
                 'url' => route('sitemap.main'),
@@ -19,16 +30,14 @@ class SitemapController extends Controller
             [
                 'url' => route('sitemap.stories'),
                 'lastmod' => Story::where('status', 'published')
+                    ->hide18Plus()
                     ->latest('updated_at')
                     ->first()
                     ?->updated_at?->toAtomString() ?? Carbon::now()->toAtomString()
             ],
             [
                 'url' => route('sitemap.chapters'),
-                'lastmod' => Chapter::where('status', 'published')
-                    ->latest('updated_at')
-                    ->first()
-                    ?->updated_at?->toAtomString() ?? Carbon::now()->toAtomString()
+                'lastmod' => $chaptersLastmod
             ],
             [
                 'url' => route('sitemap.categories'),
@@ -80,6 +89,7 @@ class SitemapController extends Controller
     public function stories()
     {
         $stories = Story::where('status', 'published')
+            ->hide18Plus()
             ->select('id', 'slug', 'updated_at')
             ->latest('updated_at')
             ->get();
@@ -91,12 +101,20 @@ class SitemapController extends Controller
 
     public function chapters()
     {
+        $hide18Plus = \App\Models\Config::getConfig('hide_story_18_plus', 0);
+        
         $chapters = Chapter::where('status', 'published')
             ->select('id', 'story_id', 'slug', 'updated_at')
-            ->with(['story:id,slug'])
-            ->where('story_id', '!=', null)
-            ->latest('updated_at')
-            ->get();
+            ->with(['story:id,slug,is_18_plus'])
+            ->where('story_id', '!=', null);
+        
+        if ($hide18Plus == 1) {
+            $chapters->whereHas('story', function ($q) {
+                $q->where('is_18_plus', false);
+            });
+        }
+        
+        $chapters = $chapters->latest('updated_at')->get();
 
         return response()->view('sitemaps.chapters', [
             'chapters' => $chapters,

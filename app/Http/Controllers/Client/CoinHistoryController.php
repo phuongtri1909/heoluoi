@@ -21,7 +21,7 @@ class CoinHistoryController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        
+
         $filters = [
             'type' => $request->get('type'),
             'transaction_type' => $request->get('transaction_type'),
@@ -38,6 +38,7 @@ class CoinHistoryController extends Controller
             \App\Models\CoinHistory::TYPE_CARD_DEPOSIT => 'Nạp thẻ',
             \App\Models\CoinHistory::TYPE_PAYPAL_DEPOSIT => 'Nạp PayPal',
             \App\Models\CoinHistory::TYPE_BANK_DEPOSIT => 'Nạp chuyển khoản',
+            \App\Models\CoinHistory::TYPE_BANK_AUTO_DEPOSIT => 'Nạp bank auto',
             \App\Models\CoinHistory::TYPE_CHAPTER_PURCHASE => 'Mua chương',
             \App\Models\CoinHistory::TYPE_STORY_PURCHASE => 'Mua combo truyện',
             \App\Models\CoinHistory::TYPE_CHAPTER_EARNINGS => 'Thu nhập từ chương',

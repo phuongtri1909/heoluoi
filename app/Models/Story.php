@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Config;
 
 class Story extends Model
 {
@@ -224,6 +225,18 @@ class Story extends Model
     public function scopeNotFeatured($query)
     {
         return $query->where('is_featured', false);
+    }
+
+    /**
+     * Scope to hide 18+ stories if config is enabled
+     */
+    public function scopeHide18Plus($query)
+    {
+        $hide18Plus = Config::getConfig('hide_story_18_plus', 0);
+        if ($hide18Plus == 1) {
+            return $query->where('is_18_plus', false);
+        }
+        return $query;
     }
 
     public static function getNextFeaturedOrder()
