@@ -116,7 +116,7 @@ class DepositController extends Controller
             return redirect()->route('home')->with('error', 'Bạn không có quyền truy cập trang này.');
         }
 
-        $query = Deposit::with(['user', 'bank']);
+        $query = Deposit::with(['user', 'bank', 'approver:id,name']);
 
         if ($request->has('status') && !empty($request->status)) {
             $query->where('status', $request->status);

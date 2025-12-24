@@ -15,7 +15,7 @@ class BankAutoDepositController extends Controller
 {
     public function index(Request $request)
     {
-        $query = BankAutoDeposit::with(['user', 'bankAuto']);
+        $query = BankAutoDeposit::with(['user:id,name,email,avatar', 'bankAuto']);
 
         // Filter by status
         if ($request->has('status') && $request->status !== '') {
@@ -36,7 +36,7 @@ class BankAutoDepositController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('transaction_code', 'like', "%{$search}%")
                   ->orWhereHas('user', function ($userQuery) use ($search) {
-                      $userQuery->where('username', 'like', "%{$search}%")
+                      $userQuery->where('name', 'like', "%{$search}%")
                                ->orWhere('email', 'like', "%{$search}%");
                   });
             });
@@ -59,7 +59,10 @@ class BankAutoDepositController extends Controller
 
     public function show(BankAutoDeposit $bankAutoDeposit)
     {
-        $bankAutoDeposit->load(['user', 'bankAuto']);
+        $bankAutoDeposit->load([
+            'user:id,name,email,avatar,coins,active,created_at', 
+            'bankAuto:id,name,code,account_number,account_name,logo,status'
+        ]);
         return view('admin.pages.bank-auto-deposits.show', compact('bankAutoDeposit'));
     }
 }

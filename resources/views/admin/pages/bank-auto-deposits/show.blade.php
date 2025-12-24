@@ -86,24 +86,39 @@
                             <p class="text-sm mb-0">{{ $bankAutoDeposit->created_at->format('d/m/Y H:i:s') }}</p>
                         </div>
                         
-                        @if($bankAutoDeposit->approved_at)
+                        @php
+                            $approvedAt = array_key_exists('approved_at', $bankAutoDeposit->getAttributes()) 
+                                ? ($bankAutoDeposit->approved_at ?? null) 
+                                : null;
+                        @endphp
+                        @if($approvedAt)
                         <div class="mb-3">
                             <label class="form-label text-sm font-weight-bold">Thời gian duyệt</label>
-                            <p class="text-sm mb-0">{{ $bankAutoDeposit->approved_at->format('d/m/Y H:i:s') }}</p>
+                            <p class="text-sm mb-0">{{ $approvedAt instanceof \Carbon\Carbon ? $approvedAt->format('d/m/Y H:i:s') : $approvedAt }}</p>
                         </div>
                         @endif
                         
-                        @if($bankAutoDeposit->rejected_at)
+                        @php
+                            $rejectedAt = array_key_exists('rejected_at', $bankAutoDeposit->getAttributes()) 
+                                ? ($bankAutoDeposit->rejected_at ?? null) 
+                                : null;
+                        @endphp
+                        @if($rejectedAt)
                         <div class="mb-3">
                             <label class="form-label text-sm font-weight-bold">Thời gian từ chối</label>
-                            <p class="text-sm mb-0">{{ $bankAutoDeposit->rejected_at->format('d/m/Y H:i:s') }}</p>
+                            <p class="text-sm mb-0">{{ $rejectedAt instanceof \Carbon\Carbon ? $rejectedAt->format('d/m/Y H:i:s') : $rejectedAt }}</p>
                         </div>
                         @endif
                         
-                        @if($bankAutoDeposit->rejection_reason)
+                        @php
+                            $rejectionReason = array_key_exists('rejection_reason', $bankAutoDeposit->getAttributes()) 
+                                ? ($bankAutoDeposit->rejection_reason ?? null) 
+                                : null;
+                        @endphp
+                        @if($rejectionReason)
                         <div class="mb-3">
                             <label class="form-label text-sm font-weight-bold">Lý do từ chối</label>
-                            <p class="text-sm mb-0">{{ $bankAutoDeposit->rejection_reason }}</p>
+                            <p class="text-sm mb-0">{{ $rejectionReason }}</p>
                         </div>
                         @endif
                     </div>
@@ -122,10 +137,15 @@
             <div class="card-body">
                 <div class="d-flex align-items-center mb-3">
                     <div class="avatar avatar-sm me-3">
-                        <img src="{{ $bankAutoDeposit->user->avatar ? Storage::url($bankAutoDeposit->user->avatar) : asset('images/defaults/avatar.jpg') }}" alt="Avatar" class="avatar-sm rounded-circle">
+                        <img src="{{ $bankAutoDeposit->user->avatar ? Storage::url($bankAutoDeposit->user->avatar) : asset('images/defaults/avatar_default.jpg') }}" alt="Avatar" class="avatar-sm rounded-circle">
                     </div>
                     <div>
-                        <h6 class="mb-0">{{ $bankAutoDeposit->user->username }}</h6>
+                        @php
+                            $userName = array_key_exists('username', $bankAutoDeposit->user->getAttributes()) 
+                                ? ($bankAutoDeposit->user->username ?? $bankAutoDeposit->user->name) 
+                                : $bankAutoDeposit->user->name;
+                        @endphp
+                        <h6 class="mb-0">{{ $userName }}</h6>
                         <p class="text-sm text-secondary mb-0">{{ $bankAutoDeposit->user->email }}</p>
                     </div>
                 </div>
@@ -178,10 +198,11 @@
                         <span class="text-sm">{{ $bankAutoDeposit->bankAuto->account_name }}</span>
                     </div>
                     
-                    <div class="mb-2">
-                        <span class="text-sm font-weight-bold">Chi nhánh:</span>
-                        <span class="text-sm">{{ $bankAutoDeposit->bankAuto->branch }}</span>
-                    </div>
+                    @php
+                        $branch = array_key_exists('branch', $bankAutoDeposit->bankAuto->getAttributes()) 
+                            ? ($bankAutoDeposit->bankAuto->branch ?? 'N/A') 
+                            : 'N/A';
+                    @endphp
                     
                     <div class="mb-0">
                         <span class="text-sm font-weight-bold">Trạng thái:</span>

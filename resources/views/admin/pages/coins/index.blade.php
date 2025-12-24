@@ -64,7 +64,7 @@
                                         </div>
 
                                             <div class="d-flex flex-column align-items-center mb-2 me-2">
-                                                <a href="{{ route('admin.users.show', ['user' => $user]) }}" class="btn btn-link p-1 mb-0 action-icon view-icon-primary" title="Chi tiết">
+                                                <a href="{{ route('admin.users.show', $user->id) }}" class="btn btn-link p-1 mb-0 action-icon view-icon-primary" title="Chi tiết">
                                                     <i class="fas fa-eye text-white"></i>
                                                 </a>
                                             </div>

@@ -123,7 +123,8 @@ class PurchaseController extends Controller
                     ], 400);
                 }
 
-                $authorPercentage = $story->is_monopoly ? Config::getConfig('monopoly_author_percentage', 90) : Config::getConfig('non_monopoly_author_percentage', 70);
+                $isMonopoly = array_key_exists('is_monopoly', $story->getAttributes()) ? ($story->is_monopoly ?? false) : false;
+                $authorPercentage = $isMonopoly ? Config::getConfig('monopoly_author_percentage', 90) : Config::getConfig('non_monopoly_author_percentage', 70);
                 $rawEarnings = ($chapter->price * $authorPercentage) / 100;
                 $authorEarnings = round($rawEarnings);
 
@@ -285,7 +286,8 @@ class PurchaseController extends Controller
                     ], 400);
                 }
 
-                $authorPercentage = $story->is_monopoly ? Config::getConfig('monopoly_author_percentage', 90) : Config::getConfig('non_monopoly_author_percentage', 70);
+                $isMonopoly = array_key_exists('is_monopoly', $story->getAttributes()) ? ($story->is_monopoly ?? false) : false;
+                $authorPercentage = $isMonopoly ? Config::getConfig('monopoly_author_percentage', 90) : Config::getConfig('non_monopoly_author_percentage', 70);
                 $rawEarnings = ($story->combo_price * $authorPercentage) / 100;
                 $authorEarnings = round($rawEarnings);
 

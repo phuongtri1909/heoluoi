@@ -137,7 +137,7 @@ class Story extends Model
 
     public function editor()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'editor_id');
     }
 
     /**

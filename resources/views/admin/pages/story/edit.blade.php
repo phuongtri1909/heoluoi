@@ -133,9 +133,12 @@
                                     <label for="story_type">Loại truyện <span class="text-danger">*</span></label>
                                     <select name="story_type" id="story_type" class="form-control @error('story_type') is-invalid @enderror">
                                         <option value="">-- Chọn loại truyện --</option>
-                                        <option value="original" {{ old('story_type', $story->story_type) == 'original' ? 'selected' : '' }}>Sáng tác</option>
-                                        <option value="translated" {{ old('story_type', $story->story_type) == 'translated' ? 'selected' : '' }}>Dịch</option>
-                                        <option value="rewritten" {{ old('story_type', $story->story_type) == 'rewritten' ? 'selected' : '' }}>Chuyển ngữ</option>
+                                        @php
+                                            $storyType = array_key_exists('story_type', $story->getAttributes()) ? ($story->story_type ?? '') : '';
+                                        @endphp
+                                        <option value="original" {{ old('story_type', $storyType) == 'original' ? 'selected' : '' }}>Sáng tác</option>
+                                        <option value="translated" {{ old('story_type', $storyType) == 'translated' ? 'selected' : '' }}>Dịch</option>
+                                        <option value="rewritten" {{ old('story_type', $storyType) == 'rewritten' ? 'selected' : '' }}>Chuyển ngữ</option>
                                     </select>
                                     @error('story_type')
                                         <div class="invalid-feedback">{{ $message }}</div>

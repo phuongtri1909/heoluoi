@@ -232,7 +232,12 @@
                                 <td>
                                     <div class="d-flex px-2 py-1">
                                         <div class="d-flex flex-column justify-content-center">
-                                            <h6 class="mb-0 text-sm">{{ $deposit->user->username }}</h6>
+                                            @php
+                                                $userName = array_key_exists('username', $deposit->user->getAttributes()) 
+                                                    ? ($deposit->user->username ?? $deposit->user->name) 
+                                                    : $deposit->user->name;
+                                            @endphp
+                                            <h6 class="mb-0 text-sm">{{ $userName }}</h6>
                                             <p class="text-xs text-secondary mb-0">{{ $deposit->user->email }}</p>
                                         </div>
                                     </div>
@@ -292,7 +297,7 @@
 
             <!-- Pagination -->
             <div class="d-flex justify-content-center mt-4">
-                {{ $deposits->appends(request()->query())->links() }}
+                <x-pagination :paginator="$deposits" />
             </div>
         </div>
     </div>

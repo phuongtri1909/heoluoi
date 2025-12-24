@@ -16,7 +16,7 @@ class BanIpController extends Controller
      */
     public function index(Request $request)
     {
-        $query = BanIp::with('user');
+        $query = BanIp::with(['user', 'bannedBy:id,name']);
 
         if ($request->filled('ip')) {
             $query->where('ip_address', 'like', '%' . $request->ip . '%');

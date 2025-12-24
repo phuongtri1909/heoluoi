@@ -88,7 +88,10 @@
                                     @if($story->is_18_plus)
                                         <span class="badge bg-gradient-danger mb-2">18+</span>
                                     @endif
-                                    @if($story->is_monopoly)
+                                    @php
+                                        $isMonopoly = array_key_exists('is_monopoly', $story->getAttributes()) ? ($story->is_monopoly ?? false) : false;
+                                    @endphp
+                                    @if($isMonopoly)
                                         <span class="badge bg-gradient-dark mb-2">Độc quyền</span>
                                     @endif
                                 </div>
@@ -119,7 +122,10 @@
                             <div class="row mb-3">
                                 <div class="col-md-6">
                                     <h6 class="text-uppercase text-xs font-weight-bolder opacity-6">Loại truyện:</h6>
-                                    <p>{{ $story->story_type ? ucfirst($story->story_type) : 'Chưa phân loại' }}</p>
+                                    @php
+                                        $storyType = array_key_exists('story_type', $story->getAttributes()) ? ($story->story_type ?? '') : '';
+                                    @endphp
+                                    <p>{{ $storyType ? ucfirst($storyType) : 'Chưa phân loại' }}</p>
                                 </div>
                                 <div class="col-md-6">
                                     <h6 class="text-uppercase text-xs font-weight-bolder opacity-6">Người đăng:</h6>
@@ -127,10 +133,13 @@
                                 </div>
                             </div>
                             
-                            @if($story->link_aff)
+                            @php
+                                $linkAff = array_key_exists('link_aff', $story->getAttributes()) ? ($story->link_aff ?? '') : '';
+                            @endphp
+                            @if($linkAff)
                                 <div class="mb-3">
                                     <h6 class="text-uppercase text-xs font-weight-bolder opacity-6">Link Affiliate:</h6>
-                                    <a href="{{ $story->link_aff }}" target="_blank">{{ $story->link_aff }}</a>
+                                    <a href="{{ $linkAff }}" target="_blank">{{ $linkAff }}</a>
                                 </div>
                             @endif
                             

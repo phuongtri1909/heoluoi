@@ -93,7 +93,7 @@ class PaypalDepositController extends Controller
      */
     public function requestPaymentIndex(Request $request)
     {
-        $query = RequestPaymentPaypal::with(['user'])
+        $query = RequestPaymentPaypal::with(['user', 'paypalDeposit'])
             ->where('payment_type', RequestPaymentPaypal::TYPE_PAYPAL);
 
         // Filter by status

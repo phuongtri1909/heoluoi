@@ -54,7 +54,7 @@ class StoryController extends Controller
 
     public function index(Request $request)
     {
-        $query = Story::with(['user', 'categories'])
+        $query = Story::with(['user', 'categories', 'editor:id,name'])
             ->withCount('chapters');
 
        

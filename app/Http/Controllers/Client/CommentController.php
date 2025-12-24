@@ -67,7 +67,14 @@ class CommentController extends Controller
 
     public function loadComments(Request $request, $storyId)
     {
-        $pinnedComments = Comment::with(['user', 'approvedReplies.user', 'reactions'])
+        $pinnedComments = Comment::with([
+            'user',
+            'approvedReplies' => function ($q) {
+                $q->approved()->latest();
+            },
+            'approvedReplies.user',
+            'reactions'
+        ])
             ->where('story_id', $storyId)
             ->whereNull('reply_id')
             ->where('is_pinned', true)
@@ -75,7 +82,14 @@ class CommentController extends Controller
             ->latest('pinned_at')
             ->get();
 
-        $regularComments = Comment::with(['user', 'approvedReplies.user', 'reactions'])
+        $regularComments = Comment::with([
+            'user',
+            'approvedReplies' => function ($q) {
+                $q->approved()->latest();
+            },
+            'approvedReplies.user',
+            'reactions'
+        ])
             ->where('story_id', $storyId)
             ->whereNull('reply_id')
             ->where('is_pinned', false)
@@ -116,7 +130,14 @@ class CommentController extends Controller
         $comment->pinned_at = $comment->is_pinned ? now() : null;
         $comment->save();
 
-        $pinnedComments = Comment::with(['user', 'replies.user', 'reactions'])
+        $pinnedComments = Comment::with([
+            'user',
+            'approvedReplies' => function ($q) {
+                $q->approved()->latest();
+            },
+            'approvedReplies.user',
+            'reactions'
+        ])
             ->where('story_id', $comment->story_id)
             ->whereNull('reply_id')
             ->where('is_pinned', true)
@@ -124,7 +145,14 @@ class CommentController extends Controller
             ->latest('pinned_at')
             ->get();
 
-        $regularComments = Comment::with(['user', 'replies.user', 'reactions'])
+        $regularComments = Comment::with([
+            'user',
+            'approvedReplies' => function ($q) {
+                $q->approved()->latest();
+            },
+            'approvedReplies.user',
+            'reactions'
+        ])
             ->where('story_id', $comment->story_id)
             ->whereNull('reply_id')
             ->where('is_pinned', false)

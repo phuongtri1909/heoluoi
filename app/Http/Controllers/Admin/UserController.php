@@ -50,7 +50,7 @@ class UserController extends Controller
         // Chỉ load dữ liệu liên quan đến doanh thu cho admin_main
         if ($authUser->role === 'admin_main') {
             $deposits = $user->deposits()
-                ->with('bank')
+                ->with(['bank', 'approver:id,name'])
                 ->orderByDesc('created_at')
                 ->paginate(5, ['*'], 'deposits_page');
 
@@ -96,6 +96,7 @@ class UserController extends Controller
             ->paginate(5, ['*'], 'daily_tasks_page');
 
         $coinHistories = $user->coinHistories()
+            ->with('reference')
             ->orderByDesc('created_at')
             ->paginate(10, ['*'], 'coin_histories_page');
 
@@ -382,7 +383,7 @@ class UserController extends Controller
         switch ($type) {
             case 'deposits':
                 $data = $user->deposits()
-                    ->with('bank')
+                    ->with(['bank', 'approver:id,name'])
                     ->orderByDesc('created_at')
                     ->paginate(5, ['*'], 'deposits_page', $page);
                 break;
@@ -444,6 +445,7 @@ class UserController extends Controller
                 break;
             case 'coin-histories':
                 $data = $user->coinHistories()
+                    ->with('reference')
                     ->orderByDesc('created_at')
                     ->paginate(10, ['*'], 'coin_histories_page', $page);
                 break;
