@@ -229,19 +229,22 @@ class AppServiceProvider extends ServiceProvider
                 $story->latest_purchase_at = null;
                 $story->latest_purchase_diff = 'Chưa có ai mua';
             }
-            $story->unsetRelation('chapters');
-            $story->unsetRelation('categories');
-            $story->unsetRelation('user');
-            if ($story->relationLoaded('latestChapter')) {
-                $story->unsetRelation('latestChapter');
+            foreach (['chapters', 'categories', 'user', 'latestChapter', 'ratings', 'bookmarks'] as $relation) {
+                if ($story->relationLoaded($relation)) {
+                    $story->unsetRelation($relation);
+                }
             }
         });
 
-            return [
-                'daily' => $dailyIds->map(fn($id) => $stories->get($id))->filter(),
-                'weekly' => $weeklyIds->map(fn($id) => $stories->get($id))->filter(),
-                'monthly' => $monthlyIds->map(fn($id) => $stories->get($id))->filter(),
-            ];
+        $dailyStories = $dailyIds->map(fn($id) => $stories->get($id))->filter()->values();
+        $weeklyStories = $weeklyIds->map(fn($id) => $stories->get($id))->filter()->values();
+        $monthlyStories = $monthlyIds->map(fn($id) => $stories->get($id))->filter()->values();
+
+        return [
+            'daily' => $dailyStories,
+            'weekly' => $weeklyStories,
+            'monthly' => $monthlyStories,
+        ];
         });
     }
 
