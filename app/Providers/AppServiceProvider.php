@@ -229,6 +229,12 @@ class AppServiceProvider extends ServiceProvider
                 $story->latest_purchase_at = null;
                 $story->latest_purchase_diff = 'Chưa có ai mua';
             }
+            $story->unsetRelation('chapters');
+            $story->unsetRelation('categories');
+            $story->unsetRelation('user');
+            if ($story->relationLoaded('latestChapter')) {
+                $story->unsetRelation('latestChapter');
+            }
         });
 
             return [

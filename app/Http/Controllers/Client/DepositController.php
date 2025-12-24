@@ -38,7 +38,10 @@ class DepositController extends Controller
     {
         $user = Auth::user();
         $banks = Bank::where('status', true)->get();
-        $deposits = Deposit::where('user_id', $user->id)->latest()->paginate(10);
+        $deposits = Deposit::with('bank')
+            ->where('user_id', $user->id)
+            ->latest()
+            ->paginate(10);
         
         $coinExchangeRate = $this->coinExchangeRate;
         $coinBankPercent = $this->coinBankPercent;
