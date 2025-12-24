@@ -123,7 +123,7 @@
             </div>
         </div>
 
-        @if ($comment->approvedReplies && $comment->approvedReplies->count() > 0)
+        @if ($comment->relationLoaded('approvedReplies') && $comment->approvedReplies && $comment->approvedReplies->count() > 0)
             <ul class="comments mt-3">
                 @foreach ($comment->approvedReplies as $reply)
                     @include('components.comments-item', ['comment' => $reply])

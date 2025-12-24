@@ -1495,12 +1495,19 @@ class HomeController extends Controller
             $pinnedComments = Comment::with([
                 'user:id,name,avatar,role',
                 'approvedReplies' => function ($q) {
-                    $q->select('id', 'user_id', 'comment', 'reply_id', 'created_at')
+                    $q->select('id', 'user_id', 'comment', 'reply_id', 'level', 'approval_status', 'created_at')
                         ->approved()
                         ->latest();
                 },
                 'approvedReplies.user:id,name,avatar,role',
                 'approvedReplies.reactions:id,comment_id,user_id,type',
+                'approvedReplies.approvedReplies' => function ($q) {
+                    $q->select('id', 'user_id', 'comment', 'reply_id', 'level', 'approval_status', 'created_at')
+                        ->approved()
+                        ->latest();
+                },
+                'approvedReplies.approvedReplies.user:id,name,avatar,role',
+                'approvedReplies.approvedReplies.reactions:id,comment_id,user_id,type',
                 'reactions:id,comment_id,user_id,type'
             ])
                 ->where('story_id', $data['story']->id)
@@ -1514,12 +1521,19 @@ class HomeController extends Controller
             $regularComments = Comment::with([
                 'user:id,name,avatar,role',
                 'approvedReplies' => function ($q) {
-                    $q->select('id', 'user_id', 'comment', 'reply_id', 'created_at')
+                    $q->select('id', 'user_id', 'comment', 'reply_id', 'level', 'approval_status', 'created_at')
                         ->approved()
                         ->latest();
                 },
                 'approvedReplies.user:id,name,avatar,role',
                 'approvedReplies.reactions:id,comment_id,user_id,type',
+                'approvedReplies.approvedReplies' => function ($q) {
+                    $q->select('id', 'user_id', 'comment', 'reply_id', 'level', 'approval_status', 'created_at')
+                        ->approved()
+                        ->latest();
+                },
+                'approvedReplies.approvedReplies.user:id,name,avatar,role',
+                'approvedReplies.approvedReplies.reactions:id,comment_id,user_id,type',
                 'reactions:id,comment_id,user_id,type'
             ])
                 ->where('story_id', $data['story']->id)
@@ -2000,12 +2014,19 @@ class HomeController extends Controller
             $pinnedComments = Comment::with([
                 'user:id,name,avatar,role',
                 'approvedReplies' => function ($q) {
-                    $q->select('id', 'user_id', 'comment', 'reply_id', 'created_at')
+                    $q->select('id', 'user_id', 'comment', 'reply_id', 'level', 'approval_status', 'created_at')
                         ->approved()
                         ->latest();
                 },
                 'approvedReplies.user:id,name,avatar,role',
                 'approvedReplies.reactions:id,comment_id,user_id,type',
+                'approvedReplies.approvedReplies' => function ($q) {
+                    $q->select('id', 'user_id', 'comment', 'reply_id', 'level', 'approval_status', 'created_at')
+                        ->approved()
+                        ->latest();
+                },
+                'approvedReplies.approvedReplies.user:id,name,avatar,role',
+                'approvedReplies.approvedReplies.reactions:id,comment_id,user_id,type',
                 'reactions:id,comment_id,user_id,type'
             ])
                 ->where('story_id', $storyId)
@@ -2019,12 +2040,19 @@ class HomeController extends Controller
             $regularComments = Comment::with([
                 'user:id,name,avatar,role',
                 'approvedReplies' => function ($q) {
-                    $q->select('id', 'user_id', 'comment', 'reply_id', 'created_at')
+                    $q->select('id', 'user_id', 'comment', 'reply_id', 'level', 'approval_status', 'created_at')
                         ->approved()
                         ->latest();
                 },
                 'approvedReplies.user:id,name,avatar,role',
                 'approvedReplies.reactions:id,comment_id,user_id,type',
+                'approvedReplies.approvedReplies' => function ($q) {
+                    $q->select('id', 'user_id', 'comment', 'reply_id', 'level', 'approval_status', 'created_at')
+                        ->approved()
+                        ->latest();
+                },
+                'approvedReplies.approvedReplies.user:id,name,avatar,role',
+                'approvedReplies.approvedReplies.reactions:id,comment_id,user_id,type',
                 'reactions:id,comment_id,user_id,type'
             ])
                 ->where('story_id', $storyId)

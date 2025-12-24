@@ -61,7 +61,11 @@ class BookmarkController
             'story' => function ($query) {
                 $query->withCount(['chapters' => function ($q) {
                     $q->where('status', 'published');
-                }]);
+                }])
+                ->withSum(['chapters' => function ($q) {
+                    $q->where('status', 'published');
+                }], 'views')
+                ->with(['latestChapter:id,story_id,number,slug']);
             },
             'lastChapter'
         ])
