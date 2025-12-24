@@ -136,8 +136,6 @@ class PurchaseController extends Controller
                     [
                         'amount_paid' => $chapter->price,
                         'amount_received' => $authorEarnings,
-                        'updated_at' => now(),
-                        'created_at' => now()
                     ]
                 );
 

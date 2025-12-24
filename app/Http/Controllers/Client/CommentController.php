@@ -73,6 +73,7 @@ class CommentController extends Controller
                 $q->approved()->latest();
             },
             'approvedReplies.user',
+            'approvedReplies.reactions',
             'reactions'
         ])
             ->where('story_id', $storyId)
@@ -88,6 +89,7 @@ class CommentController extends Controller
                 $q->approved()->latest();
             },
             'approvedReplies.user',
+            'approvedReplies.reactions',
             'reactions'
         ])
             ->where('story_id', $storyId)
@@ -136,6 +138,7 @@ class CommentController extends Controller
                 $q->approved()->latest();
             },
             'approvedReplies.user',
+            'approvedReplies.reactions',
             'reactions'
         ])
             ->where('story_id', $comment->story_id)
@@ -151,6 +154,7 @@ class CommentController extends Controller
                 $q->approved()->latest();
             },
             'approvedReplies.user',
+            'approvedReplies.reactions',
             'reactions'
         ])
             ->where('story_id', $comment->story_id)
@@ -190,7 +194,15 @@ class CommentController extends Controller
                 $comment->delete();
                 
                 if ($isPinned) {
-                    $pinnedComments = Comment::with(['user', 'replies.user', 'reactions'])
+                    $pinnedComments = Comment::with([
+                        'user',
+                        'approvedReplies' => function ($q) {
+                            $q->approved()->latest();
+                        },
+                        'approvedReplies.user',
+                        'approvedReplies.reactions',
+                        'reactions'
+                    ])
                         ->where('story_id', $storyId)
                         ->whereNull('reply_id')
                         ->where('is_pinned', true)
@@ -198,7 +210,15 @@ class CommentController extends Controller
                         ->latest('pinned_at')
                         ->get();
                     
-                    $regularComments = Comment::with(['user', 'replies.user', 'reactions'])
+                    $regularComments = Comment::with([
+                        'user',
+                        'approvedReplies' => function ($q) {
+                            $q->approved()->latest();
+                        },
+                        'approvedReplies.user',
+                        'approvedReplies.reactions',
+                        'reactions'
+                    ])
                         ->where('story_id', $storyId)
                         ->whereNull('reply_id')
                         ->where('is_pinned', false)
@@ -232,7 +252,15 @@ class CommentController extends Controller
                 $comment->delete();
                 
                 if ($isPinned) {
-                    $pinnedComments = Comment::with(['user', 'replies.user', 'reactions'])
+                    $pinnedComments = Comment::with([
+                        'user',
+                        'approvedReplies' => function ($q) {
+                            $q->approved()->latest();
+                        },
+                        'approvedReplies.user',
+                        'approvedReplies.reactions',
+                        'reactions'
+                    ])
                         ->where('story_id', $storyId)
                         ->whereNull('reply_id')
                         ->where('is_pinned', true)
@@ -240,7 +268,15 @@ class CommentController extends Controller
                         ->latest('pinned_at')
                         ->get();
                     
-                    $regularComments = Comment::with(['user', 'replies.user', 'reactions'])
+                    $regularComments = Comment::with([
+                        'user',
+                        'approvedReplies' => function ($q) {
+                            $q->approved()->latest();
+                        },
+                        'approvedReplies.user',
+                        'approvedReplies.reactions',
+                        'reactions'
+                    ])
                         ->where('story_id', $storyId)
                         ->whereNull('reply_id')
                         ->where('is_pinned', false)
@@ -369,7 +405,15 @@ class CommentController extends Controller
 
             $comment->load(['user', 'reactions']);
 
-        $pinnedComments = Comment::with(['user', 'replies.user', 'reactions'])
+        $pinnedComments = Comment::with([
+            'user',
+            'approvedReplies' => function ($q) {
+                $q->approved()->latest();
+            },
+            'approvedReplies.user',
+            'approvedReplies.reactions',
+            'reactions'
+        ])
             ->where('story_id', $validated['story_id'])
             ->whereNull('reply_id')
             ->where('is_pinned', true)

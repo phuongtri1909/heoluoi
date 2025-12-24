@@ -1500,6 +1500,7 @@ class HomeController extends Controller
                         ->latest();
                 },
                 'approvedReplies.user:id,name,avatar,role',
+                'approvedReplies.reactions:id,comment_id,user_id,type',
                 'reactions:id,comment_id,user_id,type'
             ])
                 ->where('story_id', $data['story']->id)
@@ -1518,6 +1519,7 @@ class HomeController extends Controller
                         ->latest();
                 },
                 'approvedReplies.user:id,name,avatar,role',
+                'approvedReplies.reactions:id,comment_id,user_id,type',
                 'reactions:id,comment_id,user_id,type'
             ])
                 ->where('story_id', $data['story']->id)
@@ -2003,6 +2005,7 @@ class HomeController extends Controller
                         ->latest();
                 },
                 'approvedReplies.user:id,name,avatar,role',
+                'approvedReplies.reactions:id,comment_id,user_id,type',
                 'reactions:id,comment_id,user_id,type'
             ])
                 ->where('story_id', $storyId)
@@ -2021,6 +2024,7 @@ class HomeController extends Controller
                         ->latest();
                 },
                 'approvedReplies.user:id,name,avatar,role',
+                'approvedReplies.reactions:id,comment_id,user_id,type',
                 'reactions:id,comment_id,user_id,type'
             ])
                 ->where('story_id', $storyId)
