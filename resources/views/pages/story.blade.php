@@ -26,9 +26,9 @@
     <meta property="og:title" content="{{ $story->title }} - {{ config('app.name') }}">
     <meta property="og:description" content="{{ Str::limit(html_entity_decode(strip_tags($story->description)), 160) }}">
     <meta property="og:image"
-        content="{{ $story->cover_jpeg ? url(Storage::url($story->cover_jpeg)) : url(asset('images/logo/logo-site.png')) }}">
+        content="{{ $story->cover ? url(Storage::url($story->cover)) : url(asset('images/logo/logo-site.png')) }}">
     <meta property="og:image:secure_url"
-        content="{{ $story->cover_jpeg ? url(Storage::url($story->cover_jpeg)) : url(asset('images/logo/logo-site.png')) }}">
+        content="{{ $story->cover ? url(Storage::url($story->cover)) : url(asset('images/logo/logo-site.png')) }}">
     <meta property="og:image:width" content="600">
     <meta property="og:image:height" content="800">
     <meta property="og:image:alt" content="Ảnh bìa truyện {{ $story->title }}">
@@ -42,7 +42,7 @@
     <meta name="twitter:title" content="{{ $story->title }} - {{ config('app.name') }}">
     <meta name="twitter:description" content="{{ Str::limit(html_entity_decode(strip_tags($story->description)), 160) }}">
     <meta name="twitter:image"
-        content="{{ $story->cover_jpeg ? url(Storage::url($story->cover_jpeg)) : url(asset('images/logo/logo-site.png')) }}">
+        content="{{ $story->cover ? url(Storage::url($story->cover)) : url(asset('images/logo/logo-site.png')) }}">
     <meta name="twitter:image:alt" content="Ảnh bìa truyện {{ $story->title }}">
 
     {{-- Additional Book Meta Tags --}}

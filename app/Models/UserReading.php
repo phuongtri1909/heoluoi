@@ -15,6 +15,7 @@ class UserReading extends Model
         'story_id',
         'chapter_id',
         'progress_percent',
+        'updated_at', // Cần thiết khi migrate session readings để giữ lại timestamp
     ];
 
     /**

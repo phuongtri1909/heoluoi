@@ -1,5 +1,6 @@
 @php
-    $isBookmarked = auth()->check() ? App\Models\Bookmark::isBookmarked(auth()->id(), $story->id) : false;
+    // isBookmarked được pass từ controller để tránh query trong view
+    $isBookmarked = $isBookmarked ?? false;
 @endphp
 
 <section id="info-book-home">
@@ -38,13 +39,8 @@
                                 <div class="d-flex">
                                     <div class="rating">
                                         @php
-                                            $userRating = 0;
-                                            if (auth()->check()) {
-                                                $existingRating = \App\Models\Rating::where('user_id', auth()->id())
-                                                    ->where('story_id', $story->id)
-                                                    ->first();
-                                                $userRating = $existingRating ? $existingRating->rating : 0;
-                                            }
+                                            // userRating được pass từ controller để tránh query trong view
+                                            $userRating = $userRating ?? 0;
                                             $fullStars = floor($userRating);
                                         @endphp
 

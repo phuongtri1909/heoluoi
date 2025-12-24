@@ -9,9 +9,9 @@
     <meta property="og:title" content="Chương {{ $chapter->number }}: {{ $chapter->title }} - {{ $story->title }}">
     <meta property="og:description" content="{{ Str::limit(html_entity_decode(strip_tags($chapter->content)), 100) }}">
     <meta property="og:image"
-        content="{{ $story->cover_jpeg ? url(Storage::url($story->cover_jpeg)) : url(asset('images/logo/logo-site.png')) }}">
+        content="{{ $story->cover ? url(Storage::url($story->cover)) : url(asset('images/logo/logo-site.png')) }}">
     <meta property="og:image:secure_url"
-        content="{{ $story->cover_jpeg ? url(Storage::url($story->cover_jpeg)) : url(asset('images/logo/logo-site.png')) }}">
+        content="{{ $story->cover ? url(Storage::url($story->cover)) : url(asset('images/logo/logo-site.png')) }}">
     <meta property="og:image:width" content="600">
     <meta property="og:image:height" content="800">
     <meta property="og:image:alt" content="Ảnh bìa truyện {{ $story->title }} - Chương {{ $chapter->number }}">
@@ -34,7 +34,7 @@
     <meta name="twitter:title" content="Chương {{ $chapter->number }}: {{ $chapter->title }} - {{ $story->title }}">
     <meta name="twitter:description" content="{{ Str::limit(strip_tags($chapter->content), 160) }}">
     <meta name="twitter:image"
-        content="{{ $story->cover_jpeg ? url(Storage::url($story->cover_jpeg)) : url(asset('images/logo/logo-site.png')) }}">
+        content="{{ $story->cover ? url(Storage::url($story->cover)) : url(asset('images/logo/logo-site.png')) }}">
     <meta name="twitter:image:alt" content="Ảnh bìa truyện {{ $story->title }} - Chương {{ $chapter->number }}">
 @endsection
 
@@ -217,7 +217,7 @@
                                             <p class="text-success small">
 
                                                 <i class="fas fa-check-circle"></i> Truy cập tất cả
-                                                {{ $story->chapters->count() ?? 0 }} chương
+                                                {{ $story->chapters_count ?? 0 }} chương
                                             </p>
                                             @guest
                                                 <a href="{{ route('login') }}" class="btn btn-success">Đăng nhập để

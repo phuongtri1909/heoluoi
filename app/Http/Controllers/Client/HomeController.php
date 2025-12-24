@@ -566,7 +566,12 @@ class HomeController extends Controller
                         ->where('status', 'published');
                 }
             ])
-            ->withCount(['bookmarks'])
+            ->withCount([
+                'bookmarks',
+                'chapters' => function ($query) {
+                    $query->where('status', 'published');
+                }
+            ])
             ->withAvg('ratings as average_rating', 'rating')
             ->joinSub($storyViews, 'story_views', function ($join) {
                 $join->on('stories.id', '=', 'story_views.story_id');
@@ -592,7 +597,12 @@ class HomeController extends Controller
 
     public function showStoryFollow(Request $request)
     {
-        $storiesQuery = Story::withCount('bookmarks')
+        $storiesQuery = Story::withCount([
+            'bookmarks',
+            'chapters' => function ($query) {
+                $query->where('status', 'published');
+            }
+        ])
             ->published()
             ->hide18Plus()
             ->whereHas('chapters', function ($query) {
@@ -683,41 +693,272 @@ class HomeController extends Controller
 
     public function index(Request $request)
     {
-        $hotStories = $this->getHotStories($request);
-        $newStories = $this->getNewStories();
-        $ratingStories = $this->getRatingStories();
+        // Cache key với category_id nếu có
+        $cacheKey = 'home_data_' . ($request->category_id ?? 'all');
+        
+        // Cache toàn bộ data trong 5 phút để giảm tải database
+        $data = Cache::remember($cacheKey, 300, function () use ($request) {
+            return $this->loadHomeData($request);
+        });
 
-        $latestUpdatedStories = $this->latestUpdatedStories();
-
-        $topViewedStories = $this->topViewedStories();
-
-        $topFollowedStories = $this->topFollowedStories();
-
-        $completedStories = $this->getCompletedStories();
-        $currentlyReading = $this->getCurrentlyReading();
+        // Currently reading không cache vì phụ thuộc vào user
+        $data['currentlyReading'] = $this->getCurrentlyReading();
 
         if ($request->ajax()) {
             if ($request->type === 'hot') {
                 return response()->json([
-                    'html' => view('components.stories-grid', compact('hotStories'))->render()
+                    'html' => view('components.stories-grid', ['hotStories' => $data['hotStories']])->render()
                 ]);
             } elseif ($request->type === 'new') {
                 return response()->json([
-                    'html' => view('components.story-list-items', compact('newStories'))->render()
+                    'html' => view('components.story-list-items', ['newStories' => $data['newStories']])->render()
                 ]);
             }
         }
 
-        return view('pages.home', compact(
-            'hotStories',
-            'newStories',
-            'completedStories',
-            'ratingStories',
-            'latestUpdatedStories',
-            'topViewedStories',
-            'topFollowedStories',
-            'currentlyReading',
-        ));
+        return view('pages.home', $data);
+    }
+
+    /**
+     * Load tất cả data cho trang home - tối ưu query bằng cách batch load
+     */
+    private function loadHomeData($request)
+    {
+        // Load tất cả stories cần thiết trong một batch query lớn
+        $allStoryIds = collect();
+        
+        // 1. Featured stories (hot) - 12 stories
+        $featuredIds = Story::published()
+            ->hide18Plus()
+            ->where('is_featured', true)
+            ->whereHas('chapters', function ($q) {
+                $q->where('status', 'published');
+            })
+            ->when($request->category_id, function ($q) use ($request) {
+                $q->whereHas('categories', function ($cq) use ($request) {
+                    $cq->where('categories.id', $request->category_id);
+                });
+            })
+            ->orderBy('featured_order', 'asc')
+            ->orderBy('created_at', 'desc')
+            ->limit(12)
+            ->pluck('id');
+        
+        $allStoryIds = $allStoryIds->merge($featuredIds);
+
+        // 2. New stories - 20 stories (created trong tháng)
+        $newIds = Story::published()
+            ->hide18Plus()
+            ->whereHas('chapters', function ($q) {
+                $q->where('status', 'published')
+                    ->where('published_at', '>=', now()->subMonth());
+            })
+            ->orderByDesc('created_at')
+            ->limit(20)
+            ->pluck('id');
+        
+        $allStoryIds = $allStoryIds->merge($newIds);
+
+        // 3. Rating stories - 10 stories
+        $ratingIds = Story::published()
+            ->hide18Plus()
+            ->whereHas('chapters', function ($q) {
+                $q->where('status', 'published');
+            })
+            ->whereExists(function ($q) {
+                $q->select(DB::raw(1))
+                    ->from('ratings')
+                    ->whereColumn('ratings.story_id', 'stories.id');
+            })
+            ->orderByDesc(DB::raw('(SELECT AVG(rating) FROM ratings WHERE ratings.story_id = stories.id)'))
+            ->orderBy('created_at', 'asc')
+            ->limit(10)
+            ->pluck('id');
+        
+        $allStoryIds = $allStoryIds->merge($ratingIds);
+
+        // 4. Latest updated - 10 stories với story_id và latest_time để sort sau
+        $latestChaptersData = DB::table('chapters')
+            ->select('story_id', DB::raw('MAX(created_at) as latest_time'))
+            ->where('status', 'published')
+            ->where('created_at', '>=', now()->subMonth())
+            ->groupBy('story_id')
+            ->orderByDesc('latest_time')
+            ->limit(10)
+            ->get();
+        
+        $latestChapterIds = $latestChaptersData->pluck('story_id');
+        $latestChapterTimes = $latestChaptersData->keyBy('story_id');
+        $allStoryIds = $allStoryIds->merge($latestChapterIds);
+
+        // 5. Top viewed - 10 stories với total_views để sort sau
+        $topViewedData = DB::table('chapters')
+            ->select('story_id', DB::raw('SUM(views) as total_views'))
+            ->where('status', 'published')
+            ->groupBy('story_id')
+            ->having('total_views', '>', 0)
+            ->orderByDesc('total_views')
+            ->limit(10)
+            ->get();
+        
+        $topViewedIds = $topViewedData->pluck('story_id');
+        $topViewedTotals = $topViewedData->keyBy('story_id');
+        
+        $allStoryIds = $allStoryIds->merge($topViewedIds);
+
+        // 6. Top followed - 10 stories (cần load riêng để có bookmarks_count)
+        $topFollowedData = Story::published()
+            ->hide18Plus()
+            ->whereHas('chapters', function ($q) {
+                $q->where('status', 'published');
+            })
+            ->withCount('bookmarks')
+            ->having('bookmarks_count', '>', 0)
+            ->orderByDesc('bookmarks_count')
+            ->limit(10)
+            ->get(['id', 'bookmarks_count'])
+            ->keyBy('id');
+        
+        $topFollowedIds = $topFollowedData->pluck('id');
+        $allStoryIds = $allStoryIds->merge($topFollowedIds);
+
+        // 7. Completed stories - không giới hạn nhưng chỉ lấy một số
+        $completedIds = Story::published()
+            ->hide18Plus()
+            ->where('completed', true)
+            ->whereHas('chapters', function ($q) {
+                $q->where('status', 'published');
+            })
+            ->latest('updated_at')
+            ->limit(20)
+            ->pluck('id');
+        
+        $allStoryIds = $allStoryIds->merge($completedIds);
+
+        // Loại bỏ duplicate và load tất cả trong một query duy nhất
+        $uniqueIds = $allStoryIds->unique()->values();
+        
+        if ($uniqueIds->isEmpty()) {
+            return [
+                'hotStories' => collect(),
+                'newStories' => collect(),
+                'ratingStories' => collect(),
+                'latestUpdatedStories' => collect(),
+                'topViewedStories' => collect(),
+                'topFollowedStories' => collect(),
+                'completedStories' => collect(),
+            ];
+        }
+
+        // Load tất cả stories với tất cả relationships và computed fields trong một query
+        $allStories = Story::whereIn('id', $uniqueIds)
+            ->published()
+            ->hide18Plus()
+            ->with([
+                'categories:id,name,slug,is_main',
+                'latestChapter' => function ($q) {
+                    $q->select('id', 'story_id', 'number', 'slug', 'title', 'created_at')
+                        ->where('status', 'published');
+                }
+            ])
+            ->select([
+                'id', 'title', 'slug', 'cover', 'completed', 'is_18_plus',
+                'author_name', 'description', 'created_at', 'updated_at',
+                'is_featured', 'featured_order', 'has_combo', 'combo_price'
+            ])
+            ->withCount([
+                'chapters' => fn($q) => $q->where('status', 'published'),
+                'chapters as vip_chapters_count' => fn($q) => $q->where('status', 'published')->where('is_free', 0),
+                'bookmarks',
+                'ratings'
+            ])
+            ->selectSub(function ($q) {
+                $q->from('ratings')
+                    ->selectRaw('AVG(rating)')
+                    ->whereColumn('ratings.story_id', 'stories.id');
+            }, 'average_rating')
+            ->selectSub(function ($q) {
+                $q->from('chapters')
+                    ->selectRaw('SUM(price)')
+                    ->whereColumn('chapters.story_id', 'stories.id')
+                    ->where('status', 'published')
+                    ->where('is_free', 0);
+            }, 'total_chapter_price')
+            ->selectSub(function ($q) {
+                $q->from('chapters')
+                    ->selectRaw('SUM(views)')
+                    ->whereColumn('chapters.story_id', 'stories.id')
+                    ->where('status', 'published');
+            }, 'total_views')
+            ->get()
+            ->keyBy('id');
+
+        // Phân loại và sort stories theo từng danh sách
+        $hotStories = $featuredIds->map(fn($id) => $allStories->get($id))
+            ->filter()
+            ->sortBy([['featured_order', 'asc'], ['created_at', 'desc']])
+            ->take(12)
+            ->values();
+
+        $newStories = $newIds->map(fn($id) => $allStories->get($id))
+            ->filter()
+            ->sortByDesc('created_at')
+            ->take(20)
+            ->values();
+
+        $ratingStories = $ratingIds->map(fn($id) => $allStories->get($id))
+            ->filter()
+            ->sortByDesc('average_rating')
+            ->sortBy('created_at')
+            ->take(10)
+            ->values();
+
+        $latestUpdatedStories = $latestChapterIds->map(function ($id) use ($allStories, $latestChapterTimes) {
+                $story = $allStories->get($id);
+                if ($story && isset($latestChapterTimes[$id])) {
+                    $story->latest_chapter_time = $latestChapterTimes[$id]->latest_time;
+                }
+                return $story;
+            })
+            ->filter()
+            ->sortByDesc('latest_chapter_time')
+            ->take(10)
+            ->values();
+
+        $topViewedStories = $topViewedIds->map(fn($id) => $allStories->get($id))
+            ->filter()
+            ->sortByDesc('total_views')
+            ->take(10)
+            ->values();
+
+        $topFollowedStories = $topFollowedIds->map(function ($id) use ($allStories, $topFollowedData) {
+                $story = $allStories->get($id);
+                if ($story && isset($topFollowedData[$id])) {
+                    // Đảm bảo bookmarks_count được set đúng
+                    $story->bookmarks_count = $topFollowedData[$id]->bookmarks_count;
+                }
+                return $story;
+            })
+            ->filter()
+            ->sortByDesc('bookmarks_count')
+            ->take(10)
+            ->values();
+
+        $completedStories = $completedIds->map(fn($id) => $allStories->get($id))
+            ->filter()
+            ->sortByDesc('updated_at')
+            ->take(20)
+            ->values();
+
+        return [
+            'hotStories' => $hotStories,
+            'newStories' => $newStories,
+            'ratingStories' => $ratingStories,
+            'latestUpdatedStories' => $latestUpdatedStories,
+            'topViewedStories' => $topViewedStories,
+            'topFollowedStories' => $topFollowedStories,
+            'completedStories' => $completedStories,
+        ];
     }
 
     private function getCurrentlyReading()
@@ -1189,52 +1430,176 @@ class HomeController extends Controller
 
     public function showStory(Request $request, $slug)
     {
+        // Cache key cho story data (không cache user-specific data)
+        $cacheKey = 'story_data_' . $slug;
+        
+        // Cache story data trong 5 phút
+        $data = Cache::remember($cacheKey, 300, function () use ($slug, $request) {
+            return $this->loadStoryData($slug, $request);
+        });
 
-        $story = Story::where('slug', $slug)
-            ->published()
-            ->with(['categories' => function ($query) {
-                $query->select('categories.id', 'categories.name', 'categories.slug');
-            }])
-            ->firstOrFail();
+        // Cache chapters list (không user-specific) - cache 5 phút
+        $chaptersCacheKey = 'story_chapters_' . $data['story']->id . '_page_' . request()->get('page', 1);
+        $chapters = Cache::remember($chaptersCacheKey, 300, function () use ($data) {
+            return Chapter::where('story_id', $data['story']->id)
+                ->published()
+                ->select('id', 'story_id', 'number', 'slug', 'title', 'price', 'is_free', 'status', 'views', 'created_at')
+                ->orderBy('number', 'asc')
+                ->paginate(50);
+        });
 
-
-        $story->load(['chapters' => function ($query) {
-            $query->where('status', 'published')->select('id', 'story_id', 'views');
-        }]);
-
-        $chapters = Chapter::where('story_id', $story->id)
-            ->published()
-            ->with(['purchases' => function ($query) {
-                if (Auth::check()) {
-                    $query->where('user_id', Auth::id());
-                } else {
-                    $query->whereRaw('1 = 0');
-                }
-            }])
-            ->orderBy('number', 'asc')
-            ->paginate(50);
-
+        // Load user-specific data: chapter purchases, bookmark, rating, story purchase
         $chapterPurchaseStatus = [];
+        $isBookmarked = false;
+        $userRating = null;
+        $hasPurchasedStory = false;
+        
         if (Auth::check()) {
+            $userId = Auth::id();
+            $storyId = $data['story']->id;
+            
+            // Batch check: chapter purchases (bỏ duplicate query 2)
             $chapterIds = $chapters->pluck('id');
-            $purchasedChapterIds = \App\Models\ChapterPurchase::whereIn('chapter_id', $chapterIds)
-                ->where('user_id', Auth::id())
-                ->pluck('chapter_id')
-                ->toArray();
-
-            foreach ($chapterIds as $chapterId) {
-                $chapterPurchaseStatus[$chapterId] = in_array($chapterId, $purchasedChapterIds);
+            if ($chapterIds->isNotEmpty()) {
+                $purchasedChapterIds = ChapterPurchase::whereIn('chapter_id', $chapterIds)
+                    ->where('user_id', $userId)
+                    ->pluck('chapter_id')
+                    ->toArray();
+                
+                foreach ($chapterIds as $chapterId) {
+                    $chapterPurchaseStatus[$chapterId] = in_array($chapterId, $purchasedChapterIds);
+                }
             }
+            
+            // Batch check: bookmark, rating, story purchase trong 1 query
+            $bookmark = \App\Models\Bookmark::where('user_id', $userId)
+                ->where('story_id', $storyId)
+                ->select('id')
+                ->first();
+            $isBookmarked = $bookmark !== null;
+            
+            $userRating = \App\Models\Rating::where('user_id', $userId)
+                ->where('story_id', $storyId)
+                ->select('rating')
+                ->first();
+            
+            $hasPurchasedStory = StoryPurchase::where('user_id', $userId)
+                ->where('story_id', $storyId)
+                ->select('id')
+                ->exists();
         }
 
-        $publishedChapters = $story->chapters;
+        // Cache comments - cache 2 phút để giảm queries
+        $commentsCacheKey = 'story_comments_' . $data['story']->id . '_page_' . request()->get('page', 1);
+        $commentsData = Cache::remember($commentsCacheKey, 120, function () use ($data) {
+            $pinnedComments = Comment::with([
+                'user:id,name,avatar,role',
+                'approvedReplies' => function ($q) {
+                    $q->select('id', 'user_id', 'comment', 'reply_id', 'created_at')
+                        ->approved()
+                        ->latest();
+                },
+                'approvedReplies.user:id,name,avatar,role',
+                'reactions:id,comment_id,user_id,type'
+            ])
+                ->where('story_id', $data['story']->id)
+                ->whereNull('reply_id')
+                ->where('is_pinned', true)
+                ->approved()
+                ->select('id', 'user_id', 'comment', 'story_id', 'reply_id', 'is_pinned', 'pinned_at', 'created_at')
+                ->latest('pinned_at')
+                ->get();
+
+            $regularComments = Comment::with([
+                'user:id,name,avatar,role',
+                'approvedReplies' => function ($q) {
+                    $q->select('id', 'user_id', 'comment', 'reply_id', 'created_at')
+                        ->approved()
+                        ->latest();
+                },
+                'approvedReplies.user:id,name,avatar,role',
+                'reactions:id,comment_id,user_id,type'
+            ])
+                ->where('story_id', $data['story']->id)
+                ->whereNull('reply_id')
+                ->where('is_pinned', false)
+                ->approved()
+                ->select('id', 'user_id', 'comment', 'story_id', 'reply_id', 'is_pinned', 'created_at')
+                ->latest()
+                ->paginate(10);
+            
+            return [
+                'pinned' => $pinnedComments,
+                'regular' => $regularComments
+            ];
+        });
+        
+        $pinnedComments = $commentsData['pinned'];
+        $regularComments = $commentsData['regular'];
+
+        return view('pages.story', array_merge($data, [
+            'chapters' => $chapters,
+            'pinnedComments' => $pinnedComments,
+            'regularComments' => $regularComments,
+            'chapterPurchaseStatus' => $chapterPurchaseStatus,
+            'isBookmarked' => $isBookmarked,
+            'userRating' => $userRating ? $userRating->rating : 0,
+            'hasPurchasedStory' => $hasPurchasedStory,
+        ]));
+    }
+
+    /**
+     * Load tất cả data cho trang story - tối ưu bằng batch loading
+     */
+    private function loadStoryData($slug, $request)
+    {
+        // Load story chính với tất cả computed fields
+        $story = Story::where('slug', $slug)
+            ->published()
+            ->with([
+                'categories' => function ($query) {
+                    $query->select('categories.id', 'categories.name', 'categories.slug');
+                },
+                'user:id,name'
+            ])
+            ->select('stories.*')
+            ->selectSub(function ($q) {
+                $q->from('chapters')
+                    ->selectRaw('SUM(price)')
+                    ->whereColumn('chapters.story_id', 'stories.id')
+                    ->where('status', 'published');
+            }, 'total_chapter_price')
+            ->selectSub(function ($q) {
+                $q->from('chapters')
+                    ->selectRaw('SUM(views)')
+                    ->whereColumn('chapters.story_id', 'stories.id')
+                    ->where('status', 'published');
+            }, 'total_views')
+            ->selectSub(function ($q) {
+                $q->from('chapters')
+                    ->selectRaw('COUNT(*)')
+                    ->whereColumn('chapters.story_id', 'stories.id')
+                    ->where('status', 'published');
+            }, 'total_chapters')
+            ->withCount([
+                'bookmarks',
+                'ratings'
+            ])
+            ->selectSub(function ($q) {
+                $q->from('ratings')
+                    ->selectRaw('AVG(rating)')
+                    ->whereColumn('ratings.story_id', 'stories.id');
+            }, 'average_rating')
+            ->firstOrFail();
+
+        // Tính stats từ computed fields
         $stats = [
-            'total_chapters' => $publishedChapters->count(),
-            'total_views' => $publishedChapters->sum('views'),
-            'total_bookmarks' => $story->bookmarks()->count(),
+            'total_chapters' => $story->total_chapters ?? 0,
+            'total_views' => $story->total_views ?? 0,
+            'total_bookmarks' => $story->bookmarks_count ?? 0,
             'ratings' => [
-                'count' => Rating::where('story_id', $story->id)->count(),
-                'average' => Rating::where('story_id', $story->id)->avg('rating') ?? 0
+                'count' => $story->ratings_count ?? 0,
+                'average' => $story->average_rating ?? 0
             ]
         ];
 
@@ -1250,72 +1615,158 @@ class HomeController extends Controller
             ];
         });
 
-        $pinnedComments = Comment::with(['user', 'approvedReplies.user', 'reactions'])
-            ->where('story_id', $story->id)
-            ->whereNull('reply_id')
-            ->where('is_pinned', true)
-            ->approved()
-            ->latest('pinned_at')
+        // Load latest chapters
+        $latestChapters = Chapter::where('story_id', $story->id)
+            ->where('status', 'published')
+            ->where('created_at', '>=', now()->subHours(24))
+            ->select('id', 'story_id', 'number', 'title', 'slug', 'created_at')
+            ->orderBy('created_at', 'desc')
+            ->take(4)
             ->get();
 
-        $regularComments = Comment::with(['user', 'approvedReplies.user', 'reactions'])
-            ->where('story_id', $story->id)
-            ->whereNull('reply_id')
-            ->where('is_pinned', false)
-            ->approved()
-            ->latest()
-            ->paginate(10);
+        // Batch load tất cả related stories trong một query
+        $allRelatedStoryIds = collect();
+        $featuredIds = collect();
+        $authorIds = collect();
+        $translatorIds = collect();
+        $relatedIds = collect();
+        
+        // Featured stories - 12 stories
+        $featuredIds = Story::published()
+            ->hide18Plus()
+            ->where('is_featured', true)
+            ->whereHas('chapters', function ($q) {
+                $q->where('status', 'published');
+            })
+            ->when($request->category_id, function ($q) use ($request) {
+                $q->whereHas('categories', function ($cq) use ($request) {
+                    $cq->where('categories.id', $request->category_id);
+                });
+            })
+            ->orderBy('featured_order', 'asc')
+            ->orderBy('created_at', 'desc')
+            ->limit(12)
+            ->pluck('id');
+        
+        $allRelatedStoryIds = $allRelatedStoryIds->merge($featuredIds);
 
-        $featuredStories = $this->getFeaturedStories($request);
-
-        $authorStories = collect();
+        // Author stories - 5 stories
         if ($story->author_name) {
-            $authorStories = Story::query()
-                ->published()
+            $authorIds = Story::published()
                 ->hide18Plus()
                 ->where('author_name', 'LIKE', "%{$story->author_name}%")
                 ->where('id', '!=', $story->id)
-                ->with(['categories' => function ($query) {
-                    $query->select('categories.id', 'categories.name', 'categories.slug');
-                }, 'chapters'])
-                ->take(5)
                 ->orderBy('created_at', 'desc')
-                ->get();
+                ->limit(5)
+                ->pluck('id');
+            
+            $allRelatedStoryIds = $allRelatedStoryIds->merge($authorIds);
         }
 
-        $translatorStories = collect();
+        // Translator stories - 5 stories
         if ($story->user_id) {
-            $translatorStories = Story::query()
-                ->published()
+            $translatorIds = Story::published()
                 ->hide18Plus()
                 ->where('user_id', $story->user_id)
                 ->where('id', '!=', $story->id)
-                ->with(['categories' => function ($query) {
-                    $query->select('categories.id', 'categories.name', 'categories.slug');
-                }, 'chapters', 'user'])
-                ->take(5)
                 ->orderBy('created_at', 'desc')
-                ->get();
+                ->limit(5)
+                ->pluck('id');
+            
+            $allRelatedStoryIds = $allRelatedStoryIds->merge($translatorIds);
         }
 
-        $latestChapters = $this->getLatestChapters($story->id);
-        $relatedStories = $this->getRelatedStoriesByCategory($story);
+        // Related stories by category - 8 stories
+        $firstCategory = $story->categories->first();
+        if ($firstCategory) {
+            $relatedIds = Story::published()
+                ->hide18Plus()
+                ->whereHas('categories', function ($q) use ($firstCategory) {
+                    $q->where('categories.id', $firstCategory->id);
+                })
+                ->where('id', '!=', $story->id)
+                ->whereHas('chapters', function ($q) {
+                    $q->where('status', 'published');
+                })
+                ->orderByDesc(DB::raw('(SELECT SUM(views) FROM chapters WHERE chapters.story_id = stories.id AND chapters.status = "published")'))
+                ->limit(8)
+                ->pluck('id');
+            
+            $allRelatedStoryIds = $allRelatedStoryIds->merge($relatedIds);
+        }
 
-        return view('pages.story', compact(
-            'story',
-            'stats',
-            'status',
-            'chapters',
-            'pinnedComments',
-            'regularComments',
-            'storyCategories',
-            'featuredStories',
-            'authorStories',
-            'translatorStories',
-            'chapterPurchaseStatus',
-            'latestChapters',
-            'relatedStories'
-        ));
+        // Load tất cả related stories trong một query
+        $uniqueRelatedIds = $allRelatedStoryIds->unique()->values();
+        $allRelatedStories = collect();
+        
+        if ($uniqueRelatedIds->isNotEmpty()) {
+            $allRelatedStories = Story::whereIn('id', $uniqueRelatedIds)
+                ->published()
+                ->hide18Plus()
+                ->with([
+                    'categories' => function ($q) {
+                        $q->select('categories.id', 'categories.name', 'categories.slug');
+                    },
+                    'latestChapter' => function ($q) {
+                        $q->select('id', 'story_id', 'number', 'slug', 'title', 'created_at')
+                            ->where('status', 'published');
+                    },
+                    'user:id,name'
+                ])
+                ->select([
+                    'id', 'title', 'slug', 'cover', 'completed', 'is_18_plus',
+                    'author_name', 'description', 'created_at', 'updated_at',
+                    'is_featured', 'featured_order', 'user_id'
+                ])
+                ->withCount([
+                    'chapters' => fn($q) => $q->where('status', 'published'),
+                ])
+                ->selectSub(function ($q) {
+                    $q->from('chapters')
+                        ->selectRaw('SUM(views)')
+                        ->whereColumn('chapters.story_id', 'stories.id')
+                        ->where('status', 'published');
+                }, 'total_views')
+                ->get()
+                ->keyBy('id');
+        }
+
+        // Phân loại stories theo từng danh sách
+        $featuredStories = $featuredIds->map(fn($id) => $allRelatedStories->get($id))
+            ->filter()
+            ->sortBy([['featured_order', 'asc'], ['created_at', 'desc']])
+            ->take(12)
+            ->values();
+
+        $authorStories = $authorIds->map(fn($id) => $allRelatedStories->get($id))
+            ->filter()
+            ->sortByDesc('created_at')
+            ->take(5)
+            ->values();
+
+        $translatorStories = $translatorIds->map(fn($id) => $allRelatedStories->get($id))
+            ->filter()
+            ->sortByDesc('created_at')
+            ->take(5)
+            ->values();
+
+        $relatedStories = $relatedIds->map(fn($id) => $allRelatedStories->get($id))
+            ->filter()
+            ->sortByDesc('total_views')
+            ->take(8)
+            ->values();
+
+        return [
+            'story' => $story,
+            'stats' => $stats,
+            'status' => $status,
+            'storyCategories' => $storyCategories,
+            'featuredStories' => $featuredStories,
+            'authorStories' => $authorStories,
+            'translatorStories' => $translatorStories,
+            'latestChapters' => $latestChapters,
+            'relatedStories' => $relatedStories,
+        ];
     }
 
     private function getLatestChapters($storyId)
@@ -1419,146 +1870,120 @@ class HomeController extends Controller
 
     public function chapterByStory($storySlug, $chapterSlug)
     {
+        // Cache key cho chapter data (không cache user-specific data)
+        $cacheKey = 'chapter_data_' . $storySlug . '_' . $chapterSlug;
         
-        $story = Story::where('slug', $storySlug)->firstOrFail();
+        // Cache chapter data trong 5 phút
+        $data = Cache::remember($cacheKey, 300, function () use ($storySlug, $chapterSlug) {
+            return $this->loadChapterData($storySlug, $chapterSlug);
+        });
 
-        $isNumber = is_numeric($chapterSlug);
+        // Load user-specific data (không cache) - tối ưu batch loading
+        $readingService = new ReadingHistoryService();
+        $readingService->saveReadingProgress($data['story'], $data['chapter']);
+
+        // Batch load reading progress và recent reads
+        $userId = Auth::id();
+        $storyId = $data['story']->id;
+        $chapterId = $data['chapter']->id;
         
-        if ($isNumber) {
-            $query = Chapter::where(function($q) use ($chapterSlug) {
-                $q->where('number', $chapterSlug)
-                  ->orWhere('id', $chapterSlug);
-            })->where('story_id', $story->id);
-        } else {
-            $query = Chapter::where('slug', $chapterSlug)
-                ->where('story_id', $story->id);
-        }
-
-        if (Auth::check()) {
-            if (in_array(Auth::user()->role, ['admin_main', 'admin_sub'])) {
-                $chapter = $query->firstOrFail();
-            } else {
-                $chapter = $query->where('status', 'published')->firstOrFail();
+        if ($userId) {
+            // Gộp 2 queries thành 1: load tất cả readings cùng lúc (lấy 10 records để có đủ cho recent reads)
+            $allReadings = UserReading::where('user_id', $userId)
+                ->select('id', 'story_id', 'chapter_id', 'progress_percent', 'updated_at')
+                ->orderByDesc('updated_at')
+                ->limit(10)
+                ->get();
+            
+            // Tách progress (current chapter) và recent reads (các chapters khác)
+            $userReading = $allReadings->first(function ($r) use ($storyId, $chapterId) {
+                return $r->story_id == $storyId && $r->chapter_id == $chapterId;
+            });
+            
+            // Recent reads: loại trừ current chapter, lấy 5 records đầu tiên
+            $recentReads = $allReadings
+                ->reject(function ($r) use ($storyId, $chapterId) {
+                    return $r->story_id == $storyId && $r->chapter_id == $chapterId;
+                })
+                ->take(5)
+                ->values();
+            
+            // Chỉ eager load nếu có records - không load categories (không cần trong recent reads view)
+            if ($recentReads->isNotEmpty()) {
+                $recentReads->load([
+                    'story:id,title,slug,cover',
+                    'chapter:id,story_id,number,slug,title'
+                ]);
             }
         } else {
-            $chapter = $query->where('status', 'published')->firstOrFail();
-        }
-
-        if ($isNumber && $chapter->slug !== $chapterSlug) {
-            return redirect()->route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug], 301);
-        }
-
-        $ip = request()->ip();
-        $sessionKey = "chapter_view_{$chapter->id}_{$ip}";
-
-        if (!session()->has($sessionKey)) {
-            $chapter->increment('views');
-            session([$sessionKey => true]);
-            session()->put($sessionKey, true, 1440);
-        }
-
-        $wordCount = str_word_count(strip_tags($chapter->content), 0, 'àáãạảăắằẳẵặâấầẩẫậèéẹẻẽêềếểễệđìíĩỉịòóõọỏôốồổỗộơớờởỡợùúũụủưứừửữựỳýỵỷỹ');
-        $chapter->word_count = $wordCount;
-
-        $chapter->comments_count = Comment::where('story_id', $story->id)->count();
-
-        // Find next and previous chapters
-        $nextChapterQuery = Chapter::where('story_id', $story->id)
-            ->where('number', '>', $chapter->number)
-            ->orderBy('number', 'asc');
-
-        $prevChapterQuery = Chapter::where('story_id', $story->id)
-            ->where('number', '<', $chapter->number)
-            ->orderBy('number', 'desc');
-
-        if (!Auth::check() || !in_array(Auth::user()->role, ['admin_main', 'admin_sub'])) {
-            $nextChapterQuery->where('status', 'published');
-            $prevChapterQuery->where('status', 'published');
-        }
-
-        $nextChapter = $nextChapterQuery->first();
-        $prevChapter = $prevChapterQuery->first();
-
-        $recentChaptersQuery = Chapter::where('story_id', $story->id)
-            ->where('id', '!=', $chapter->id)
-            ->orderBy('number', 'desc')
-            ->take(5);
-
-        if (!Auth::check() || !in_array(Auth::user()->role, ['admin_main', 'admin_sub'])) {
-            $recentChaptersQuery->where('status', 'published');
-        }
-
-        $recentChapters = $recentChaptersQuery->get();
-
-        // Lưu tiến độ đọc
-        $readingService = new ReadingHistoryService();
-        $readingService->saveReadingProgress($story, $chapter);
-
-        // Lấy danh sách truyện đọc gần đây
-        $recentReads = $readingService->getRecentReadings(5);
-
-        // Retrieve reading progress if exists
-        $userReading = null;
-        if (Auth::check()) {
-            $userReading = UserReading::where('user_id', Auth::id())
-                ->where('story_id', $story->id)
-                ->where('chapter_id', $chapter->id)
-                ->first();
-        } else {
+            // Guest - gộp 2 queries thành 1
             $deviceKey = $readingService->getOrCreateDeviceKey();
-            $userReading = UserReading::where('session_id', $deviceKey)
+            $allReadings = UserReading::where('session_id', $deviceKey)
                 ->whereNull('user_id')
-                ->where('story_id', $story->id)
-                ->where('chapter_id', $chapter->id)
-                ->first();
+                ->select('id', 'story_id', 'chapter_id', 'progress_percent', 'updated_at')
+                ->orderByDesc('updated_at')
+                ->limit(10)
+                ->get();
+            
+            // Tách progress và recent reads
+            $userReading = $allReadings->first(function ($r) use ($storyId, $chapterId) {
+                return $r->story_id == $storyId && $r->chapter_id == $chapterId;
+            });
+            
+            $recentReads = $allReadings
+                ->reject(function ($r) use ($storyId, $chapterId) {
+                    return $r->story_id == $storyId && $r->chapter_id == $chapterId;
+                })
+                ->take(5)
+                ->values();
+            
+            // Chỉ eager load nếu có records - không load categories (không cần)
+            if ($recentReads->isNotEmpty()) {
+                $recentReads->load([
+                    'story:id,title,slug,cover',
+                    'chapter:id,story_id,number,slug,title'
+                ]);
+            }
         }
 
-        // Pass reading progress to view
         $readingProgress = $userReading ? $userReading->progress_percent : 0;
 
-        // Kiểm tra quyền truy cập nội dung
+        // Kiểm tra quyền truy cập nội dung (user-specific) - batch check
         $hasAccess = false;
         $hasPurchasedChapter = false;
         $hasPurchasedStory = false;
 
-        // Admin, mod, author và chủ sở hữu truyện luôn có quyền truy cập
         if (Auth::check()) {
             $user = Auth::user();
-
-            if (
-                in_array($user->role, ['admin_main', 'admin_sub'])
-            ) {
+            if (in_array($user->role, ['admin_main', 'admin_sub'])) {
                 $hasAccess = true;
             } else {
+                // Batch check purchases - chỉ select id để tối ưu
                 $hasPurchasedChapter = ChapterPurchase::where('user_id', $user->id)
-                    ->where('chapter_id', $chapter->id)
+                    ->where('chapter_id', $chapterId)
+                    ->select('id')
                     ->exists();
 
                 $hasPurchasedStory = StoryPurchase::where('user_id', $user->id)
-                    ->where('story_id', $story->id)
+                    ->where('story_id', $storyId)
+                    ->select('id')
                     ->exists();
 
                 $hasAccess = $hasPurchasedChapter || $hasPurchasedStory;
             }
         }
 
-        if (!$chapter->price || $chapter->price == 0) {
+        if (!$data['chapter']->price || $data['chapter']->price == 0) {
             $hasAccess = true;
         }
 
-
+        // Password feature không có trong database, bỏ qua check
         $hasPasswordAccess = true;
-        if ($chapter->is_free && !empty($chapter->password)) {
-            $hasPasswordAccess = false;
-            $passwordSessionKey = "chapter_password_{$chapter->id}";
-            if (session()->has($passwordSessionKey)) {
-                $hasPasswordAccess = true;
-            }
-        }
 
+        // Xử lý content dựa trên access
+        $chapter = $data['chapter'];
         if (!$hasAccess) {
             $originalContent = $chapter->content;
-
             $previewLength = min(300, intval(strlen($originalContent) * 0.1));
             $chapter->preview_content = substr($originalContent, 0, $previewLength) . '...';
         }
@@ -1567,65 +1992,178 @@ class HomeController extends Controller
             $chapter->content = '';
         }
 
-        $pinnedComments = Comment::with(['user', 'approvedReplies.user', 'reactions'])
-            ->where('story_id', $story->id)
-            ->whereNull('reply_id')
-            ->where('is_pinned', true)
-            ->approved()
-            ->latest('pinned_at')
-            ->get();
+        // Cache comments - cache 2 phút để giảm queries
+        $commentsCacheKey = 'story_comments_' . $storyId . '_page_' . request()->get('page', 1);
+        $commentsData = Cache::remember($commentsCacheKey, 120, function () use ($storyId) {
+            $pinnedComments = Comment::with([
+                'user:id,name,avatar,role',
+                'approvedReplies' => function ($q) {
+                    $q->select('id', 'user_id', 'comment', 'reply_id', 'created_at')
+                        ->approved()
+                        ->latest();
+                },
+                'approvedReplies.user:id,name,avatar,role',
+                'reactions:id,comment_id,user_id,type'
+            ])
+                ->where('story_id', $storyId)
+                ->whereNull('reply_id')
+                ->where('is_pinned', true)
+                ->approved()
+                ->select('id', 'user_id', 'comment', 'story_id', 'reply_id', 'is_pinned', 'pinned_at', 'created_at')
+                ->latest('pinned_at')
+                ->get();
 
-        $regularComments = Comment::with(['user', 'approvedReplies.user', 'reactions'])
-            ->where('story_id', $story->id)
-            ->whereNull('reply_id')
-            ->where('is_pinned', false)
-            ->approved()
-            ->latest()
-            ->paginate(10);
+            $regularComments = Comment::with([
+                'user:id,name,avatar,role',
+                'approvedReplies' => function ($q) {
+                    $q->select('id', 'user_id', 'comment', 'reply_id', 'created_at')
+                        ->approved()
+                        ->latest();
+                },
+                'approvedReplies.user:id,name,avatar,role',
+                'reactions:id,comment_id,user_id,type'
+            ])
+                ->where('story_id', $storyId)
+                ->whereNull('reply_id')
+                ->where('is_pinned', false)
+                ->approved()
+                ->select('id', 'user_id', 'comment', 'story_id', 'reply_id', 'is_pinned', 'created_at')
+                ->latest()
+                ->paginate(10);
+            
+            return [
+                'pinned' => $pinnedComments,
+                'regular' => $regularComments
+            ];
+        });
+        
+        $pinnedComments = $commentsData['pinned'];
+        $regularComments = $commentsData['regular'];
 
-        return view('pages.chapter', compact(
-            'chapter',
-            'story',
-            'nextChapter',
-            'prevChapter',
-            'recentChapters',
-            'recentReads',
-            'readingProgress',
-            'pinnedComments',
-            'regularComments',
-            'hasAccess',
-            'hasPasswordAccess',
-            'hasPurchasedChapter',
-            'hasPurchasedStory'
-        ));
+        // Increment views (không cache)
+        $ip = request()->ip();
+        $sessionKey = "chapter_view_{$chapter->id}_{$ip}";
+        if (!session()->has($sessionKey)) {
+            $chapter->increment('views');
+            session([$sessionKey => true]);
+            session()->put($sessionKey, true, 1440);
+        }
+
+        return view('pages.chapter', array_merge($data, [
+            'chapter' => $chapter,
+            'recentReads' => $recentReads,
+            'readingProgress' => $readingProgress,
+            'pinnedComments' => $pinnedComments,
+            'regularComments' => $regularComments,
+            'hasAccess' => $hasAccess,
+            'hasPasswordAccess' => $hasPasswordAccess,
+            'hasPurchasedChapter' => $hasPurchasedChapter,
+            'hasPurchasedStory' => $hasPurchasedStory
+        ]));
+    }
+
+    /**
+     * Load tất cả data cho trang chapter - tối ưu bằng batch loading
+     */
+    private function loadChapterData($storySlug, $chapterSlug)
+    {
+        $isNumber = is_numeric($chapterSlug);
+        $isAdmin = Auth::check() && in_array(Auth::user()->role, ['admin_main', 'admin_sub']);
+
+        // Load story với categories và user - chỉ select columns cần thiết
+        $story = Story::where('slug', $storySlug)
+            ->published()
+            ->with([
+                'categories' => function ($q) {
+                    $q->select('categories.id', 'categories.name', 'categories.slug');
+                },
+                'user:id,name'
+            ])
+            ->select([
+                'id', 'title', 'slug', 'cover', 'author_name', 
+                'user_id', 'created_at', 'updated_at'
+            ])
+            ->firstOrFail();
+
+        // Load chapter chính - chỉ select columns cần thiết
+        if ($isNumber) {
+            $chapterQuery = Chapter::where(function($q) use ($chapterSlug) {
+                $q->where('number', $chapterSlug)
+                  ->orWhere('id', $chapterSlug);
+            })->where('story_id', $story->id);
+        } else {
+            $chapterQuery = Chapter::where('slug', $chapterSlug)
+                ->where('story_id', $story->id);
+        }
+
+        if (!$isAdmin) {
+            $chapterQuery->where('status', 'published');
+        }
+
+        $chapter = $chapterQuery
+            ->select([
+                'id', 'story_id', 'number', 'slug', 'title', 'content',
+                'price', 'is_free', 'status', 'views',
+                'created_at', 'updated_at'
+            ])
+            ->firstOrFail();
+
+        // Redirect nếu là number nhưng slug khác
+        if ($isNumber && $chapter->slug !== $chapterSlug) {
+            return redirect()->route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug], 301);
+        }
+
+        // Tính word count
+        $chapter->word_count = str_word_count(strip_tags($chapter->content), 0, 'àáãạảăắằẳẵặâấầẩẫậèéẹẻẽêềếểễệđìíĩỉịòóõọỏôốồổỗộơớờởỡợùúũụủưứừửữựỳýỵỷỹ');
+
+        // Load comments count và chapters trong một query
+        $story->loadCount(['comments' => function ($q) {
+            $q->whereNull('reply_id');
+        }])
+        ->load(['chapters' => function ($q) use ($isAdmin) {
+            if (!$isAdmin) {
+                $q->where('status', 'published');
+            }
+            $q->select('id', 'story_id', 'number', 'slug', 'title')
+                ->orderBy('number', 'asc');
+        }]);
+
+        // Set comments count từ withCount
+        $chapter->comments_count = $story->comments_count ?? 0;
+
+        // Tìm next và prev chapter từ chapters đã load
+        $allChapters = $story->chapters;
+        $nextChapter = $allChapters->first(function ($ch) use ($chapter) {
+            return $ch->number > $chapter->number;
+        });
+
+        $prevChapter = $allChapters->reverse()->first(function ($ch) use ($chapter) {
+            return $ch->number < $chapter->number;
+        });
+
+        // Recent chapters (5 chapters gần nhất, loại trừ chapter hiện tại)
+        $recentChapters = $allChapters
+            ->where('id', '!=', $chapter->id)
+            ->sortByDesc('number')
+            ->take(5)
+            ->values();
+
+        return [
+            'story' => $story,
+            'chapter' => $chapter,
+            'nextChapter' => $nextChapter,
+            'prevChapter' => $prevChapter,
+            'recentChapters' => $recentChapters,
+        ];
     }
 
     public function checkChapterPassword(Request $request, $storySlug, $chapterSlug)
     {
-        $story = Story::where('slug', $storySlug)->firstOrFail();
-        $chapter = Chapter::where('slug', $chapterSlug)
-            ->where('story_id', $story->id)
-            ->where('status', 'published')
-            ->firstOrFail();
-
-        $request->validate([
-            'password' => 'required|string'
-        ]);
-
-        if ($chapter->checkPassword($request->password)) {
-            $passwordSessionKey = "chapter_password_{$chapter->id}";
-            session([$passwordSessionKey => true]);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Mật khẩu đúng!'
-            ]);
-        } else {
-            return response()->json([
-                'success' => false,
-                'message' => 'Mật khẩu không đúng!'
-            ], 400);
-        }
+        // Password feature không có trong database, trả về lỗi
+        return response()->json([
+            'success' => false,
+            'message' => 'Tính năng mật khẩu chưa được kích hoạt.'
+        ], 400);
     }
 
     public function searchChapters(Request $request)

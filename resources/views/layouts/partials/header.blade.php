@@ -7,9 +7,9 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
     @php
-        $logoSite = \App\Models\LogoSite::first();
-        $logoPath = $logoSite && $logoSite->logo ? Storage::url($logoSite->logo) : asset('images/logo/logo-site.png');
-        $faviconPath = $logoSite && $logoSite->favicon ? Storage::url($logoSite->favicon) : asset('favicon.ico');
+        // Logo được load từ View Composer (đã cache)
+        $logoPath = isset($logoSite) && $logoSite && $logoSite->logo ? Storage::url($logoSite->logo) : asset('images/logo/logo-site.png');
+        $faviconPath = isset($logoSite) && $logoSite && $logoSite->favicon ? Storage::url($logoSite->favicon) : asset('favicon.ico');
     @endphp
 
     <title>@yield('title', 'Trang chủ - ' . config('app.name'))</title>

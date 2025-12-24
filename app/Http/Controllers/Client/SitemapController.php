@@ -5,13 +5,16 @@ namespace App\Http\Controllers\Client;
 use App\Models\Story;
 use App\Models\Chapter;
 use App\Models\Category;
+use App\Services\ConfigService;
 use Illuminate\Support\Carbon;
 use App\Http\Controllers\Controller;
+
 class SitemapController extends Controller
 {
     public function index()
     {
-        $hide18Plus = \App\Models\Config::getConfig('hide_story_18_plus', 0);
+        $configService = new ConfigService();
+        $hide18Plus = $configService->shouldHide18Plus();
         $chaptersQuery = Chapter::where('status', 'published');
         if ($hide18Plus == 1) {
             $chaptersQuery->whereHas('story', function ($q) {
@@ -101,14 +104,15 @@ class SitemapController extends Controller
 
     public function chapters()
     {
-        $hide18Plus = \App\Models\Config::getConfig('hide_story_18_plus', 0);
+        $configService = new ConfigService();
+        $hide18Plus = $configService->shouldHide18Plus();
         
         $chapters = Chapter::where('status', 'published')
             ->select('id', 'story_id', 'slug', 'updated_at')
             ->with(['story:id,slug,is_18_plus'])
             ->where('story_id', '!=', null);
         
-        if ($hide18Plus == 1) {
+        if ($hide18Plus) {
             $chapters->whereHas('story', function ($q) {
                 $q->where('is_18_plus', false);
             });

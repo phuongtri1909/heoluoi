@@ -78,7 +78,7 @@
                 </div>
 
                 <p class="badge bg-1 text-white small rounded-pill d-flex align-items-center">
-                    {{ $story->chapters_count ?? ($story->chapters ? $story->chapters->count() : 0) }} chương</p>
+                    {{ $story->chapters_count ?? 0 }} chương</p>
             </div>
         </div>
     </div>

@@ -39,7 +39,7 @@ class ReadingHistoryService
             [
                 'chapter_id' => $chapterId,
                 'progress_percent' => $progressPercent,
-                'updated_at' => now()
+                'updated_at' => now() // Cập nhật thời gian đọc mới nhất
             ]
         );
     }
@@ -167,7 +167,7 @@ class ReadingHistoryService
                     [
                         'chapter_id' => $reading->chapter_id,
                         'progress_percent' => $reading->progress_percent,
-                        'updated_at' => $reading->updated_at
+                        'updated_at' => $reading->updated_at // Giữ lại timestamp cũ khi migrate
                     ]
                 );
             }
@@ -207,7 +207,7 @@ class ReadingHistoryService
                 'story_id' => $reading->story_id,
                 'chapter_id' => $reading->chapter_id,
                 'progress_percent' => $reading->progress_percent,
-                'updated_at' => $reading->updated_at,
+                'updated_at' => $reading->updated_at, // Giữ lại timestamp khi copy
                 'created_at' => now(),
             ]);
         }

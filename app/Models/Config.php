@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class Config extends Model
 {
     use HasFactory;
+
+    private static array $requestCache = [];
 
     protected $fillable = [
         'key',
@@ -24,8 +27,20 @@ class Config extends Model
      */
     public static function getConfig($key, $default = null)
     {
-        $config = self::where('key', $key)->first();
-        return $config ? $config->value : $default;
+        if (isset(self::$requestCache[$key])) {
+            return self::$requestCache[$key];
+        }
+
+        $cacheKey = "config.{$key}";
+
+        $value = Cache::rememberForever($cacheKey, function () use ($key, $default) {
+            $config = self::where('key', $key)->first();
+            return $config ? $config->value : $default;
+        });
+
+        self::$requestCache[$key] = $value;
+
+        return $value;
     }
 
     /**

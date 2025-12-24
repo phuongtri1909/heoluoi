@@ -9,6 +9,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckBan
 {
+    /**
+     * Request-level cache để tránh duplicate query
+     * Key: IP address, Value: boolean (is banned)
+     */
+    private static array $ipBanCache = [];
+
     public function handle(Request $request, Closure $next, $action = null): Response
     {
         $user = Auth::user();
@@ -43,8 +49,18 @@ class CheckBan
             }
         }
 
+        // Cache kết quả check IP trong request để tránh duplicate query
         $ip = $request->ip();
-        if (\App\Models\BanIp::where('ip_address', $ip)->exists()) {
+        
+        // Kiểm tra cache trước
+        if (!isset(self::$ipBanCache[$ip])) {
+            // Check IP ban và cache kết quả
+            self::$ipBanCache[$ip] = \App\Models\BanIp::where('ip_address', $ip)->exists();
+        }
+        
+        $isBanned = self::$ipBanCache[$ip];
+
+        if ($isBanned) {
             sleep(10);
             if($request->ajax()){
                 return response()->json(['message' => 'IP của bạn đã bị cấm.'], 403);

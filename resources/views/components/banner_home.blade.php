@@ -8,16 +8,17 @@
                     <a href="{{ $banner->link ?? route('show.page.story', $banner->story->slug) }}"
                         rel="noopener noreferrer">
                         <img src="{{ asset('storage/' . $banner->image) ?? asset('assets/images/banner_default.jpg') }}"
-                            alt="{{ $banner->alt_text ?? 'Banner Image' }}" loading="lazy">
+                            alt="Banner Image" loading="lazy">
                         @if ($banner->story && $banner->story->is_18_plus === 1)
                             @include('components.tag18plus')
                         @endif
                     </a>
-                    @if ($banner->title)
+                    {{-- Title không có trong Banner model, comment lại để tránh lỗi --}}
+                    {{-- @if ($banner->title)
                         <div class="title">
                             <span>{{ $banner->title }}</span>
                         </div>
-                    @endif
+                    @endif --}}
                 </div>
             @endforeach
             <button class="nav prev pe-0">&#10094;</button>

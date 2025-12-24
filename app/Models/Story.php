@@ -87,7 +87,11 @@ class Story extends Model
         if (isset($this->attributes['chapters_sum_views'])) {
             return $this->attributes['chapters_sum_views'];
         }
+        // Tránh lazy loading - dùng query builder thay vì relationship
+        if ($this->relationLoaded('chapters')) {
         return $this->chapters->sum('views');
+        }
+        return $this->chapters()->sum('views');
     }
 
     public function getAverageViewsAttribute()
@@ -165,6 +169,10 @@ class Story extends Model
         if (isset($this->attributes['total_chapter_price'])) {
             return $this->attributes['total_chapter_price'];
         }
+        // Kiểm tra vớiSum result
+        if (isset($this->attributes['chapters_sum_price'])) {
+            return $this->attributes['chapters_sum_price'];
+        }
         return $this->chapters()->where('status', 'published')->sum('price');
     }
 
@@ -233,6 +241,7 @@ class Story extends Model
     public function scopeHide18Plus($query)
     {
         $hide18Plus = Config::getConfig('hide_story_18_plus', 0);
+        
         if ($hide18Plus == 1) {
             return $query->where('is_18_plus', false);
         }
