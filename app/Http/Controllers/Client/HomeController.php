@@ -1544,6 +1544,48 @@ class HomeController extends Controller
                 ->latest()
                 ->paginate(10);
             
+            // Unset relationships và detach connection trong comments để tránh PDO serialization issues
+            $pinnedComments->each(function ($comment) {
+                foreach (['user', 'approvedReplies', 'reactions'] as $relation) {
+                    if ($comment->relationLoaded($relation)) {
+                        $comment->unsetRelation($relation);
+                    }
+                }
+                // Unset nested relationships trong replies
+                if ($comment->relationLoaded('approvedReplies')) {
+                    $comment->approvedReplies->each(function ($reply) {
+                        foreach (['user', 'reactions', 'approvedReplies'] as $relation) {
+                            if ($reply->relationLoaded($relation)) {
+                                $reply->unsetRelation($relation);
+                            }
+                        }
+                        $reply->setConnection(null);
+                    });
+                }
+                $comment->setConnection(null);
+            });
+            
+            // Unset relationships và detach connection trong regular comments
+            $regularComments->getCollection()->each(function ($comment) {
+                foreach (['user', 'approvedReplies', 'reactions'] as $relation) {
+                    if ($comment->relationLoaded($relation)) {
+                        $comment->unsetRelation($relation);
+                    }
+                }
+                // Unset nested relationships trong replies
+                if ($comment->relationLoaded('approvedReplies')) {
+                    $comment->approvedReplies->each(function ($reply) {
+                        foreach (['user', 'reactions', 'approvedReplies'] as $relation) {
+                            if ($reply->relationLoaded($relation)) {
+                                $reply->unsetRelation($relation);
+                            }
+                        }
+                        $reply->setConnection(null);
+                    });
+                }
+                $comment->setConnection(null);
+            });
+            
             return [
                 'pinned' => $pinnedComments,
                 'regular' => $regularComments
@@ -1552,6 +1594,64 @@ class HomeController extends Controller
         
         $pinnedComments = $commentsData['pinned'];
         $regularComments = $commentsData['regular'];
+        
+        // Restore connection cho comments sau khi lấy từ cache
+        $pinnedComments->each(function ($comment) {
+            $comment->setConnection(config('database.default'));
+            if ($comment->relationLoaded('approvedReplies')) {
+                $comment->approvedReplies->each(function ($reply) {
+                    $reply->setConnection(config('database.default'));
+                });
+            }
+        });
+        
+        $regularComments->getCollection()->each(function ($comment) {
+            $comment->setConnection(config('database.default'));
+            if ($comment->relationLoaded('approvedReplies')) {
+                $comment->approvedReplies->each(function ($reply) {
+                    $reply->setConnection(config('database.default'));
+                });
+            }
+        });
+        
+        // Reload relationships cho comments sau khi restore connection
+        $pinnedComments->load([
+            'user:id,name,avatar,role',
+            'approvedReplies' => function ($q) {
+                $q->select('id', 'user_id', 'comment', 'reply_id', 'level', 'approval_status', 'created_at')
+                    ->approved()
+                    ->latest();
+            },
+            'approvedReplies.user:id,name,avatar,role',
+            'approvedReplies.reactions:id,comment_id,user_id,type',
+            'approvedReplies.approvedReplies' => function ($q) {
+                $q->select('id', 'user_id', 'comment', 'reply_id', 'level', 'approval_status', 'created_at')
+                    ->approved()
+                    ->latest();
+            },
+            'approvedReplies.approvedReplies.user:id,name,avatar,role',
+            'approvedReplies.approvedReplies.reactions:id,comment_id,user_id,type',
+            'reactions:id,comment_id,user_id,type'
+        ]);
+        
+        $regularComments->getCollection()->load([
+            'user:id,name,avatar,role',
+            'approvedReplies' => function ($q) {
+                $q->select('id', 'user_id', 'comment', 'reply_id', 'level', 'approval_status', 'created_at')
+                    ->approved()
+                    ->latest();
+            },
+            'approvedReplies.user:id,name,avatar,role',
+            'approvedReplies.reactions:id,comment_id,user_id,type',
+            'approvedReplies.approvedReplies' => function ($q) {
+                $q->select('id', 'user_id', 'comment', 'reply_id', 'level', 'approval_status', 'created_at')
+                    ->approved()
+                    ->latest();
+            },
+            'approvedReplies.approvedReplies.user:id,name,avatar,role',
+            'approvedReplies.approvedReplies.reactions:id,comment_id,user_id,type',
+            'reactions:id,comment_id,user_id,type'
+        ]);
 
         return view('pages.story', array_merge($data, [
             'chapters' => $chapters,
@@ -1886,13 +1986,105 @@ class HomeController extends Controller
 
     public function chapterByStory($storySlug, $chapterSlug)
     {
+        // Kiểm tra redirect trước (không cache redirect)
+        $isNumber = is_numeric($chapterSlug);
+        if ($isNumber) {
+            // Nếu là number, kiểm tra xem có cần redirect không
+            $story = Story::where('slug', $storySlug)
+                ->published()
+                ->select('id')
+                ->firstOrFail();
+            
+            $chapter = Chapter::where(function($q) use ($chapterSlug) {
+                $q->where('number', $chapterSlug)
+                  ->orWhere('id', $chapterSlug);
+            })
+            ->where('story_id', $story->id)
+            ->where('status', 'published')
+            ->select('id', 'slug')
+            ->first();
+            
+            if ($chapter && $chapter->slug !== $chapterSlug) {
+                return redirect()->route('chapter', ['storySlug' => $storySlug, 'chapterSlug' => $chapter->slug], 301);
+            }
+        }
+        
         // Cache key cho chapter data (không cache user-specific data)
         $cacheKey = 'chapter_data_' . $storySlug . '_' . $chapterSlug;
         
         // Cache chapter data trong 5 phút
+        // Sử dụng fresh models để tránh PDO serialization issues
         $data = Cache::remember($cacheKey, 300, function () use ($storySlug, $chapterSlug) {
-            return $this->loadChapterData($storySlug, $chapterSlug);
+            $cachedData = $this->loadChapterData($storySlug, $chapterSlug);
+            
+            // Kiểm tra nếu là redirect response thì không cache
+            if ($cachedData instanceof \Illuminate\Http\RedirectResponse) {
+                return $cachedData;
+            }
+            
+            // Convert models to arrays để tránh PDO serialization
+            return [
+                'story_id' => $cachedData['story']->id,
+                'chapter_id' => $cachedData['chapter']->id,
+                'next_chapter_id' => $cachedData['nextChapter']?->id,
+                'prev_chapter_id' => $cachedData['prevChapter']?->id,
+                'recent_chapter_ids' => $cachedData['recentChapters']->pluck('id')->toArray(),
+            ];
         });
+        
+        // Nếu cache trả về redirect, return luôn
+        if ($data instanceof \Illuminate\Http\RedirectResponse) {
+            return $data;
+        }
+        
+        // Rebuild models từ cache
+        $story = Story::with([
+            'categories' => function ($q) {
+                $q->select('categories.id', 'categories.name', 'categories.slug');
+            },
+            'user:id,name'
+        ])
+        ->select([
+            'id', 'title', 'slug', 'cover', 'author_name', 
+            'user_id', 'created_at', 'updated_at'
+        ])
+        ->findOrFail($data['story_id']);
+        
+        $chapter = Chapter::select([
+            'id', 'story_id', 'number', 'slug', 'title', 'content',
+            'price', 'is_free', 'status', 'views',
+            'created_at', 'updated_at'
+        ])->findOrFail($data['chapter_id']);
+        
+        // Tính word count
+        $chapter->word_count = str_word_count(strip_tags($chapter->content), 0, 'àáãạảăắằẳẵặâấầẩẫậèéẹẻẽêềếểễệđìíĩỉịòóõọỏôốồổỗộơớờởỡợùúũụủưứừửữựỳýỵỷỹ');
+        
+        // Load chapters list
+        $story->load(['chapters' => function ($q) {
+            $q->select('id', 'story_id', 'number', 'slug', 'title')
+                ->orderBy('number', 'asc');
+        }]);
+        
+        // Load comments count
+        $story->loadCount(['comments' => function ($q) {
+            $q->whereNull('reply_id');
+        }]);
+        $chapter->comments_count = $story->comments_count ?? 0;
+        
+        // Rebuild next/prev/recent chapters
+        $allChapters = $story->chapters;
+        $nextChapter = $data['next_chapter_id'] ? $allChapters->firstWhere('id', $data['next_chapter_id']) : null;
+        $prevChapter = $data['prev_chapter_id'] ? $allChapters->firstWhere('id', $data['prev_chapter_id']) : null;
+        $recentChapters = $allChapters->whereIn('id', $data['recent_chapter_ids'])->values();
+        
+        // Rebuild data array
+        $data = [
+            'story' => $story,
+            'chapter' => $chapter,
+            'nextChapter' => $nextChapter,
+            'prevChapter' => $prevChapter,
+            'recentChapters' => $recentChapters,
+        ];
 
         // Load user-specific data (không cache) - tối ưu batch loading
         $readingService = new ReadingHistoryService();
@@ -2063,6 +2255,48 @@ class HomeController extends Controller
                 ->latest()
                 ->paginate(10);
             
+            // Unset relationships và detach connection trong comments để tránh PDO serialization issues
+            $pinnedComments->each(function ($comment) {
+                foreach (['user', 'approvedReplies', 'reactions'] as $relation) {
+                    if ($comment->relationLoaded($relation)) {
+                        $comment->unsetRelation($relation);
+                    }
+                }
+                // Unset nested relationships trong replies
+                if ($comment->relationLoaded('approvedReplies')) {
+                    $comment->approvedReplies->each(function ($reply) {
+                        foreach (['user', 'reactions', 'approvedReplies'] as $relation) {
+                            if ($reply->relationLoaded($relation)) {
+                                $reply->unsetRelation($relation);
+                            }
+                        }
+                        $reply->setConnection(null);
+                    });
+                }
+                $comment->setConnection(null);
+            });
+            
+            // Unset relationships và detach connection trong regular comments
+            $regularComments->getCollection()->each(function ($comment) {
+                foreach (['user', 'approvedReplies', 'reactions'] as $relation) {
+                    if ($comment->relationLoaded($relation)) {
+                        $comment->unsetRelation($relation);
+                    }
+                }
+                // Unset nested relationships trong replies
+                if ($comment->relationLoaded('approvedReplies')) {
+                    $comment->approvedReplies->each(function ($reply) {
+                        foreach (['user', 'reactions', 'approvedReplies'] as $relation) {
+                            if ($reply->relationLoaded($relation)) {
+                                $reply->unsetRelation($relation);
+                            }
+                        }
+                        $reply->setConnection(null);
+                    });
+                }
+                $comment->setConnection(null);
+            });
+            
             return [
                 'pinned' => $pinnedComments,
                 'regular' => $regularComments
@@ -2071,6 +2305,64 @@ class HomeController extends Controller
         
         $pinnedComments = $commentsData['pinned'];
         $regularComments = $commentsData['regular'];
+        
+        // Restore connection cho comments sau khi lấy từ cache
+        $pinnedComments->each(function ($comment) {
+            $comment->setConnection(config('database.default'));
+            if ($comment->relationLoaded('approvedReplies')) {
+                $comment->approvedReplies->each(function ($reply) {
+                    $reply->setConnection(config('database.default'));
+                });
+            }
+        });
+        
+        $regularComments->getCollection()->each(function ($comment) {
+            $comment->setConnection(config('database.default'));
+            if ($comment->relationLoaded('approvedReplies')) {
+                $comment->approvedReplies->each(function ($reply) {
+                    $reply->setConnection(config('database.default'));
+                });
+            }
+        });
+        
+        // Reload relationships cho comments sau khi restore connection
+        $pinnedComments->load([
+            'user:id,name,avatar,role',
+            'approvedReplies' => function ($q) {
+                $q->select('id', 'user_id', 'comment', 'reply_id', 'level', 'approval_status', 'created_at')
+                    ->approved()
+                    ->latest();
+            },
+            'approvedReplies.user:id,name,avatar,role',
+            'approvedReplies.reactions:id,comment_id,user_id,type',
+            'approvedReplies.approvedReplies' => function ($q) {
+                $q->select('id', 'user_id', 'comment', 'reply_id', 'level', 'approval_status', 'created_at')
+                    ->approved()
+                    ->latest();
+            },
+            'approvedReplies.approvedReplies.user:id,name,avatar,role',
+            'approvedReplies.approvedReplies.reactions:id,comment_id,user_id,type',
+            'reactions:id,comment_id,user_id,type'
+        ]);
+        
+        $regularComments->getCollection()->load([
+            'user:id,name,avatar,role',
+            'approvedReplies' => function ($q) {
+                $q->select('id', 'user_id', 'comment', 'reply_id', 'level', 'approval_status', 'created_at')
+                    ->approved()
+                    ->latest();
+            },
+            'approvedReplies.user:id,name,avatar,role',
+            'approvedReplies.reactions:id,comment_id,user_id,type',
+            'approvedReplies.approvedReplies' => function ($q) {
+                $q->select('id', 'user_id', 'comment', 'reply_id', 'level', 'approval_status', 'created_at')
+                    ->approved()
+                    ->latest();
+            },
+            'approvedReplies.approvedReplies.user:id,name,avatar,role',
+            'approvedReplies.approvedReplies.reactions:id,comment_id,user_id,type',
+            'reactions:id,comment_id,user_id,type'
+        ]);
 
         // Increment views (không cache)
         $ip = request()->ip();
@@ -2140,10 +2432,11 @@ class HomeController extends Controller
             ])
             ->firstOrFail();
 
-        // Redirect nếu là number nhưng slug khác
-        if ($isNumber && $chapter->slug !== $chapterSlug) {
-            return redirect()->route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug], 301);
-        }
+        // Redirect nếu là number nhưng slug khác - không return redirect trong loadChapterData
+        // Redirect sẽ được xử lý trong chapterByStory trước khi cache
+        // if ($isNumber && $chapter->slug !== $chapterSlug) {
+        //     return redirect()->route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug], 301);
+        // }
 
         // Tính word count
         $chapter->word_count = str_word_count(strip_tags($chapter->content), 0, 'àáãạảăắằẳẵặâấầẩẫậèéẹẻẽêềếểễệđìíĩỉịòóõọỏôốồổỗộơớờởỡợùúũụủưứừửữựỳýỵỷỹ');
@@ -2179,6 +2472,40 @@ class HomeController extends Controller
             ->sortByDesc('number')
             ->take(5)
             ->values();
+
+        // Unset relationships để tránh PDO serialization issues khi cache
+        // Story relationships
+        foreach (['categories', 'user', 'chapters'] as $relation) {
+            if ($story->relationLoaded($relation)) {
+                $story->unsetRelation($relation);
+            }
+        }
+        
+        // Detach models khỏi connection để tránh PDO serialization
+        $story->setConnection(null);
+        $chapter->setConnection(null);
+        
+        // Next/Prev chapters - unset nếu có relationships và detach connection
+        if ($nextChapter) {
+            if ($nextChapter->relationLoaded('story')) {
+                $nextChapter->unsetRelation('story');
+            }
+            $nextChapter->setConnection(null);
+        }
+        if ($prevChapter) {
+            if ($prevChapter->relationLoaded('story')) {
+                $prevChapter->unsetRelation('story');
+            }
+            $prevChapter->setConnection(null);
+        }
+        
+        // Recent chapters - unset relationships và detach connection
+        $recentChapters->each(function ($ch) {
+            if ($ch->relationLoaded('story')) {
+                $ch->unsetRelation('story');
+            }
+            $ch->setConnection(null);
+        });
 
         return [
             'story' => $story,

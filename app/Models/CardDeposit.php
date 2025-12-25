@@ -30,6 +30,8 @@ class CardDeposit extends Model
         'processed_at',
         'penalty_amount',
         'penalty_percent',
+        'ip_address',
+        'user_agent',
     ];
 
     protected $casts = [
