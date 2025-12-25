@@ -50,6 +50,7 @@ class CardDepositController extends Controller
         $user = Auth::user();
 
         $cardDeposits = CardDeposit::where('user_id', $user->id)
+            ->select('*')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 

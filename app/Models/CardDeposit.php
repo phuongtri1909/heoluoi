@@ -102,6 +102,11 @@ class CardDeposit extends Model
         return self::CARD_TYPES[$this->type] ?? $this->type;
     }
 
+    public function getCardTypeTextAttribute()
+    {
+        return self::CARD_TYPES[$this->type] ?? $this->type;
+    }
+
     public function getAmountFormattedAttribute()
     {
         return number_format($this->amount) . ' VNĐ';

@@ -324,6 +324,7 @@
 
         @if (!Auth()->check() || (Auth()->check() && Auth()->user()->ban_comment == false))
             @include('components.comment', [
+                'story' => $story,
                 'pinnedComments' => $pinnedComments,
                 'regularComments' => $regularComments,
             ])
