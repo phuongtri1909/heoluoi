@@ -9,84 +9,30 @@
 @section('info_content')
     <ul class="nav nav-tabs mb-4" id="purchaseTabs" role="tablist">
         <li class="nav-item" role="presentation">
-            <button class="nav-link active" id="chapters-tab" data-bs-toggle="tab" data-bs-target="#chapters-content" type="button" role="tab" aria-controls="chapters-content" aria-selected="true">
-                <i class="fas fa-book-open me-2"></i>Chương đã mua
+            <button class="nav-link active btn btn-sm " id="stories-tab" data-bs-toggle="tab" data-bs-target="#stories-content"
+                type="button" role="tab" aria-controls="stories-content" aria-selected="false">
+                Combo truyện
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" id="stories-tab" data-bs-toggle="tab" data-bs-target="#stories-content" type="button" role="tab" aria-controls="stories-content" aria-selected="false">
-                <i class="fas fa-books me-2"></i>Combo truyện
+            <button class="nav-link btn btn-sm" id="chapters-tab" data-bs-toggle="tab" data-bs-target="#chapters-content"
+                type="button" role="tab" aria-controls="chapters-content" aria-selected="true">
+                Chương đã mua
             </button>
         </li>
     </ul>
 
     <div class="tab-content" id="purchaseTabContent">
-        <!-- Purchased Chapters Tab -->
-        <div class="tab-pane fade show active" id="chapters-content" role="tabpanel" aria-labelledby="chapters-tab">
-            @if(count($purchasedChapters) > 0)
-                <div class="purchased-chapters-list">
-                    @foreach($purchasedChapters as $key => $purchase)
-                        <div class="purchase-item" data-delay="{{ $key }}">
-                            <div class="d-flex">
-                                <div class="story-thumb-container me-3">
-                                    <img src="{{ Storage::url($purchase->chapter->story->cover) }}" alt="{{ $purchase->chapter->story->title }}" class="story-thumb">
-                                </div>
-                                <div class="flex-grow-1">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <h6 class="story-title">
-                                            <a href="{{ route('show.page.story', $purchase->chapter->story->slug) }}">
-                                                {{ $purchase->chapter->story->title }}
-                                            </a>
-                                        </h6>
-                                        <small class="text-muted ms-2">{{ Carbon\Carbon::parse($purchase->created_at)->diffForHumans() }}</small>
-                                    </div>
-                                    <div class="story-details mb-2">
-                                        <span class="badge bg-primary me-2">
-                                            <i class="fas fa-bookmark me-1"></i> Chương VIP
-                                        </span>
-                                        <span class="text-muted">
-                                            <i class="fas fa-book-open me-1"></i>
-                                            <a href="{{ route('chapter', [$purchase->chapter->story->slug, $purchase->chapter->slug]) }}"
-                                               class="text-decoration-none">
-                                                Chương {{ $purchase->chapter->number }}: {{ $purchase->chapter->title }}
-                                            </a>
-                                        </span>
-                                    </div>
-
-                                    <div class="d-flex justify-content-between align-items-center mt-2">
-                                        <span class="purchase-details">
-                                            <i class="fas fa-coins text-warning"></i>
-                                            <span>{{ number_format($purchase->price) }} cám</span>
-                                        </span>
-                                        <a href="{{ route('chapter', [$purchase->chapter->story->slug, $purchase->chapter->slug]) }}"
-                                           class="btn btn-sm action-btn-primary">
-                                            <i class="fas fa-book-open me-1"></i> Đọc ngay
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                            <hr class="my-3 opacity-25">
-                        </div>
-                    @endforeach
-                </div>
-            @else
-                <div class="empty-state">
-                    <i class="fa-solid fa-cart-arrow-down empty-icon"></i>
-                    <p class="empty-text">Bạn chưa mua chương truyện nào.</p>
-                    <a href="{{ route('home') }}" class="btn discover-btn">Khám phá truyện ngay</a>
-                </div>
-            @endif
-        </div>
-
         <!-- Purchased Stories Tab -->
-        <div class="tab-pane fade" id="stories-content" role="tabpanel" aria-labelledby="stories-tab">
-            @if(count($purchasedStories) > 0)
+        <div class="tab-pane fade show active" id="stories-content" role="tabpanel" aria-labelledby="stories-tab">
+            @if (count($purchasedStories) > 0)
                 <div class="purchased-stories-list">
-                    @foreach($purchasedStories as $key => $purchase)
+                    @foreach ($purchasedStories as $key => $purchase)
                         <div class="purchase-item" data-delay="{{ $key }}">
                             <div class="d-flex">
                                 <div class="story-thumb-container me-3">
-                                    <img src="{{ Storage::url($purchase->story->cover) }}" alt="{{ $purchase->story->title }}" class="story-thumb">
+                                    <img src="{{ Storage::url($purchase->story->cover) }}"
+                                        alt="{{ $purchase->story->title }}" class="story-thumb">
                                 </div>
                                 <div class="flex-grow-1">
                                     <div class="d-flex justify-content-between align-items-start mb-2">
@@ -95,7 +41,8 @@
                                                 {{ $purchase->story->title }}
                                             </a>
                                         </h6>
-                                        <small class="text-muted ms-2">{{ Carbon\Carbon::parse($purchase->created_at)->diffForHumans() }}</small>
+                                        <small
+                                            class="text-muted ms-2">{{ Carbon\Carbon::parse($purchase->created_at)->diffForHumans() }}</small>
                                     </div>
                                     <div class="story-details mb-2">
                                         <span class="badge bg-success me-2">
@@ -113,7 +60,7 @@
                                             <span>{{ number_format($purchase->price) }} cám</span>
                                         </span>
                                         <a href="{{ route('show.page.story', $purchase->story->slug) }}"
-                                           class="btn btn-sm action-btn-primary">
+                                            class="btn btn-sm action-btn-primary">
                                             <i class="fas fa-book me-1"></i> Xem truyện
                                         </a>
                                     </div>
@@ -127,6 +74,65 @@
                 <div class="empty-state">
                     <i class="fa-solid fa-cart-arrow-down empty-icon"></i>
                     <p class="empty-text">Bạn chưa mua combo truyện nào.</p>
+                    <a href="{{ route('home') }}" class="btn discover-btn">Khám phá truyện ngay</a>
+                </div>
+            @endif
+        </div>
+
+        <!-- Purchased Chapters Tab -->
+        <div class="tab-pane fade" id="chapters-content" role="tabpanel" aria-labelledby="chapters-tab">
+            @if (count($purchasedChapters) > 0)
+                <div class="purchased-chapters-list">
+                    @foreach ($purchasedChapters as $key => $purchase)
+                        <div class="purchase-item" data-delay="{{ $key }}">
+                            <div class="d-flex">
+                                <div class="story-thumb-container me-3">
+                                    <img src="{{ Storage::url($purchase->chapter->story->cover) }}"
+                                        alt="{{ $purchase->chapter->story->title }}" class="story-thumb">
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="story-title">
+                                            <a href="{{ route('show.page.story', $purchase->chapter->story->slug) }}">
+                                                {{ $purchase->chapter->story->title }}
+                                            </a>
+                                        </h6>
+                                        <small
+                                            class="text-muted ms-2">{{ Carbon\Carbon::parse($purchase->created_at)->diffForHumans() }}</small>
+                                    </div>
+                                    <div class="story-details mb-2">
+                                        <span class="badge bg-primary me-2">
+                                            <i class="fas fa-bookmark me-1"></i> Chương VIP
+                                        </span>
+                                        <span class="text-muted">
+                                            <i class="fas fa-book-open me-1"></i>
+                                            <a href="{{ route('chapter', [$purchase->chapter->story->slug, $purchase->chapter->slug]) }}"
+                                                class="text-decoration-none">
+                                                Chương {{ $purchase->chapter->number }}: {{ $purchase->chapter->title }}
+                                            </a>
+                                        </span>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center mt-2">
+                                        <span class="purchase-details">
+                                            <i class="fas fa-coins text-warning"></i>
+                                            <span>{{ number_format($purchase->price) }} cám</span>
+                                        </span>
+                                        <a href="{{ route('chapter', [$purchase->chapter->story->slug, $purchase->chapter->slug]) }}"
+                                            class="btn btn-sm action-btn-primary">
+                                            <i class="fas fa-book-open me-1"></i> Đọc ngay
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="my-3 opacity-25">
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="empty-state">
+                    <i class="fa-solid fa-cart-arrow-down empty-icon"></i>
+                    <p class="empty-text">Bạn chưa mua chương truyện nào.</p>
                     <a href="{{ route('home') }}" class="btn discover-btn">Khám phá truyện ngay</a>
                 </div>
             @endif
@@ -240,6 +246,7 @@
 
         /* Tab styling */
         .nav-tabs .nav-link {
+
             color: #666;
             border: none;
             padding: 10px 20px;
@@ -249,8 +256,9 @@
 
         .nav-tabs .nav-link.active {
             color: var(--primary-color);
-            background: transparent;
+            background: var(--primary-color-7);
             border: none;
+
         }
 
         .nav-tabs .nav-link.active::after {

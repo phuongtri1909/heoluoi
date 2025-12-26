@@ -13,12 +13,6 @@
                             @include('components.tag18plus')
                         @endif
                     </a>
-                    {{-- Title không có trong Banner model, comment lại để tránh lỗi --}}
-                    {{-- @if ($banner->title)
-                        <div class="title">
-                            <span>{{ $banner->title }}</span>
-                        </div>
-                    @endif --}}
                 </div>
             @endforeach
             <button class="nav prev pe-0">&#10094;</button>
@@ -50,23 +44,25 @@
                     top: 50%;
                     left: 50%;
                     width: 70%;
-                    height: 100%;
+                    height: auto;
                     border-radius: 16px;
                     overflow: hidden;
-                    background: #ddd;
+                    background: #fff;
                     transform: translate(-50%, -50%);
                     transition: transform .45s cubic-bezier(.2, .8, .2, 1),
                         opacity .45s cubic-bezier(.2, .8, .2, 1),
                         z-index .45s;
                     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
                     max-width: 100%;
+                    max-height: 100%;
                 }
 
                 .slide img {
                     width: 100%;
-                    height: 100%;
-                    object-fit: cover;
+                    height: auto;
+                    object-fit: contain;
                     display: block;
+                    max-height: 350px;
                 }
 
                 .slide .title {
@@ -143,12 +139,16 @@
 
                 @media (max-width: 768px) {
                     .slider {
-                        height: 400px;
+                        height: 300px;
                     }
 
                     .slide {
                         width: 80%;
                         max-width: 80%;
+                    }
+
+                    .slide img {
+                        max-height: 300px;
                     }
 
                     .nav {
@@ -174,12 +174,16 @@
 
                 @media (max-width: 576px) {
                     .slider {
-                        height: 300px;
+                        height: 250px;
                     }
 
                     .slide {
                         width: 85%;
                         max-width: 85%;
+                    }
+
+                    .slide img {
+                        max-height: 250px;
                     }
 
                     .nav {
@@ -205,12 +209,16 @@
 
                 @media (max-width: 480px) {
                     .slider {
-                        height: 250px;
+                        height: 220px;
                     }
 
                     .slide {
                         width: 90%;
                         max-width: 90%;
+                    }
+
+                    .slide img {
+                        max-height: 220px;
                     }
 
                     .nav {
@@ -243,12 +251,12 @@
                     const slides = Array.from(slider.querySelectorAll('.slide'));
                     const prevBtn = slider.querySelector('.prev');
                     const nextBtn = slider.querySelector('.next');
-                    let active = Math.floor(slides.length / 2); // slide trung tâm
+                    let active = Math.floor(slides.length / 2);
 
                     function update() {
                         const isMobile = window.innerWidth <= 768;
                         const isSmallMobile = window.innerWidth <= 480;
-                        const gap = isSmallMobile ? 80 : isMobile ? 100 : 110; // giảm gap để đủ hiển thị 7 slides
+                        const gap = isSmallMobile ? 80 : isMobile ? 100 : 110;
                         const n = slides.length;
 
                         slides.forEach((slide, i) => {
@@ -288,7 +296,6 @@
                         });
                     }
 
-
                     function prev() {
                         active = (active - 1 + slides.length) % slides.length;
                         update();
@@ -302,7 +309,6 @@
                     prevBtn.addEventListener('click', prev);
                     nextBtn.addEventListener('click', next);
 
-                    // Drag / Swipe support
                     let startX = 0;
                     let isDown = false;
 
@@ -328,13 +334,10 @@
                     });
                     slider.addEventListener('touchend', up);
 
-                    // Responsive update
                     window.addEventListener('resize', update);
 
-                    // Autoplay 5s
                     let autoplay = setInterval(next, 5000);
 
-                    // Dừng khi hover để user điều khiển
                     slider.addEventListener('mouseenter', () => clearInterval(autoplay));
                     slider.addEventListener('mouseleave', () => autoplay = setInterval(next, 5000));
 
