@@ -123,13 +123,13 @@ class CoinController extends Controller
 
         $transactions = $query->orderBy('created_at', 'desc')->paginate(20);
 
-        $stats = [
-            'total_add' => CoinTransaction::where('type', 'add')->sum('amount'),
-            'total_subtract' => CoinTransaction::where('type', 'subtract')->sum('amount'),
-            'total_transactions' => CoinTransaction::count(),
-            'today_transactions' => CoinTransaction::whereDate('created_at', today())->count(),
-        ];
+        // $stats = [
+        //     'total_add' => CoinTransaction::where('type', 'add')->sum('amount'),
+        //     'total_subtract' => CoinTransaction::where('type', 'subtract')->sum('amount'),
+        //     'total_transactions' => CoinTransaction::count(),
+        //     'today_transactions' => CoinTransaction::whereDate('created_at', today())->count(),
+        // ];
 
-        return view('admin.pages.coins.transactions', compact('transactions', 'stats'));
+        return view('admin.pages.coins.transactions', compact('transactions'));
     }
 }

@@ -200,7 +200,8 @@
     </div>
 </div>
 
-@if($isAdminMain)
+{{-- Đã đóng - Bỏ mục Tổng Cám người dùng, Cám đã nạp và Cám nhiệm vụ --}}
+{{-- @if($isAdminMain)
 <!-- Coin Statistics -->
 <div class="row mb-4">
     <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
@@ -264,7 +265,7 @@
         </div>
     </div>
 </div>
-@endif
+@endif --}}
 
 <!-- Detailed Statistics Tables -->
 <div class="row">
@@ -570,12 +571,13 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('newChapters').textContent = formatNumber(data.basicStats.new_chapters);
         document.getElementById('newComments').textContent = formatNumber(data.basicStats.new_comments);
         
+        // Đã đóng - Bỏ mục Tổng Cám người dùng, Cám đã nạp và Cám nhiệm vụ
         // Update coin stats (only if admin_main)
-        if (data.coinStats) {
-            document.getElementById('totalUserCoins').textContent = formatNumber(data.coinStats.total_user_coins);
-            document.getElementById('totalDeposited').textContent = formatNumber(data.coinStats.total_deposited);
-            document.getElementById('totalDailyTaskCoins').textContent = formatNumber(data.coinStats.total_daily_task_coins);
-        }
+        // if (data.coinStats) {
+        //     document.getElementById('totalUserCoins').textContent = formatNumber(data.coinStats.total_user_coins);
+        //     document.getElementById('totalDeposited').textContent = formatNumber(data.coinStats.total_deposited);
+        //     document.getElementById('totalDailyTaskCoins').textContent = formatNumber(data.coinStats.total_daily_task_coins);
+        // }
         
         // Update tables
         updateTable('storyViewsTable', data.storyViews, 'story');

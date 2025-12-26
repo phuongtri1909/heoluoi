@@ -76,6 +76,21 @@
                                  </div>
                              </div>
                          </div>
+                         <div class="col-md-3 mb-3">
+                             <div class="card border-0 shadow-sm h-100">
+                                 <div class="card-body d-flex align-items-center">
+                                     <div class="flex-shrink-0">
+                                         <div class="bg-primary bg-gradient rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                             <i class="fas fa-trophy text-white fs-4"></i>
+                                         </div>
+                                     </div>
+                                     <div class="flex-grow-1 ms-3">
+                                         <h6 class="card-title text-muted mb-1">Cám nhiệm vụ</h6>
+                                         <h4 class="mb-0 text-primary fw-bold">{{ number_format($stats['total_daily_task_coins'] ?? 0) }} cám</h4>
+                                     </div>
+                                 </div>
+                             </div>
+                         </div>
                      </div>
 
                     <!-- Filters -->

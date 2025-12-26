@@ -3,7 +3,7 @@
 @section('content-auth')
 <div class="container-fluid py-4">
     <!-- Statistics Cards -->
-    <div class="row mb-4">
+    {{-- <div class="row mb-4">
         <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
             <div class="card">
                 <div class="card-body p-3">
@@ -91,7 +91,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 
     <!-- Transactions Table -->
     <div class="row">

@@ -178,10 +178,21 @@ class CoinService
             $query->whereDate('created_at', '<=', $dateTo);
         }
 
+        // Tính cám nhiệm vụ từ user_daily_tasks
+        $dailyTaskQuery = \App\Models\UserDailyTask::query();
+        if ($dateFrom) {
+            $dailyTaskQuery->whereDate('created_at', '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $dailyTaskQuery->whereDate('created_at', '<=', $dateTo);
+        }
+        $totalDailyTaskCoins = $dailyTaskQuery->sum(DB::raw('coin_reward * completed_count'));
+
         return [
             'total_added' => (clone $query)->where('type', 'add')->sum('amount'),
             'total_subtracted' => (clone $query)->where('type', 'subtract')->sum('amount'),
             'total_transactions' => (clone $query)->count(),
+            'total_daily_task_coins' => $totalDailyTaskCoins ?? 0,
             'by_type' => (clone $query)->selectRaw('transaction_type, type, SUM(amount) as total, COUNT(*) as count')
                 ->groupBy('transaction_type', 'type')
                 ->get(),

@@ -45,13 +45,13 @@ class DashboardController extends Controller
         // Only include revenue data for admin_main
         if ($isAdminMain) {
             $revenueStats = $this->getRevenueStats($dateFilter);
-            $coinStats = $this->getCoinStats($dateFilter);
+            // $coinStats = $this->getCoinStats($dateFilter); // Đã đóng
             $depositStats = $this->getDepositStats($dateFilter);
             $manualCoinStats = $this->getManualCoinStats($dateFilter);
             
             $data = array_merge($data, compact(
                 'revenueStats',
-                'coinStats',
+                // 'coinStats', // Đã đóng
                 'depositStats',
                 'manualCoinStats'
             ));
@@ -81,7 +81,7 @@ class DashboardController extends Controller
         if ($isAdminMain) {
             $data = array_merge($data, [
                 'revenueStats' => $this->getRevenueStats($dateFilter),
-                'coinStats' => $this->getCoinStats($dateFilter),
+                // 'coinStats' => $this->getCoinStats($dateFilter), // Đã đóng
                 'depositStats' => $this->getDepositStats($dateFilter),
                 'manualCoinStats' => $this->getManualCoinStats($dateFilter),
             ]);
@@ -206,33 +206,34 @@ class DashboardController extends Controller
         return $revenueStats;
     }
     
-    private function getCoinStats($dateFilter)
-    {
-        // Get total coin statistics
-        $coinStats = DB::select("
-            SELECT 
-                (SELECT COALESCE(SUM(coins), 0) FROM users WHERE active = 'active') as total_user_coins,
-                (
-                    (SELECT COALESCE(SUM(total_coins), 0) FROM deposits WHERE status = 'approved' AND created_at BETWEEN ? AND ?) +
-                    (SELECT COALESCE(SUM(total_coins), 0) FROM paypal_deposits WHERE status = 'approved' AND created_at BETWEEN ? AND ?) +
-                    (SELECT COALESCE(SUM(total_coins), 0) FROM card_deposits WHERE status = 'success' AND created_at BETWEEN ? AND ?) +
-                    (SELECT COALESCE(SUM(total_coins), 0) FROM bank_auto_deposits WHERE status = 'success' AND created_at BETWEEN ? AND ?)
-                ) as total_deposited,
-                (SELECT COALESCE(SUM(udt.coin_reward * udt.completed_count), 0) FROM user_daily_tasks udt WHERE udt.created_at BETWEEN ? AND ?) as total_daily_task_coins,
-                (SELECT COALESCE(SUM(amount), 0) FROM coin_transactions WHERE type = 'add' AND created_at BETWEEN ? AND ?) as total_manual_added,
-                (SELECT COALESCE(SUM(amount), 0) FROM coin_transactions WHERE type = 'subtract' AND created_at BETWEEN ? AND ?) as total_manual_subtracted
-        ", [
-            $dateFilter['start'], $dateFilter['end'],
-            $dateFilter['start'], $dateFilter['end'],
-            $dateFilter['start'], $dateFilter['end'],
-            $dateFilter['start'], $dateFilter['end'],
-            $dateFilter['start'], $dateFilter['end'],
-            $dateFilter['start'], $dateFilter['end'],
-            $dateFilter['start'], $dateFilter['end']
-        ])[0];
-        
-        return (array) $coinStats;
-    }
+    // Đã đóng - Bỏ mục Tổng Cám người dùng, Cám đã nạp và Cám nhiệm vụ
+    // private function getCoinStats($dateFilter)
+    // {
+    //     // Get total coin statistics
+    //     $coinStats = DB::select("
+    //         SELECT 
+    //             (SELECT COALESCE(SUM(coins), 0) FROM users WHERE active = 'active') as total_user_coins,
+    //             (
+    //                 (SELECT COALESCE(SUM(total_coins), 0) FROM deposits WHERE status = 'approved' AND created_at BETWEEN ? AND ?) +
+    //                 (SELECT COALESCE(SUM(total_coins), 0) FROM paypal_deposits WHERE status = 'approved' AND created_at BETWEEN ? AND ?) +
+    //                 (SELECT COALESCE(SUM(total_coins), 0) FROM card_deposits WHERE status = 'success' AND created_at BETWEEN ? AND ?) +
+    //                 (SELECT COALESCE(SUM(total_coins), 0) FROM bank_auto_deposits WHERE status = 'success' AND created_at BETWEEN ? AND ?)
+    //             ) as total_deposited,
+    //             (SELECT COALESCE(SUM(udt.coin_reward * udt.completed_count), 0) FROM user_daily_tasks udt WHERE udt.created_at BETWEEN ? AND ?) as total_daily_task_coins,
+    //             (SELECT COALESCE(SUM(amount), 0) FROM coin_transactions WHERE type = 'add' AND created_at BETWEEN ? AND ?) as total_manual_added,
+    //             (SELECT COALESCE(SUM(amount), 0) FROM coin_transactions WHERE type = 'subtract' AND created_at BETWEEN ? AND ?) as total_manual_subtracted
+    //     ", [
+    //         $dateFilter['start'], $dateFilter['end'],
+    //         $dateFilter['start'], $dateFilter['end'],
+    //         $dateFilter['start'], $dateFilter['end'],
+    //         $dateFilter['start'], $dateFilter['end'],
+    //         $dateFilter['start'], $dateFilter['end'],
+    //         $dateFilter['start'], $dateFilter['end'],
+    //         $dateFilter['start'], $dateFilter['end']
+    //     ])[0];
+    //     
+    //     return (array) $coinStats;
+    // }
     
     private function getDepositStats($dateFilter)
     {
