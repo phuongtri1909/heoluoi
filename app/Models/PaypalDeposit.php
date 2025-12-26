@@ -149,12 +149,11 @@ class PaypalDeposit extends Model
     /**
      * Mark as approved and add coins
      */
-    public function markAsApproved($note = null, $paypalTransactionId = null)
+    public function markAsApproved($note = null)
     {
         $this->update([
             'status' => self::STATUS_APPROVED,
             'note' => $note,
-            'paypal_transaction_id' => $paypalTransactionId,
             'processed_at' => now()
         ]);
 

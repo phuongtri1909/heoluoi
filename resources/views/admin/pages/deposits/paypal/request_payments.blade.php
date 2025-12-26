@@ -70,7 +70,7 @@
                                         <td>
                                             <div class="d-flex">
                                                 <div>
-                                                    <img src="{{ $payment->user->avatar ? asset('storage/' . $payment->user->avatar) : asset('assets/img/default-avatar.png') }}"
+                                                    <img src="{{ $payment->user->avatar ? asset('storage/' . $payment->user->avatar) : asset('/images/defaults/avatar_default.jpg') }}"
                                                          class="avatar avatar-sm me-2" alt="user image">
                                                 </div>
                                                 <div class="d-flex flex-column justify-content-center">

@@ -48,6 +48,7 @@ class PaypalDepositController extends Controller
         $user = Auth::user();
 
         $paypalDeposits = PaypalDeposit::where('user_id', $user->id)
+            ->with('requestPaymentPaypal')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 

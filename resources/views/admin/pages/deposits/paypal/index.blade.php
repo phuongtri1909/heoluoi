@@ -74,7 +74,7 @@
                                         <td>
                                             <a href="{{ route('admin.users.show', $deposit->user->id) }}" class="d-flex">
                                                 <div>
-                                                    <img src="{{ $deposit->user->avatar ? asset('storage/' . $deposit->user->avatar) : asset('assets/img/default-avatar.png') }}"
+                                                    <img src="{{ $deposit->user->avatar ? asset('storage/' . $deposit->user->avatar) : asset('/images/defaults/avatar_default.jpg') }}"
                                                          class="avatar avatar-sm me-2" alt="user image">
                                                 </div>
                                                 <div class="d-flex flex-column justify-content-center">
