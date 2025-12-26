@@ -29,7 +29,20 @@ class AuthController
 
     public function redirectToGoogle()
     {
-        return Socialite::driver('google')->redirect();
+        // CÁCH 1: Thêm prompt parameter để force select account
+        // Tạo URL redirect với prompt parameter thủ công
+        $provider = Socialite::driver('google');
+        
+        // Lấy authorization URL
+        $redirectResponse = $provider->redirect();
+        $authorizationUrl = $redirectResponse->getTargetUrl();
+        
+        // Thêm prompt parameter vào URL
+        $separator = strpos($authorizationUrl, '?') !== false ? '&' : '?';
+        $authorizationUrl .= $separator . 'prompt=select_account';
+        
+        // Redirect với URL đã được modify
+        return redirect($authorizationUrl);
     }
 
     public function handleGoogleCallback()
