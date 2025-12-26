@@ -28,7 +28,7 @@
                         <i class="fas fa-exclamation-triangle me-2"></i> Bạn không đủ Cám để đọc chương này. Vui lòng
                         nạp thêm.
                         <div class="mt-2">
-                            <a href="{{ route('user.deposit') }}" class="btn btn-sm btn-warning">Nạp Cám ngay</a>
+                            <a href="{{ route('user.bank.auto.deposit') }}" class="btn btn-sm btn-warning">Nạp Cám ngay</a>
                         </div>
                     </div>
 
@@ -43,7 +43,7 @@
                             <li>Sau khi mua, bạn có thể [Đọc chương] này không giới hạn số lần.</li>
                             <li>Bạn chỉ bị trừ Cám khi [Đọc chương] này lần đầu tiên.</li>
                             <li>Kiểm tra Cám hiện tại <a href="{{ route('user.profile') }}" class="color-7">Tài
-                                    khoản</a>. Nạp thêm Cám tại <a href="{{ route('user.deposit') }}"
+                                    khoản</a>. Nạp thêm Cám tại <a href="{{ route('user.bank.auto.deposit') }}"
                                     class="color-7">Nạp Cám</a>.</li>
                         </ul>
                     </div>
@@ -147,7 +147,7 @@
                 purchaseInfoList.innerHTML = `
                     <li>Sau khi mua, bạn có thể <span class="fw-semibold color-7">[Đọc chương]</span> này không giới hạn số lần.</li>
                     <li>Bạn chỉ bị trừ Cám khi <span class="fw-semibold color-7">[Đọc chương]</span> này lần đầu tiên.</li>
-                    <li>Kiểm tra Cám hiện tại <a href="{{ route('user.profile') }}" class="color-7">Tài khoản</a>. Nạp thêm Cám tại <a href="{{ route('user.deposit') }}" class="color-7">Nạp Cám</a>.</li>
+                    <li>Kiểm tra Cám hiện tại <a href="{{ route('user.profile') }}" class="color-7">Tài khoản</a>. Nạp thêm Cám tại <a href="{{ route('user.bank.auto.deposit') }}" class="color-7">Nạp Cám</a>.</li>
                 `;
             } else if (type === 'story') {
                 modalTitle.textContent = 'Xác nhận mua trọn bộ';
@@ -159,7 +159,7 @@
                 purchaseInfoList.innerHTML = `
                     <li>Sau khi mua, bạn có thể <span class="fw-semibold color-7">[Đọc truyện]</span> này không giới hạn số lần.</li>
                     <li>Sau khi full truyện, bạn sẽ không tốn <span class="fw-semibold color-7">Cám</span> khi đọc các chương lẻ</li>
-                    <li>Kiểm tra Cám hiện tại <a href="{{ route('user.profile') }}" class="color-7">Tài khoản</a>. Nạp thêm Cám tại <a href="{{ route('user.deposit') }}" class="color-7">Nạp Cám</a>.</li>
+                    <li>Kiểm tra Cám hiện tại <a href="{{ route('user.profile') }}" class="color-7">Tài khoản</a>. Nạp thêm Cám tại <a href="{{ route('user.bank.auto.deposit') }}" class="color-7">Nạp Cám</a>.</li>
                 `;
             }
 

@@ -105,7 +105,7 @@ class PurchaseController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Bạn không đủ cám để mua chương này. Vui lòng nạp thêm.',
-                    'redirect' => route('user.deposit')
+                    'redirect' => route('user.bank.auto.deposit')
                 ], 400);
             }
 
@@ -119,7 +119,7 @@ class PurchaseController extends Controller
                     return response()->json([
                         'success' => false,
                         'message' => 'Số dư không đủ để mua chương này.',
-                        'redirect' => route('user.deposit')
+                        'redirect' => route('user.bank.auto.deposit')
                     ], 400);
                 }
 
@@ -250,7 +250,7 @@ class PurchaseController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Bạn không đủ cám để mua combo này. Vui lòng nạp thêm.',
-                    'redirect' => route('user.deposit')
+                    'redirect' => route('user.bank.auto.deposit')
                 ], 400);
             }
 
@@ -280,7 +280,7 @@ class PurchaseController extends Controller
                     return response()->json([
                         'success' => false,
                         'message' => 'Số dư không đủ để mua combo này.',
-                        'redirect' => route('user.deposit')
+                        'redirect' => route('user.bank.auto.deposit')
                     ], 400);
                 }
 

@@ -177,7 +177,7 @@
                                                     <li>
                                                         Kiểm tra Cám hiện tại <a href="{{ route('user.profile') }}"
                                                             class="fw-semibold color-7">Tài khoản</a>. Nạp thêm <span class="fw-semibold color-7">Cám</span> tại <a
-                                                            href="{{ route('user.deposit') }}" class="fw-semibold color-7">Nạp
+                                                            href="{{ route('user.bank.auto.deposit') }}" class="fw-semibold color-7">Nạp
                                                             Cám</a>.
                                                     </li>
                                                     <li>
