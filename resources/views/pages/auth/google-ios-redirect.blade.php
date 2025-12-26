@@ -51,62 +51,84 @@
         </p>
         
         <div style="margin-top: 30px;">
-            <a href="{{ $googleLoginUrl }}" 
-               class="btn btn-primary btn-lg" 
-               style="background: #4285F4; color: white; padding: 15px 30px; border-radius: 10px; text-decoration: none; display: inline-block; margin-bottom: 15px;"
-               id="openLink">
+            <button type="button" 
+                    class="btn btn-primary btn-lg" 
+                    onclick="openInSafari()"
+                    style="background: #4285F4; color: white; padding: 15px 30px; border-radius: 10px; border: none; margin-bottom: 15px; width: 100%;">
                 <i class="fab fa-safari me-2"></i>
                 Mở bằng Safari
-            </a>
+            </button>
             <br>
             <button type="button" 
                     class="btn btn-outline-secondary" 
                     onclick="copyLink()"
-                    style="padding: 10px 20px; border-radius: 10px;">
+                    style="padding: 10px 20px; border-radius: 10px; width: 100%;">
                 <i class="fas fa-copy me-2"></i>
                 Sao chép liên kết
             </button>
             <div id="copySuccess" style="display: none; color: #4caf50; margin-top: 10px;">
-                <i class="fas fa-check-circle"></i> Đã sao chép!
+                <i class="fas fa-check-circle"></i> Đã sao chép! Mở Safari và dán vào thanh địa chỉ.
             </div>
         </div>
     </div>
 </div>
 
 <script>
+const googleLoginUrl = '{{ $googleLoginUrl }}';
+
 function copyLink() {
-    const url = '{{ $googleLoginUrl }}';
-    navigator.clipboard.writeText(url).then(function() {
-        document.getElementById('copySuccess').style.display = 'block';
-        setTimeout(function() {
-            document.getElementById('copySuccess').style.display = 'none';
-        }, 3000);
-    }).catch(function(err) {
-        // Fallback
-        const textArea = document.createElement('textarea');
-        textArea.value = url;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        document.getElementById('copySuccess').style.display = 'block';
-        setTimeout(function() {
-            document.getElementById('copySuccess').style.display = 'none';
-        }, 3000);
-    });
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(googleLoginUrl).then(function() {
+            document.getElementById('copySuccess').style.display = 'block';
+            setTimeout(function() {
+                document.getElementById('copySuccess').style.display = 'none';
+            }, 5000);
+        }).catch(function(err) {
+            fallbackCopy();
+        });
+    } else {
+        fallbackCopy();
+    }
 }
 
-// Thử tự động redirect sau 2 giây
-setTimeout(function() {
-    const googleLoginUrl = '{{ $googleLoginUrl }}';
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    
-    if (!isIOS) {
-        // Android hoặc desktop: redirect trực tiếp
-        window.location.href = googleLoginUrl;
+function fallbackCopy() {
+    const textArea = document.createElement('textarea');
+    textArea.value = googleLoginUrl;
+    textArea.style.position = 'fixed';
+    textArea.style.opacity = '0';
+    textArea.style.left = '-9999px';
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+        document.execCommand('copy');
+        document.getElementById('copySuccess').style.display = 'block';
+        setTimeout(function() {
+            document.getElementById('copySuccess').style.display = 'none';
+        }, 5000);
+    } catch(err) {
+        alert('Không thể sao chép. Vui lòng ghi nhớ liên kết: ' + googleLoginUrl);
     }
-    // iOS: để user click nút hoặc copy link
-}, 2000);
+    document.body.removeChild(textArea);
+}
+
+function openInSafari() {
+    // Copy link trước
+    copyLink();
+    
+    // Thử mở bằng window.open
+    try {
+        const newWindow = window.open(googleLoginUrl, '_blank', 'noopener,noreferrer');
+        if (newWindow && !newWindow.closed) {
+            newWindow.focus();
+            return;
+        }
+    } catch(e) {
+        console.log('Cannot open popup');
+    }
+    
+    // Nếu không mở được, hiển thị hướng dẫn
+    alert('Đã sao chép liên kết!\n\n📱 Hướng dẫn:\n1. Nhấn nút Home để thoát\n2. Mở Safari\n3. Nhấn vào thanh địa chỉ\n4. Nhấn giữ và chọn "Dán"\n5. Nhấn Enter để đăng nhập');
+}
 </script>
 @endsection
 

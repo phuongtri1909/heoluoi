@@ -25,73 +25,11 @@
                             </a>
                         </div>
 
-                        <a href="{{ route('login.google') }}" 
-                           class="btn w-100 mb-3 border auth-btn text-dark"
-                           id="googleLoginBtn">
+                        <a href="{{ route('login.google') }}" class="btn w-100 mb-3 border auth-btn text-dark">
                             <img src="{{ asset('images/svg/google_2025.svg') }}" alt="Google" class="me-2"
                                 height="30">
                             Đăng nhập với Google
                         </a>
-                        
-                        <script>
-                        // CÁCH 3: JavaScript để detect và xử lý iOS in-app browser TRƯỚC KHI redirect
-                        document.addEventListener('DOMContentLoaded', function() {
-                            const googleBtn = document.getElementById('googleLoginBtn');
-                            if (!googleBtn) return;
-                            
-                            googleBtn.addEventListener('click', function(e) {
-                                const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-                                const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
-                                const isInAppBrowser = /FBAN|FBAV|Messenger|Instagram|Line|Twitter|LinkedInApp|WhatsApp|Snapchat|TikTok/.test(userAgent);
-                                
-                                // Nếu là iOS và in-app browser, PREVENT DEFAULT ngay lập tức
-                                if (isIOS && isInAppBrowser) {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    e.stopImmediatePropagation();
-                                    
-                                    const url = '{{ route("login.google") }}';
-                                    
-                                    // Copy link trước
-                                    copyGoogleLink(url);
-                                    
-                                    // Hiển thị thông báo rõ ràng
-                                    alert('⚠️ Google không cho phép đăng nhập từ trình duyệt trong ứng dụng.\n\n✅ Đã sao chép liên kết!\n\n📱 Hướng dẫn:\n1. Nhấn nút Home để thoát\n2. Mở Safari\n3. Dán liên kết vào thanh địa chỉ\n4. Nhấn Enter để đăng nhập\n\nHoặc bạn có thể chụp màn hình liên kết này và mở thủ công.');
-                                    
-                                    return false;
-                                }
-                                
-                                // Nếu không phải iOS in-app browser, để link hoạt động bình thường
-                            });
-                        });
-                        
-                        function copyGoogleLink(url) {
-                            if (navigator.clipboard && navigator.clipboard.writeText) {
-                                navigator.clipboard.writeText(url).catch(function(err) {
-                                    console.log('Clipboard error:', err);
-                                    fallbackCopy(url);
-                                });
-                            } else {
-                                fallbackCopy(url);
-                            }
-                        }
-                        
-                        function fallbackCopy(url) {
-                            const textArea = document.createElement('textarea');
-                            textArea.value = url;
-                            textArea.style.position = 'fixed';
-                            textArea.style.opacity = '0';
-                            textArea.style.left = '-9999px';
-                            document.body.appendChild(textArea);
-                            textArea.select();
-                            try {
-                                document.execCommand('copy');
-                            } catch(err) {
-                                console.log('Copy failed:', err);
-                            }
-                            document.body.removeChild(textArea);
-                        }
-                        </script>
 
                         <div class="d-flex align-items-center text-center my-4">
                             <hr class="flex-grow-1 border-top border-secondary">

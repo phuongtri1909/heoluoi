@@ -166,6 +166,7 @@ Route::middleware(['ban:login', 'block.devtools'])->group(function () {
         Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('forgot.password');
 
         Route::get('auth/google', [AuthController::class, 'redirectToGoogle'])->name('login.google');
+        Route::get('auth/google/direct', [AuthController::class, 'redirectToGoogleDirect'])->name('login.google.direct');
         Route::get('auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
     });
 });

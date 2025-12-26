@@ -27,9 +27,46 @@ class AuthController
         $this->readingService = $readingService;
     }
 
-    public function redirectToGoogle()
+    public function redirectToGoogle(Request $request)
     {
-        // CÁCH 3: Redirect bình thường, JavaScript trong login page sẽ xử lý
+        // CÁCH 4: Tạo route trung gian để detect và xử lý trước khi redirect đến Google
+        $userAgent = $request->header('User-Agent', '');
+        $isIOS = (strpos($userAgent, 'iPhone') !== false || strpos($userAgent, 'iPad') !== false);
+        $isInAppBrowser = strpos($userAgent, 'FBAN') !== false || 
+                         strpos($userAgent, 'FBAV') !== false ||
+                         strpos($userAgent, 'Messenger') !== false ||
+                         strpos($userAgent, 'Instagram') !== false;
+        
+        // Nếu là iOS và in-app browser, hiển thị view hướng dẫn
+        if ($isIOS && $isInAppBrowser) {
+            return view('pages.auth.google-ios-redirect', [
+                'googleLoginUrl' => route('login.google.direct')
+            ]);
+        }
+        
+        // Nếu không phải iOS in-app browser, redirect đến Google bình thường
+        return Socialite::driver('google')->redirect();
+    }
+    
+    /**
+     * Route trung gian để lấy Google OAuth URL (chỉ dùng cho iOS in-app browser)
+     */
+    public function getGoogleLoginUrl()
+    {
+        // Lấy authorization URL từ Socialite
+        $redirectResponse = Socialite::driver('google')->redirect();
+        $authorizationUrl = $redirectResponse->getTargetUrl();
+        
+        return response()->json([
+            'url' => $authorizationUrl
+        ]);
+    }
+    
+    /**
+     * Route trực tiếp để redirect đến Google (dùng cho copy link)
+     */
+    public function redirectToGoogleDirect()
+    {
         return Socialite::driver('google')->redirect();
     }
 
