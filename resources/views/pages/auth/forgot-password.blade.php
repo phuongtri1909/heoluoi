@@ -333,7 +333,9 @@
 
                                         if (response && response.status ===
                                             'error') {
-                                            if (response.message.email) {
+                                            if (typeof response.message === 'string') {
+                                                showToast(response.message, 'error');
+                                            } else if (response.message.email) {
                                                 response.message.email
                                                     .forEach(error => {
                                                         const
@@ -374,14 +376,21 @@
                     error: function(xhr) {
                         const response = xhr.responseJSON;
 
-                        if (response && response.message && response.message.email) {
-                            response.message.email.forEach(error => {
-                                const invalidFeedback = $(
-                                    '<div class="invalid-feedback"></div>').text(
-                                    error);
-                                emailInput.addClass('is-invalid').parent().append(
-                                    invalidFeedback);
-                            });
+                        if (response && response.message) {
+                            if (typeof response.message === 'string') {
+                                showToast(response.message, 'error');
+                            } 
+                            else if (response.message.email) {
+                                response.message.email.forEach(error => {
+                                    const invalidFeedback = $(
+                                        '<div class="invalid-feedback"></div>').text(
+                                        error);
+                                    emailInput.addClass('is-invalid').parent().append(
+                                        invalidFeedback);
+                                });
+                            } else {
+                                showToast('Đã xảy ra lỗi, vui lòng thử lại.', 'error');
+                            }
                         } else {
                             showToast('Đã xảy ra lỗi, vui lòng thử lại.', 'error');
                         }

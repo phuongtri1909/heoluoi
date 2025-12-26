@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Client;
 
 use Exception;
 use App\Models\User;
+use App\Models\Config;
 use App\Mail\OTPMail;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -29,7 +30,6 @@ class AuthController
 
     public function redirectToGoogle(Request $request)
     {
-        // CÁCH 4: Tạo route trung gian để detect và xử lý trước khi redirect đến Google
         $userAgent = $request->header('User-Agent', '');
         $isIOS = (strpos($userAgent, 'iPhone') !== false || strpos($userAgent, 'iPad') !== false);
         $isInAppBrowser = strpos($userAgent, 'FBAN') !== false || 
@@ -37,10 +37,8 @@ class AuthController
                          strpos($userAgent, 'Messenger') !== false ||
                          strpos($userAgent, 'Instagram') !== false;
         
-        // Nếu là iOS và in-app browser, lấy Google OAuth URL trực tiếp và hiển thị view
         if ($isIOS && $isInAppBrowser) {
             try {
-                // Lấy Google OAuth URL trực tiếp (không redirect)
                 $redirectResponse = Socialite::driver('google')->redirect();
                 $googleOAuthUrl = $redirectResponse->getTargetUrl();
                 
@@ -48,14 +46,12 @@ class AuthController
                     'googleOAuthUrl' => $googleOAuthUrl
                 ]);
             } catch (\Exception $e) {
-                // Nếu có lỗi, fallback về route
                 return view('pages.auth.google-ios-redirect', [
                     'googleOAuthUrl' => route('login.google.direct')
                 ]);
             }
         }
         
-        // Nếu không phải iOS in-app browser, redirect đến Google bình thường
         return Socialite::driver('google')->redirect();
     }
     
@@ -65,7 +61,6 @@ class AuthController
      */
     public function redirectToGoogleDirect()
     {
-        // Luôn redirect đến Google, không detect
         return Socialite::driver('google')->redirect();
     }
 
@@ -171,6 +166,12 @@ class AuthController
 
     public function register(Request $request)
     {
+        if (!(int)Config::getConfig('enable_email_password_login', 0)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Tạm thời đóng đăng ký bằng email mật khẩu, vui lòng đăng nhập bằng Google.',
+            ], 403);
+        }
 
         if ($request->has('email') && $request->has('otp') && $request->has('password')) {
             try {
@@ -309,6 +310,10 @@ class AuthController
 
     public function login(Request $request)
     {
+        if (!(int)Config::getConfig('enable_email_password_login', 0)) {
+            return redirect()->back()->with('error', 'Tạm thời đóng login bằng email mật khẩu, vui lòng đăng nhập bằng Google.');
+        }
+        
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -391,6 +396,13 @@ class AuthController
 
     public function forgotPassword(Request $request)
     {
+        if (!(int)Config::getConfig('enable_email_password_login', 0)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Tạm thời đóng chức năng quên mật khẩu, vui lòng đăng nhập bằng Google.',
+            ], 403);
+        }
+        
         if ($request->has('email')) {
             try {
                 $request->validate([

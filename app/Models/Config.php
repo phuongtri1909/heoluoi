@@ -61,6 +61,11 @@ class Config extends Model
             ]
         );
 
+        $cacheKey = "config.{$key}";
+        Cache::forget($cacheKey);
+        
+        self::clearRequestCache($key);
+
         return $config;
     }
 
@@ -73,5 +78,28 @@ class Config extends Model
             ->toArray();
 
         return array_merge($defaults, $values);
+    }
+
+    /**
+     * Clear request cache for a specific key
+     * 
+     * @param string $key
+     * @return void
+     */
+    public static function clearRequestCache(string $key): void
+    {
+        if (isset(self::$requestCache[$key])) {
+            unset(self::$requestCache[$key]);
+        }
+    }
+
+    /**
+     * Clear all request cache
+     * 
+     * @return void
+     */
+    public static function clearAllRequestCache(): void
+    {
+        self::$requestCache = [];
     }
 }

@@ -30,16 +30,11 @@ class ConfigObserver
      */
     private function clearConfigCache(string $key): void
     {
+        // Clear Laravel cache
         Cache::forget("config.{$key}");
         
-        if (property_exists(\App\Models\Config::class, 'requestCache')) {
-            $reflection = new \ReflectionClass(\App\Models\Config::class);
-            $property = $reflection->getStaticPropertyValue('requestCache');
-            if (isset($property[$key])) {
-                unset($property[$key]);
-                $reflection->setStaticPropertyValue('requestCache', $property);
-            }
-        }
+        // Clear request cache
+        Config::clearRequestCache($key);
     }
 }
 

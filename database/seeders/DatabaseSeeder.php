@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             ConfigSeeder::class,
             DailyTaskSeeder::class,
+            EmailPasswordLoginSeeder::class,
         ]);
     }
 }
