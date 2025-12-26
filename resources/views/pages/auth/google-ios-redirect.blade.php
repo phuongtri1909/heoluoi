@@ -9,7 +9,7 @@
         align-items: center;
         justify-content: center;
         padding: 20px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
     }
     .redirect-card {
         background: white;
@@ -45,7 +45,7 @@
         position: relative;
         display: flex;
         flex-direction: column;
-        align-items: flex-end;
+        align-items: center;
     }
     .arrow-line {
         width: 3px;
@@ -70,7 +70,6 @@
         font-size: 14px;
         font-weight: 600;
         white-space: nowrap;
-        margin-right: 10px;
         margin-bottom: 5px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
@@ -110,27 +109,6 @@
             <br><br>
             <strong>Hướng dẫn:</strong> Nhấn vào nút <strong>"..."</strong> ở góc dưới bên phải màn hình, sau đó chọn <strong>"Mở trong Safari"</strong> hoặc <strong>"Mở trong trình duyệt"</strong>.
         </p>
-        
-        <div style="margin-top: 30px;">
-            <button type="button" 
-                    class="btn btn-primary btn-lg" 
-                    onclick="openInSafari()"
-                    style="background: #4285F4; color: white; padding: 15px 30px; border-radius: 10px; border: none; margin-bottom: 15px; width: 100%;">
-                <i class="fab fa-safari me-2"></i>
-                Mở bằng Safari
-            </button>
-            <br>
-            <button type="button" 
-                    class="btn btn-outline-secondary" 
-                    onclick="copyLink()"
-                    style="padding: 10px 20px; border-radius: 10px; width: 100%;">
-                <i class="fas fa-copy me-2"></i>
-                Sao chép liên kết
-            </button>
-            <div id="copySuccess" style="display: none; color: #4caf50; margin-top: 10px;">
-                <i class="fas fa-check-circle"></i> Đã sao chép! Mở Safari và dán vào thanh địa chỉ.
-            </div>
-        </div>
     </div>
 </div>
 
@@ -144,63 +122,5 @@
         <div class="arrow-head"></div>
     </div>
 </div>
-
-<script>
-const googleOAuthUrl = '{{ $googleOAuthUrl }}';
-
-function copyLink() {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(googleOAuthUrl).then(function() {
-            document.getElementById('copySuccess').style.display = 'block';
-            setTimeout(function() {
-                document.getElementById('copySuccess').style.display = 'none';
-            }, 5000);
-        }).catch(function(err) {
-            fallbackCopy();
-        });
-    } else {
-        fallbackCopy();
-    }
-}
-
-function fallbackCopy() {
-    const textArea = document.createElement('textarea');
-    textArea.value = googleOAuthUrl;
-    textArea.style.position = 'fixed';
-    textArea.style.opacity = '0';
-    textArea.style.left = '-9999px';
-    document.body.appendChild(textArea);
-    textArea.select();
-    try {
-        document.execCommand('copy');
-        document.getElementById('copySuccess').style.display = 'block';
-        setTimeout(function() {
-            document.getElementById('copySuccess').style.display = 'none';
-        }, 5000);
-    } catch(err) {
-        alert('Không thể sao chép. Vui lòng ghi nhớ liên kết: ' + googleOAuthUrl);
-    }
-    document.body.removeChild(textArea);
-}
-
-function openInSafari() {
-    // Copy link trước (link Google OAuth trực tiếp)
-    copyLink();
-    
-    // Thử mở bằng window.open (sẽ không hoạt động trong in-app browser)
-    try {
-        const newWindow = window.open(googleOAuthUrl, '_blank', 'noopener,noreferrer');
-        if (newWindow && !newWindow.closed) {
-            newWindow.focus();
-            return;
-        }
-    } catch(e) {
-        console.log('Cannot open popup');
-    }
-    
-    // Hiển thị hướng dẫn
-    alert('✅ Đã sao chép liên kết Google OAuth!\n\n📱 Hướng dẫn:\n1. Nhấn nút Home để thoát khỏi ứng dụng này\n2. Mở Safari\n3. Nhấn vào thanh địa chỉ\n4. Nhấn giữ và chọn "Dán"\n5. Nhấn Enter để đăng nhập Google');
-}
-</script>
 @endsection
 
