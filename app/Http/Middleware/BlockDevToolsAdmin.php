@@ -64,7 +64,40 @@ class BlockDevToolsAdmin
                     e.stopImmediatePropagation();
                     return false;
                 }
+                
+                // Chặn phím tắt in (Ctrl+P hoặc Cmd+P trên Mac)
+                if ((e.ctrlKey || e.metaKey) && (e.key === "p" || e.key === "P" || e.keyCode === 80)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    return false;
+                }
             }, true);
+            
+            // Chặn window.print()
+            window.print = function() {
+                return false;
+            };
+            
+            // Chặn beforeprint và afterprint events
+            window.addEventListener("beforeprint", function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                return false;
+            }, true);
+            
+            window.addEventListener("afterprint", function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                return false;
+            }, true);
+            
+            // Thêm CSS để ẩn nội dung khi print
+            const style = document.createElement("style");
+            style.textContent = "@media print { body { display: none !important; } * { display: none !important; } }";
+            document.head.appendChild(style);
             
         })();
         </script>';
