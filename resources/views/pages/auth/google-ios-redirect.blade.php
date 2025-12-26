@@ -43,40 +43,70 @@
         <div class="loading-icon">
             <i class="fab fa-google"></i>
         </div>
-        <h2 class="mb-3">Đang mở Safari...</h2>
+        <h2 class="mb-3">Cần mở bằng Safari</h2>
         <p class="redirect-message">
-            Vui lòng đợi trong giây lát. Hệ thống đang tự động mở Safari để đăng nhập Google.
+            Google không cho phép đăng nhập từ trình duyệt trong ứng dụng (Messenger, Facebook).
+            <br><br>
+            Vui lòng mở liên kết bằng Safari để tiếp tục.
         </p>
+        
+        <div style="margin-top: 30px;">
+            <a href="{{ $googleLoginUrl }}" 
+               class="btn btn-primary btn-lg" 
+               style="background: #4285F4; color: white; padding: 15px 30px; border-radius: 10px; text-decoration: none; display: inline-block; margin-bottom: 15px;"
+               id="openLink">
+                <i class="fab fa-safari me-2"></i>
+                Mở bằng Safari
+            </a>
+            <br>
+            <button type="button" 
+                    class="btn btn-outline-secondary" 
+                    onclick="copyLink()"
+                    style="padding: 10px 20px; border-radius: 10px;">
+                <i class="fas fa-copy me-2"></i>
+                Sao chép liên kết
+            </button>
+            <div id="copySuccess" style="display: none; color: #4caf50; margin-top: 10px;">
+                <i class="fas fa-check-circle"></i> Đã sao chép!
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-(function() {
+function copyLink() {
+    const url = '{{ $googleLoginUrl }}';
+    navigator.clipboard.writeText(url).then(function() {
+        document.getElementById('copySuccess').style.display = 'block';
+        setTimeout(function() {
+            document.getElementById('copySuccess').style.display = 'none';
+        }, 3000);
+    }).catch(function(err) {
+        // Fallback
+        const textArea = document.createElement('textarea');
+        textArea.value = url;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        document.getElementById('copySuccess').style.display = 'block';
+        setTimeout(function() {
+            document.getElementById('copySuccess').style.display = 'none';
+        }, 3000);
+    });
+}
+
+// Thử tự động redirect sau 2 giây
+setTimeout(function() {
     const googleLoginUrl = '{{ $googleLoginUrl }}';
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     
-    if (isIOS) {
-        // Cách 4: Thử dùng popup
-        try {
-            const popup = window.open(googleLoginUrl, '_blank', 'noopener,noreferrer');
-            if (popup && !popup.closed) {
-                // Nếu popup mở được, focus vào nó
-                popup.focus();
-                return;
-            }
-        } catch(e) {
-            console.log('Popup blocked');
-        }
-        
-        // Fallback: Thử redirect trực tiếp
-        setTimeout(function() {
-            window.location.href = googleLoginUrl;
-        }, 500);
-    } else {
+    if (!isIOS) {
         // Android hoặc desktop: redirect trực tiếp
         window.location.href = googleLoginUrl;
     }
-})();
+    // iOS: để user click nút hoặc copy link
+}, 2000);
 </script>
 @endsection
 
