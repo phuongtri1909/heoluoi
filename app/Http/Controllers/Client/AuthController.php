@@ -27,22 +27,26 @@ class AuthController
         $this->readingService = $readingService;
     }
 
-    public function redirectToGoogle()
+    public function redirectToGoogle(Request $request)
     {
-        // CÁCH 1: Thêm prompt parameter để force select account
-        // Tạo URL redirect với prompt parameter thủ công
-        $provider = Socialite::driver('google');
+        // CÁCH 2: Detect iOS WebView và xử lý
+        $userAgent = $request->header('User-Agent', '');
+        $isIOSWebView = (strpos($userAgent, 'iPhone') !== false || 
+                        strpos($userAgent, 'iPad') !== false) &&
+                        (strpos($userAgent, 'Safari') === false || 
+                         strpos($userAgent, 'FBAN') !== false ||
+                         strpos($userAgent, 'FBAV') !== false ||
+                         strpos($userAgent, 'Messenger') !== false);
         
-        // Lấy authorization URL
-        $redirectResponse = $provider->redirect();
-        $authorizationUrl = $redirectResponse->getTargetUrl();
+        if ($isIOSWebView) {
+            // Trả về view với JavaScript để force mở Safari
+            return view('pages.auth.google-ios-redirect', [
+                'googleLoginUrl' => route('login.google')
+            ]);
+        }
         
-        // Thêm prompt parameter vào URL
-        $separator = strpos($authorizationUrl, '?') !== false ? '&' : '?';
-        $authorizationUrl .= $separator . 'prompt=select_account';
-        
-        // Redirect với URL đã được modify
-        return redirect($authorizationUrl);
+        // Nếu không phải iOS WebView, redirect bình thường
+        return Socialite::driver('google')->redirect();
     }
 
     public function handleGoogleCallback()
