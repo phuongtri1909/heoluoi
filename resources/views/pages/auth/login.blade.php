@@ -27,52 +27,43 @@
 
                         <a href="{{ route('login.google') }}" 
                            class="btn w-100 mb-3 border auth-btn text-dark"
-                           id="googleLoginBtn"
-                           onclick="handleGoogleLogin(event, this)">
+                           id="googleLoginBtn">
                             <img src="{{ asset('images/svg/google_2025.svg') }}" alt="Google" class="me-2"
                                 height="30">
                             Đăng nhập với Google
                         </a>
                         
                         <script>
-                        // CÁCH 3: JavaScript để detect và xử lý iOS in-app browser
-                        function handleGoogleLogin(e, element) {
-                            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-                            const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
-                            const isInAppBrowser = /FBAN|FBAV|Messenger|Instagram|Line|Twitter|LinkedInApp|WhatsApp|Snapchat|TikTok/.test(userAgent);
+                        // CÁCH 3: JavaScript để detect và xử lý iOS in-app browser TRƯỚC KHI redirect
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const googleBtn = document.getElementById('googleLoginBtn');
+                            if (!googleBtn) return;
                             
-                            // Nếu là iOS và in-app browser
-                            if (isIOS && isInAppBrowser) {
-                                e.preventDefault();
-                                e.stopPropagation();
+                            googleBtn.addEventListener('click', function(e) {
+                                const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+                                const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+                                const isInAppBrowser = /FBAN|FBAV|Messenger|Instagram|Line|Twitter|LinkedInApp|WhatsApp|Snapchat|TikTok/.test(userAgent);
                                 
-                                const url = '{{ route("login.google") }}';
-                                
-                                // Thử mở bằng window.open với target _blank
-                                try {
-                                    const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+                                // Nếu là iOS và in-app browser, PREVENT DEFAULT ngay lập tức
+                                if (isIOS && isInAppBrowser) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    e.stopImmediatePropagation();
                                     
-                                    // Kiểm tra xem có mở được không
-                                    if (newWindow && !newWindow.closed) {
-                                        newWindow.focus();
-                                        return;
-                                    }
-                                } catch(err) {
-                                    console.log('Popup blocked:', err);
+                                    const url = '{{ route("login.google") }}';
+                                    
+                                    // Copy link trước
+                                    copyGoogleLink(url);
+                                    
+                                    // Hiển thị thông báo rõ ràng
+                                    alert('⚠️ Google không cho phép đăng nhập từ trình duyệt trong ứng dụng.\n\n✅ Đã sao chép liên kết!\n\n📱 Hướng dẫn:\n1. Nhấn nút Home để thoát\n2. Mở Safari\n3. Dán liên kết vào thanh địa chỉ\n4. Nhấn Enter để đăng nhập\n\nHoặc bạn có thể chụp màn hình liên kết này và mở thủ công.');
+                                    
+                                    return false;
                                 }
                                 
-                                // Nếu popup không hoạt động, copy link và hướng dẫn
-                                copyGoogleLink(url);
-                                
-                                // Hiển thị thông báo
-                                alert('Vui lòng mở liên kết bằng Safari:\n\n1. Đã sao chép liên kết\n2. Mở Safari\n3. Dán vào thanh địa chỉ\n4. Nhấn Enter');
-                                
-                                return false;
-                            }
-                            
-                            // Nếu không phải iOS in-app browser, để link hoạt động bình thường
-                            return true;
-                        }
+                                // Nếu không phải iOS in-app browser, để link hoạt động bình thường
+                            });
+                        });
                         
                         function copyGoogleLink(url) {
                             if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -90,6 +81,7 @@
                             textArea.value = url;
                             textArea.style.position = 'fixed';
                             textArea.style.opacity = '0';
+                            textArea.style.left = '-9999px';
                             document.body.appendChild(textArea);
                             textArea.select();
                             try {
