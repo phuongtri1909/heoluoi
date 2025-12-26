@@ -25,11 +25,81 @@
                             </a>
                         </div>
 
-                        <a href="{{ route('login.google') }}" class="btn w-100 mb-3 border auth-btn text-dark">
+                        <a href="{{ route('login.google') }}" 
+                           class="btn w-100 mb-3 border auth-btn text-dark"
+                           id="googleLoginBtn"
+                           onclick="handleGoogleLogin(event, this)">
                             <img src="{{ asset('images/svg/google_2025.svg') }}" alt="Google" class="me-2"
                                 height="30">
                             Đăng nhập với Google
                         </a>
+                        
+                        <script>
+                        // CÁCH 3: JavaScript để detect và xử lý iOS in-app browser
+                        function handleGoogleLogin(e, element) {
+                            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+                            const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream;
+                            const isInAppBrowser = /FBAN|FBAV|Messenger|Instagram|Line|Twitter|LinkedInApp|WhatsApp|Snapchat|TikTok/.test(userAgent);
+                            
+                            // Nếu là iOS và in-app browser
+                            if (isIOS && isInAppBrowser) {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                
+                                const url = '{{ route("login.google") }}';
+                                
+                                // Thử mở bằng window.open với target _blank
+                                try {
+                                    const newWindow = window.open(url, '_blank', 'noopener,noreferrer');
+                                    
+                                    // Kiểm tra xem có mở được không
+                                    if (newWindow && !newWindow.closed) {
+                                        newWindow.focus();
+                                        return;
+                                    }
+                                } catch(err) {
+                                    console.log('Popup blocked:', err);
+                                }
+                                
+                                // Nếu popup không hoạt động, copy link và hướng dẫn
+                                copyGoogleLink(url);
+                                
+                                // Hiển thị thông báo
+                                alert('Vui lòng mở liên kết bằng Safari:\n\n1. Đã sao chép liên kết\n2. Mở Safari\n3. Dán vào thanh địa chỉ\n4. Nhấn Enter');
+                                
+                                return false;
+                            }
+                            
+                            // Nếu không phải iOS in-app browser, để link hoạt động bình thường
+                            return true;
+                        }
+                        
+                        function copyGoogleLink(url) {
+                            if (navigator.clipboard && navigator.clipboard.writeText) {
+                                navigator.clipboard.writeText(url).catch(function(err) {
+                                    console.log('Clipboard error:', err);
+                                    fallbackCopy(url);
+                                });
+                            } else {
+                                fallbackCopy(url);
+                            }
+                        }
+                        
+                        function fallbackCopy(url) {
+                            const textArea = document.createElement('textarea');
+                            textArea.value = url;
+                            textArea.style.position = 'fixed';
+                            textArea.style.opacity = '0';
+                            document.body.appendChild(textArea);
+                            textArea.select();
+                            try {
+                                document.execCommand('copy');
+                            } catch(err) {
+                                console.log('Copy failed:', err);
+                            }
+                            document.body.removeChild(textArea);
+                        }
+                        </script>
 
                         <div class="d-flex align-items-center text-center my-4">
                             <hr class="flex-grow-1 border-top border-secondary">

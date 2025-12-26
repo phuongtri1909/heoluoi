@@ -27,25 +27,9 @@ class AuthController
         $this->readingService = $readingService;
     }
 
-    public function redirectToGoogle(Request $request)
+    public function redirectToGoogle()
     {
-        // CÁCH 2: Detect iOS WebView và xử lý
-        $userAgent = $request->header('User-Agent', '');
-        $isIOSWebView = (strpos($userAgent, 'iPhone') !== false || 
-                        strpos($userAgent, 'iPad') !== false) &&
-                        (strpos($userAgent, 'Safari') === false || 
-                         strpos($userAgent, 'FBAN') !== false ||
-                         strpos($userAgent, 'FBAV') !== false ||
-                         strpos($userAgent, 'Messenger') !== false);
-        
-        if ($isIOSWebView) {
-            // Trả về view với JavaScript để force mở Safari
-            return view('pages.auth.google-ios-redirect', [
-                'googleLoginUrl' => route('login.google')
-            ]);
-        }
-        
-        // Nếu không phải iOS WebView, redirect bình thường
+        // CÁCH 3: Redirect bình thường, JavaScript trong login page sẽ xử lý
         return Socialite::driver('google')->redirect();
     }
 
