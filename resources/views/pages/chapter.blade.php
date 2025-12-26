@@ -202,7 +202,7 @@
                                                     <input type="hidden" name="chapter_id" value="{{ $chapter->id }}">
                                                     <button type="button"
                                                         class="btn bg-7 purchase-chapter-btn fw-bold rounded-1 px-2 py-3"
-                                                        onclick="showPurchaseModal('chapter', {{ $chapter->id }}, 'Chương {{ $chapter->number }}: {{ $chapter->title }}', {{ $chapter->price }})">
+                                                        onclick="showPurchaseModal('chapter', {{ $chapter->id }}, 'Chương {{ $chapter->number }}: {{ $chapter->title }}', {{ $chapter->price }}, {{ $story->id }}, '{{ addslashes($story->title) }}', {{ $story->has_combo ? ($story->combo_price ?? 0) : 0 }}, {{ $story->total_chapter_price ?? 0 }})">
                                                         <i class="fas fa-shopping-cart me-1"></i> ĐỌC CHƯƠNG
                                                     </button>
                                                 </form>

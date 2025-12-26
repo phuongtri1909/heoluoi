@@ -2046,8 +2046,15 @@ class HomeController extends Controller
         ])
         ->select([
             'id', 'title', 'slug', 'cover', 'author_name', 
-            'user_id', 'created_at', 'updated_at'
+            'user_id', 'created_at', 'updated_at', 'has_combo', 'combo_price'
         ])
+        ->selectSub(function ($q) {
+            $q->from('chapters')
+                ->selectRaw('SUM(price)')
+                ->whereColumn('chapters.story_id', 'stories.id')
+                ->where('status', 'published')
+                ->where('is_free', 0);
+        }, 'total_chapter_price')
         ->findOrFail($data['story_id']);
         
         $chapter = Chapter::select([

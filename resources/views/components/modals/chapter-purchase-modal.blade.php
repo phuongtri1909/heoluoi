@@ -54,7 +54,7 @@
                     <input type="hidden" id="purchase-item-id" name="chapter_id" value="">
                 </form>
             </div>
-            <div class="modal-footer border-0 pt-0 justify-content-center">
+            <div class="modal-footer border-0 pt-0 justify-content-center" id="modal-footer">
                 <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">Hủy</button>
                 <button type="button" class="btn bg-7 fw-bold text-dark px-4" id="confirm-purchase-btn">
                     <span id="purchase-item-icon"></span>
@@ -123,7 +123,7 @@
         window.userCoins = {{ auth()->check() ? auth()->user()->coins : 0 }};
 
         // Function to open purchase modal
-        function showPurchaseModal(type, id, title, price) {
+        function showPurchaseModal(type, id, title, price, storyId = null, storyTitle = null, comboPrice = null, totalChapterPrice = null) {
             const modalTitle = document.getElementById('purchaseModalLabel');
             const itemTitle = document.getElementById('purchase-item-title');
             const itemPrice = document.getElementById('purchase-item-price');
@@ -135,6 +135,12 @@
             const confirmBtn = document.getElementById('confirm-purchase-btn');
             const itemIcon = document.getElementById('purchase-item-icon');
             const purchaseInfoList = document.getElementById('purchase-info-list');
+            const modalFooter = document.getElementById('modal-footer');
+            
+            const existingComboBtn = document.getElementById('purchase-combo-btn');
+            if (existingComboBtn) {
+                existingComboBtn.remove();
+            }
 
             // Update modal content based on purchase type
             if (type === 'chapter') {
@@ -149,7 +155,56 @@
                     <li>Bạn chỉ bị trừ Cám khi <span class="fw-semibold color-7">[Đọc chương]</span> này lần đầu tiên.</li>
                     <li>Kiểm tra Cám hiện tại <a href="{{ route('user.profile') }}" class="color-7">Tài khoản</a>. Nạp thêm Cám tại <a href="{{ route('user.bank.auto.deposit') }}" class="color-7">Nạp Cám</a>.</li>
                 `;
+                
+                if (storyId && 
+                    comboPrice && 
+                    Number(comboPrice) > 0 && 
+                    totalChapterPrice && 
+                    Number(totalChapterPrice) > 0 && 
+                    Number(comboPrice) < Number(totalChapterPrice)) {
+                    
+                    const discountPercent = Math.round(((Number(totalChapterPrice) - Number(comboPrice)) / Number(totalChapterPrice)) * 100);
+                    const comboBtn = document.createElement('button');
+                    comboBtn.type = 'button';
+                    comboBtn.className = 'btn bg-7 me-2';
+                    comboBtn.id = 'purchase-combo-btn';
+                    comboBtn.innerHTML = '<i class="fas fa-gift me-1"></i> Mua trọn bộ <span class="badge bg-light text-success ms-1">-' + discountPercent + '%</span>';
+                    
+                    comboBtn.setAttribute('data-story-id', storyId);
+                    comboBtn.setAttribute('data-story-title', storyTitle || '');
+                    comboBtn.setAttribute('data-combo-price', comboPrice);
+                    
+                    comboBtn.addEventListener('click', function() {
+                        const storyId = this.getAttribute('data-story-id');
+                        const storyTitle = this.getAttribute('data-story-title');
+                        const comboPrice = parseInt(this.getAttribute('data-combo-price'));
+                        
+                        if (!storyId || !comboPrice) return;
+                        
+                        // Close current modal
+                        try {
+                            bootstrap.Modal.getInstance(document.getElementById('purchaseModal')).hide();
+                        } catch (e) {
+                            console.warn('Không thể đóng modal:', e);
+                        }
+                        
+                        // Open story combo purchase modal
+                        setTimeout(() => {
+                            showPurchaseModal('story', storyId, storyTitle, comboPrice);
+                        }, 300);
+                    });
+                    
+                    // Insert before confirm button
+                    const confirmBtn = document.getElementById('confirm-purchase-btn');
+                    modalFooter.insertBefore(comboBtn, confirmBtn);
+                } else {
+                    console.log('Combo button not shown - conditions not met');
+                }
             } else if (type === 'story') {
+                const existingComboBtn = document.getElementById('purchase-combo-btn');
+                if (existingComboBtn) {
+                    existingComboBtn.remove();
+                }
                 modalTitle.textContent = 'Xác nhận mua trọn bộ';
                 itemTitle.textContent = 'Trọn bộ: ' + title;
                 purchaseForm.action = "{{ route('purchase.story.combo') }}";
@@ -273,8 +328,9 @@
                 })
                 .finally(() => {
                     // Reset button state
-                    this.disabled = false;
-                    this.innerHTML = 'Xác nhận mua';
+                    const confirmBtn = document.getElementById('confirm-purchase-btn');
+                    confirmBtn.disabled = false;
+                    confirmBtn.innerHTML = document.getElementById('purchase-item-icon').innerHTML;
                 });
         });
     </script>
