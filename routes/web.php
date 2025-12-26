@@ -23,11 +23,11 @@ use App\Http\Controllers\Client\RequestPaymentController;
 use App\Http\Controllers\Client\BankAutoController;
 
 
-Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
-Route::get('/sitemap-main.xml', [SitemapController::class, 'main'])->name('sitemap.main');
-Route::get('/sitemap-stories.xml', [SitemapController::class, 'stories'])->name('sitemap.stories');
-Route::get('/sitemap-chapters.xml', [SitemapController::class, 'chapters'])->name('sitemap.chapters');
-Route::get('/sitemap-categories.xml', [SitemapController::class, 'categories'])->name('sitemap.categories');
+// Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+// Route::get('/sitemap-main.xml', [SitemapController::class, 'main'])->name('sitemap.main');
+// Route::get('/sitemap-stories.xml', [SitemapController::class, 'stories'])->name('sitemap.stories');
+// Route::get('/sitemap-chapters.xml', [SitemapController::class, 'chapters'])->name('sitemap.chapters');
+// Route::get('/sitemap-categories.xml', [SitemapController::class, 'categories'])->name('sitemap.categories');
 
 
 Route::post('/card-deposit/callback', [CardDepositController::class, 'callback'])->name('card.deposit.callback');

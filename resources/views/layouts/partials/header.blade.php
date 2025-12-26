@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi" translate="no">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="google" content="notranslate">
 
     @php
         // Logo được load từ View Composer (đã cache)
@@ -15,7 +16,7 @@
     <title>@yield('title', 'Trang chủ - ' . config('app.name'))</title>
     <meta name="description" content="@yield('description', 'Truyện ' . config('app.name') . ' - Đọc truyện online, tiểu thuyết, truyện tranh, tiểu thuyết hay nhất')">
     <meta name="keywords" content="@yield('keywords', 'truyện, tiểu thuyết, truyện tranh, đọc truyện online')">
-    <meta name="robots" content="index, follow">
+    <meta name="robots" content="noindex, nofollow">
 
     @hasSection('meta')
         @yield('meta')
@@ -64,7 +65,7 @@
 
 </head>
 
-<body>
+<body translate="no">
     <header>
         <nav
             class="navbar navbar-expand-lg fixed-top transition-header chapter-header scrolled bg-site shadow-sm py-0 d-block">

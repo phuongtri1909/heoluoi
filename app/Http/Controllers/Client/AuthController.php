@@ -41,7 +41,11 @@ class AuthController
             if ($existingUser) {
                 $existingUser->active = 'active';
                 $existingUser->save();
-                Auth::login($existingUser);
+                
+                Auth::login($existingUser, true);
+                
+                $existingUser->remember_token_expires_at = Carbon::now()->addWeeks(2);
+                $existingUser->save();
                 
                 // Complete daily login task
                 \App\Models\UserDailyTask::completeTask(
@@ -81,7 +85,11 @@ class AuthController
                 }
 
                 $user->save();
-                Auth::login($user);
+                
+                Auth::login($user, true);
+                
+                $user->remember_token_expires_at = Carbon::now()->addWeeks(2);
+                $user->save();
 
                 // Complete daily login task for new Google user
                 \App\Models\UserDailyTask::completeTask(
@@ -294,7 +302,17 @@ class AuthController
                 ]);
             }
 
-            Auth::login($user);
+            $remember = $request->has('remember') && $request->remember == '1';
+            
+            Auth::login($user, $remember);
+            
+            if ($remember) {
+                $user->remember_token_expires_at = Carbon::now()->addWeeks(2);
+                $user->save();
+            } else {
+                $user->remember_token_expires_at = null;
+                $user->save();
+            }
 
             $user->ip_address = $request->ip();
             $user->save();

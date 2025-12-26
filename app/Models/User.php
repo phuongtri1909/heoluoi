@@ -29,7 +29,8 @@ class User extends Authenticatable
         'google_id',
         'ip_address',
         'recently_read',
-        'coins'
+        'coins',
+        'remember_token_expires_at'
     ];
 
     const ROLE_USER = 'user';
@@ -160,8 +161,21 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'remember_token_expires_at' => 'datetime',
         'recently_read' => 'array'
     ];
+    
+    /**
+     * Kiểm tra xem remember token còn hạn không
+     */
+    public function isRememberTokenValid(): bool
+    {
+        if (!$this->remember_token || !$this->remember_token_expires_at) {
+            return false;
+        }
+        
+        return $this->remember_token_expires_at->isFuture();
+    }
 
     /**
      * Get total amount spent on chapters

@@ -63,33 +63,20 @@ class ManualPurchaseController extends Controller
      */
     public function store(Request $request)
     {
-        // Custom validation với flexible format
+        // Custom validation
         $validatedData = $request->validate([
             'user_ids' => 'required',
-            'type' => 'required|in:story,chapter',
+            'story_ids' => 'required',
             'reference_id' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:1000',
         ]);
         
         // Normalize IDs to arrays
         $userIds = is_array($request->user_ids) ? $request->user_ids : [$request->user_ids];
-        $storyIds = [];
-        $chapterIds = [];
+        $storyIds = is_array($request->story_ids) ? $request->story_ids : [$request->story_ids];
         
-        if ($request->type === 'story') {
-            if ($request->has('story_ids')) {
-                $storyIds = is_array($request->story_ids) ? $request->story_ids : [$request->story_ids];
-            }
-            if (empty($storyIds)) {
-                return back()->withErrors(['story_ids' => 'Vui lòng chọn ít nhất 1 truyện']);
-            }
-        } else {
-            if ($request->has('chapter_ids')) {
-                $chapterIds = is_array($request->chapter_ids) ? $request->chapter_ids : [$request->chapter_ids];
-            }
-            if (empty($chapterIds)) {
-                return back()->withErrors(['chapter_ids' => 'Vui lòng chọn ít nhất 1 chương']);
-            }
+        if (empty($storyIds)) {
+            return back()->withErrors(['story_ids' => 'Vui lòng chọn ít nhất 1 truyện']);
         }
         
         // Validate user existence
@@ -99,83 +86,44 @@ class ManualPurchaseController extends Controller
             }
         }
         
-        // Validate story/chapter existence
+        // Validate story existence
         foreach ($storyIds as $storyId) {
             if (!Story::find($storyId)) {
                 return back()->withErrors(['story_ids' => 'Truyện không tồn tại']);
-            }
-        }
-        
-        foreach ($chapterIds as $chapterId) {
-            if (!Chapter::find($chapterId)) {
-                return back()->withErrors(['chapter_ids' => 'Chương không tồn tại']);
             }
         }
 
         $createdCount = 0;
         $errors = [];
 
-        if ($request->type === 'story') {
-            foreach ($userIds as $userId) {
-                foreach ($storyIds as $storyId) {
-                    if (StoryPurchase::hasUserPurchased($userId, $storyId)) {
-                        $user = User::find($userId);
-                        $story = Story::find($storyId);
-                        $errors[] = "{$user->email} đã mua truyện '{$story->title}'";
-                        continue;
-                    }
-
+        foreach ($userIds as $userId) {
+            foreach ($storyIds as $storyId) {
+                if (StoryPurchase::hasUserPurchased($userId, $storyId)) {
+                    $user = User::find($userId);
                     $story = Story::find($storyId);
-                    
-                    if ($story->combo_price <= 0) {
-                        $errors[] = "Truyện '{$story->title}' không phải truyện trả phí";
-                        continue;
-                    }
-                    
-                    StoryPurchase::create([
-                        'user_id' => $userId,
-                        'story_id' => $storyId,
-                        'amount_paid' => 0,
-                        'amount_received' => $story->combo_price ?? 0,
-                        'admin_id' => Auth::id(),
-                        'reference_id' => $request->reference_id,
-                        'notes' => $request->notes,
-                        'added_by' => 'admin',
-                    ]);
-                    
-                    $createdCount++;
+                    $errors[] = "{$user->email} đã mua truyện '{$story->title}'";
+                    continue;
                 }
-            }
-        } else {
-            foreach ($userIds as $userId) {
-                foreach ($chapterIds as $chapterId) {
-                    if (ChapterPurchase::where('user_id', $userId)->where('chapter_id', $chapterId)->exists()) {
-                        $user = User::find($userId);
-                        $chapter = Chapter::find($chapterId);
-                        $errors[] = "{$user->email} đã mua chương '{$chapter->title}'";
-                        continue;
-                    }
 
-                    $chapter = Chapter::find($chapterId);
-                    
-                    if ($chapter->price <= 0) {
-                        $errors[] = "Chương '{$chapter->title}' không phải chương trả phí";
-                        continue;
-                    }
-                    
-                    ChapterPurchase::create([
-                        'user_id' => $userId,
-                        'chapter_id' => $chapterId,
-                        'amount_paid' => 0,
-                        'amount_received' => $chapter->price ?? 0,
-                        'admin_id' => Auth::id(),
-                        'reference_id' => $request->reference_id,
-                        'notes' => $request->notes,
-                        'added_by' => 'admin',
-                    ]);
-                    
-                    $createdCount++;
+                $story = Story::find($storyId);
+                
+                if ($story->combo_price <= 0) {
+                    $errors[] = "Truyện '{$story->title}' không phải truyện trả phí";
+                    continue;
                 }
+                
+                StoryPurchase::create([
+                    'user_id' => $userId,
+                    'story_id' => $storyId,
+                    'amount_paid' => 0,
+                    'amount_received' => $story->combo_price ?? 0,
+                    'admin_id' => Auth::id(),
+                    'reference_id' => $request->reference_id,
+                    'notes' => $request->notes,
+                    'added_by' => 'admin',
+                ]);
+                
+                $createdCount++;
             }
         }
 
@@ -226,15 +174,21 @@ class ManualPurchaseController extends Controller
      */
     public function getStories(Request $request)
     {
-        $search = $request->search;
+        $search = $request->get('search', '');
         
-        $stories = Story::where('combo_price', '>', 0) // Only paid stories
-                       ->where(function($query) use ($search) {
-                           $query->where('title', 'like', "%{$search}%")
-                                 ->orWhere('slug', 'like', "%{$search}%");
-                       })
-                       ->select('id', 'title', 'slug', 'combo_price')
-                       ->limit(10)
+        $query = Story::where('combo_price', '>', 0); // Only paid stories
+        
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('slug', 'like', "%{$search}%")
+                  ->orWhere('author_name', 'like', "%{$search}%");
+            });
+        }
+        
+        $stories = $query->select('id', 'title', 'slug', 'author_name', 'combo_price')
+                       ->orderBy('title')
+                       ->limit(20)
                        ->get();
 
         return response()->json($stories);
@@ -265,12 +219,20 @@ class ManualPurchaseController extends Controller
      */
     public function getUsers(Request $request)
     {
-        $search = $request->search;
+        $search = $request->get('search', '');
         
-        $users = User::where('email', 'like', "%{$search}%")
-                    ->orWhere('name', 'like', "%{$search}%")
-                    ->select('id', 'email', 'name')
-                    ->limit(10)
+        $query = User::where('role', 'user');
+        
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('email', 'like', "%{$search}%")
+                  ->orWhere('name', 'like', "%{$search}%");
+            });
+        }
+        
+        $users = $query->select('id', 'email', 'name')
+                    ->orderBy('email')
+                    ->limit(20)
                     ->get();
 
         return response()->json($users);

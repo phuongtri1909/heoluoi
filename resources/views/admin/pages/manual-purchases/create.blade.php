@@ -52,29 +52,8 @@
                             </div>
                         </div>
 
-                        <!-- Purchase Type -->
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label for="type" class="form-control-label">Loại quyền truy cập</label>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="type" id="storyType" value="story" required checked>
-                                        <label class="form-check-label" for="storyType">
-                                            Mua truyện (toàn bộ truyện)
-                                        </label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="type" id="chapterType" value="chapter">
-                                        <label class="form-check-label" for="chapterType">
-                                            Mua chương (từng chương riêng lẻ)
-                                        </label>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Multi-Story Selection -->
-                        <div class="row" id="storySelection" style="display: none;">
+                        <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label class="form-control-label">Chọn truyện</label>
@@ -84,7 +63,7 @@
                                     
                                     <!-- Search Input -->
                                     <input type="text" class="form-control" 
-                                           id="story_search_input" placeholder="Gõ tên truyện hoặc tác giả..."
+                                           id="story_search_input" placeholder="Gõ tên truyện hoặc tác giả để tìm..."
                                            autocomplete="off">
                                     
                                     <!-- Search Results -->
@@ -94,31 +73,6 @@
                                     <div id="story_hidden_inputs"></div>
                                     
                                     <div class="form-text">Có thể chọn nhiều truyện cùng lúc</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Multi-Chapter Selection -->
-                        <div class="row" id="chapterSelection" style="display: none;">
-                            <div class="col-md-12">
-                                <div class="form-group">
-                                    <label class="form-control-label">Chọn chương</label>
-                                    
-                                    <!-- Selected Chapters Display -->
-                                    <div id="selected_chapters" class="selected-items mb-2"></div>
-                                    
-                                    <!-- Search Input -->
-                                    <input type="text" class="form-control" 
-                                           id="chapter_search_input" placeholder="Gõ tên chương, số chương hoặc tên truyện..."
-                                           autocomplete="off">
-                                    
-                                    <!-- Search Results -->
-                                    <div id="chapter_search_results" class="search-results mt-2" style="display: none;"></div>
-                                    
-                                    <!-- Hidden inputs for selected chapters -->
-                                    <div id="chapter_hidden_inputs"></div>
-                                    
-                                    <div class="form-text">Có thể chọn nhiều chương cùng lúc</div>
                                 </div>
                             </div>
                         </div>
@@ -300,113 +254,22 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    function waitForElements() {
-        const requiredElements = [
-            'storySelection', 'chapterSelection',
-            'selected_users', 'selected_stories', 'selected_chapters',
-            'user_search_results', 'story_search_results', 'chapter_search_results',
-            'user_hidden_inputs', 'story_hidden_inputs', 'chapter_hidden_inputs'
-        ];
-        
-        const missingElements = requiredElements.filter(id => !document.getElementById(id));
-        
-        if (missingElements.length > 0) {
-            console.log('Missing elements:', missingElements);
-            return false;
-        }
-        return true;
-    }
-    
-    if (!waitForElements()) {
-        setTimeout(() => {
-            if (waitForElements()) {
-                initializeAll();
-            }
-        }, 1000);
-    } else {
-        initializeAll();
-    }
-    
-    function initializeAll(retryCount = 0) {
-        const usrEl = document.getElementById('selected_users');
-        const storyEl = document.getElementById('selected_stories');
-        const chEl = document.getElementById('selected_chapters');
-        
-        if (!usrEl || !storyEl || !chEl) {
-            if (retryCount >= 5) {
-                return;
-            }
-            setTimeout(() => initializeAll(retryCount + 1), 500);
-            return;
-        }
-        
-        document.querySelectorAll('input[name="type"]').forEach(function(radio) {
-        radio.addEventListener('change', function() {
-            const storySelection = document.getElementById('storySelection');
-            const chapterSelection = document.getElementById('chapterSelection');
-            
-            if (this.value === 'story') {
-                storySelection.style.display = 'block';
-                chapterSelection.style.display = 'none';
-            selectedChapters = [];
-            refreshDropdown('story');
-            } else {
-                chapterSelection.style.display = 'block';
-                storySelection.style.display = 'none';
-                selectedStories = [];
-                refreshDropdown('chapter');
-            }
-        });
-    });
-
-    const users = {!! json_encode(\App\Models\User::whereIn('role', ['user'])->orderBy('email')->get()) !!};
-    const stories = {!! json_encode(\App\Models\Story::where('combo_price', '>', 0)->orderBy('title')->get()) !!};
-    const chapters = {!! json_encode(\App\Models\Chapter::with('story')->where('price', '>', 0)->orderBy('number')->get()) !!};
-
     // Global variables for selected items
     let selectedUsers = [];
     let selectedStories = [];
-    let selectedChapters = [];
 
     // Initialize multi-select functionality
-    initMultiSearch('user', users);
-    initMultiSearch('story', stories);
-    initMultiSearch('chapter', chapters);
-    
-    // Load initial data for all searches
-    setTimeout(() => {
-        if (document.getElementById('storySelection')) {
-            document.getElementById('storySelection').style.display = 'block';
-        }
-        loadInitialData();
-    }, 500);
-    
-    function loadInitialData() {
-        const userResults = document.getElementById('user_search_results');
-        const storyResults = document.getElementById('story_search_results');
-        const chapterResults = document.getElementById('chapter_search_results');
-        
-        if (userResults) {
-            displayMultiResults(userResults, users.slice(0, 10), 'user');
-            userResults.style.display = 'block';
-        }
-        
-        if (storyResults) {
-            displayMultiResults(storyResults, stories.slice(0, 10), 'story');
-            storyResults.style.display = 'block';
-        }
-        
-        if (chapterResults) {
-            displayMultiResults(chapterResults, chapters.slice(0, 10), 'chapter');
-            chapterResults.style.display = 'block';
-        }
-    }
+    initAjaxSearch('user');
+    initAjaxSearch('story');
 
-    function initMultiSearch(type, data) {
+    function initAjaxSearch(type) {
         const searchInput = document.getElementById(type + '_search_input');
         const results = document.getElementById(type + '_search_results');
-        const selectedContainer = document.getElementById('selected_' + type + 's');
-        const hiddenInputs = document.getElementById(type + '_hidden_inputs');
+        
+        if (!searchInput || !results) {
+            console.error('Search elements not found for type:', type);
+            return;
+        }
         
         let searchTimeout;
 
@@ -421,20 +284,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             searchTimeout = setTimeout(() => {
-                const filtered = data.filter(item => {
-                    let display = '';
-                    if (type === 'user') {
-                        display = item.email + (item.name ? ' (' + item.name + ')' : '');
-                    } else if (type === 'story') {
-                        display = item.title + (item.author_name ? ' - ' + item.author_name : '');
-                    } else if (type === 'chapter') {
-                        display = 'Chương ' + item.number + ': ' + item.title + ' (' + item.story.title + ')';
-                    }
-                    return display.toLowerCase().includes(query.toLowerCase());
-                });
-                
-                displayMultiResults(results, filtered, type);
+                performAjaxSearch(type, query);
             }, 300);
+        });
+
+        searchInput.addEventListener('focus', function() {
+            const query = this.value.trim();
+            if (query.length >= 2) {
+                performAjaxSearch(type, query);
+            }
         });
 
         searchInput.addEventListener('blur', function() {
@@ -442,6 +300,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 results.style.display = 'none';
             }, 200);
         });
+    }
+
+    function performAjaxSearch(type, query) {
+        const results = document.getElementById(type + '_search_results');
+        const url = type === 'user' 
+            ? '{{ route("admin.manual-purchases.api.users") }}'
+            : '{{ route("admin.manual-purchases.api.stories") }}';
+        
+        // Show loading
+        results.innerHTML = '<div class="search-result-item">Đang tìm kiếm...</div>';
+        results.style.display = 'block';
+        
+        fetch(url + '?search=' + encodeURIComponent(query))
+            .then(response => response.json())
+            .then(data => {
+                displayMultiResults(results, data, type);
+            })
+            .catch(error => {
+                console.error('Search error:', error);
+                results.innerHTML = '<div class="search-result-item">Có lỗi xảy ra khi tìm kiếm</div>';
+            });
     }
 
     function displayMultiResults(container, items, type) {
@@ -467,8 +346,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     display = item.email + (item.name ? ' (' + item.name + ')' : '');
                 } else if (type === 'story') {
                     display = item.title + (item.author_name ? ' - ' + item.author_name : '');
-                } else if (type === 'chapter') {
-                    display = 'Chương ' + item.number + ': ' + item.title + ' (' + item.story.title + ')';
                 }
                 
                 div.innerHTML = '<span class="checkbox-indicator">' + (isSelected ? '✓' : '') + '</span><span>' + display + '</span>';
@@ -489,33 +366,33 @@ document.addEventListener('DOMContentLoaded', function() {
         const isSelected = selected.some(s => s.id === item.id);
         
         if (isSelected) {
-            if (type === 'user' && selectedUsers.length > 0) {
+            if (type === 'user') {
                 selectedUsers = selectedUsers.filter(s => s.id !== item.id);
-            } else if (type === 'story' && selectedStories.length > 0) {
+            } else if (type === 'story') {
                 selectedStories = selectedStories.filter(s => s.id !== item.id);
-            } else if (type === 'chapter' && selectedChapters.length > 0) {
-                selectedChapters = selectedChapters.filter(s => s.id !== item.id);
             }
         } else {
             const selectedItem = {id: item.id, display: display};
-            if (type === 'user') selectedUsers.push(selectedItem);
-            else if (type === 'story') selectedStories.push(selectedItem);
-            else if (type === 'chapter') selectedChapters.push(selectedItem);
+            if (type === 'user') {
+                selectedUsers.push(selectedItem);
+            } else if (type === 'story') {
+                selectedStories.push(selectedItem);
+            }
         }
         
-        const correspondingContainer = document.getElementById('selected_' + type + 's');
-        if (correspondingContainer && correspondingContainer.offsetParent !== null) {
-            updateSelectedDisplay(type);
-        }
-        
+        updateSelectedDisplay(type);
         updateHiddenInputs(type);
-        refreshDropdown(type);
+        
+        // Refresh search results to update checkmarks
+        const searchInput = document.getElementById(type + '_search_input');
+        if (searchInput && searchInput.value.trim().length >= 2) {
+            performAjaxSearch(type, searchInput.value.trim());
+        }
     }
 
     function getSelectedItems(type) {
         if (type === 'user') return selectedUsers;
         else if (type === 'story') return selectedStories;
-        else if (type === 'chapter') return selectedChapters;
         return [];
     }
 
@@ -561,44 +438,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    function refreshDropdown(type) {
-        const data = type === 'user' ? users : (type === 'story' ? stories : chapters);
-        const results = document.getElementById(type + '_search_results');
-        const input = document.getElementById(type + '_search_input');
-        const query = input.value.trim();
-        
-        // Nếu có search query thì filter, không thì hiển thị 10 items đầu
-        let filtered = [];
-        if (query.length >= 2) {
-            filtered = data.filter(item => {
-                let display = '';
-                if (type === 'user') {
-                    display = item.email + (item.name ? ' (' + item.name + ')' : '');
-                } else if (type === 'story') {
-                    display = item.title + (item.author_name ? ' - ' + item.author_name : '');
-                } else if (type === 'chapter') {
-                    display = 'Chương ' + item.number + ': ' + item.title + ' (' + item.story.title + ')';
-                }
-                return display.toLowerCase().includes(query.toLowerCase());
-            });
-        } else {
-            filtered = data.slice(0, 10);
+    window.removeSelection = function(type, id) {
+        if (type === 'user') {
+            selectedUsers = selectedUsers.filter(s => s.id !== id);
+        } else if (type === 'story') {
+            selectedStories = selectedStories.filter(s => s.id !== id);
         }
         
-        displayMultiResults(results, filtered, type);
-        results.style.display = 'block';
-    }
-
-        window.removeSelection = function(type, id) {
-            if (type === 'user') selectedUsers = selectedUsers.filter(s => s.id !== id);
-            else if (type === 'story') selectedStories = selectedStories.filter(s => s.id !== id);
-            else if (type === 'chapter') selectedChapters = selectedChapters.filter(s => s.id !== id);
-            
-            updateSelectedDisplay(type);
-            updateHiddenInputs(type);
-            refreshDropdown(type);
-        };
-    }
+        updateSelectedDisplay(type);
+        updateHiddenInputs(type);
+        
+        // Refresh search results to update checkmarks
+        const searchInput = document.getElementById(type + '_search_input');
+        if (searchInput && searchInput.value.trim().length >= 2) {
+            performAjaxSearch(type, searchInput.value.trim());
+        }
+    };
 });
 </script>
 @endsection

@@ -64,7 +64,13 @@
                                 </div>
                             </div>
 
-                            <div class="mb-4 text-end">
+                            <div class="mb-4 d-flex justify-content-between align-items-center">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="remember" id="remember" value="1" {{ old('remember') ? 'checked' : '' }}>
+                                    <label class="form-check-label text-dark" for="remember">
+                                        Nhớ đăng nhập
+                                    </label>
+                                </div>
                                 <a href="{{ route('forgot-password') }}" class="color-3 text-decoration-none">Quên mật
                                     khẩu?</a>
                             </div>

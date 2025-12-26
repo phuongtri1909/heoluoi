@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi" translate="no">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="google" content="notranslate">
     @php
         // Get the logo and favicon from LogoSite model
         $logoSite = \App\Models\LogoSite::first();
@@ -32,7 +33,7 @@
     {{-- end styles --}}
 </head>
 
-<body style="padding-top:0">
+<body style="padding-top:0" translate="no">
 
     <div class="">
         @include('components.toast-main')
