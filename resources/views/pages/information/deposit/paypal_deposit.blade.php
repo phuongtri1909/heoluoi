@@ -53,9 +53,9 @@
         <a href="{{ route('user.bank.auto.deposit') }}" class="deposit-tab">
             <i class="fas fa-robot me-2"></i>Bank auto
         </a>
-        <a href="{{ route('user.deposit') }}" class="deposit-tab">
+        {{-- <a href="{{ route('user.deposit') }}" class="deposit-tab">
             <i class="fas fa-university me-2"></i>Bank
-        </a>
+        </a> --}}
         <a href="{{ route('user.card.deposit') }}" class="deposit-tab">
             <i class="fas fa-credit-card me-2"></i>Card
         </a>

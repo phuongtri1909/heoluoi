@@ -29,6 +29,7 @@
                                 <input type="text" class="form-control @error('code') is-invalid @enderror" 
                                        name="code" id="code" value="{{ old('code', $bankAuto->code) }}" required>
                                 <small class="form-text text-muted">Ví dụ: VCB, BIDV, TPB, MB, ...</small>
+                                <a class="mt-1 bg-gradient-primary btn btn-sm" href="https://api.vietqr.io/v2/banks" target="_blank">Lấy code ngân hàng</a>
                                 @error('code')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

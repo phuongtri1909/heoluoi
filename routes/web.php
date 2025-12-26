@@ -104,7 +104,8 @@ Route::middleware(['ban:login', 'block.devtools'])->group(function () {
         Route::get('/daily-tasks/history', [DailyTaskController::class, 'getHistory'])->name('daily-tasks.history');
 
         Route::withoutMiddleware('block.devtools')->group(function () {
-            Route::get('/deposit', [DepositController::class, 'index'])->name('deposit');
+            //đóng bank thủ công
+            // Route::get('/deposit', [DepositController::class, 'index'])->name('deposit');
             Route::post('/request-payment', [RequestPaymentController::class, 'store'])->name('request.payment.store');
             Route::post('/request-payment/confirm', [RequestPaymentController::class, 'confirm'])->name('request.payment.confirm');
 

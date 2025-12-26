@@ -151,9 +151,9 @@
         <a href="{{ route('user.bank.auto.deposit') }}" class="deposit-tab active">
             <i class="fas fa-robot me-2"></i>Bank auto
         </a>
-        <a href="{{ route('user.deposit') }}" class="deposit-tab">
+        {{-- <a href="{{ route('user.deposit') }}" class="deposit-tab">
             <i class="fas fa-university me-2"></i>Bank
-        </a>
+        </a> --}}
         <a href="{{ route('user.card.deposit') }}" class="deposit-tab">
             <i class="fas fa-credit-card me-2"></i>Card
         </a>
@@ -182,9 +182,11 @@
                             @csrf
 
                             <div class="mb-4">
-                                <label class="form-label fw-bold mb-3">
+                                <label class="form-label fw-bold mb-1">
                                     <i class="fas fa-university me-2"></i>Chọn ngân hàng
                                 </label>
+                                <br>
+                                <span class="text-muted font-italic mb-3">Đây là ngân hàng thụ hưởng, không phải ngân hàng của bạn</span>
                                 <div class="row">
                                     @foreach ($banks as $bank)
                                         <div class="col-6">
@@ -652,7 +654,7 @@
                                 ${bankInfo.qr_code ? `
                                         <div class="text-center mb-3">
                                             <div class="payment-qr-code mb-3">
-                                                <img src="${bankInfo.qr_code}" alt="QR Code" class="img-fluid" style="max-height: 200px;">
+                                                <img src="${bankInfo.qr_code}" alt="QR Code" class="img-fluid" style="max-height: 240px;">
                                             </div>
                                             <p class="text-muted">Quét mã QR để thực hiện thanh toán</p>
                                         </div>

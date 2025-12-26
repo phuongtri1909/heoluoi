@@ -144,7 +144,7 @@ class BankAutoController extends Controller
                 'transaction_code' => $transactionCode,
                 'amount' => $amount,
                 'coins' => $calculation['total_coins'],
-                'bank_info' => $this->getBankInfo($bankId),
+                'bank_info' => $this->getBankInfo($bankId, $transactionCode, $amount),
                 'message' => 'Vui lòng chuyển khoản theo thông tin bên dưới'
             ]);
 
@@ -162,12 +162,18 @@ class BankAutoController extends Controller
     /**
      * Lấy thông tin ngân hàng để hiển thị cho user
      */
-    private function getBankInfo($bankId)
+    private function getBankInfo($bankId, $transactionCode = null, $amount = null)
     {
         $bank = BankAuto::find($bankId);
         
         if (!$bank) {
             return null;
+        }
+        
+        // Generate QR code dynamically if transaction code and amount are provided
+        $qrCodeData = null;
+        if ($transactionCode && $amount) {
+            $qrCodeData = $this->generateBankQRCode($bank, $transactionCode, $amount);
         }
         
         return [
@@ -176,8 +182,71 @@ class BankAutoController extends Controller
             'account_number' => $bank->account_number ?? 'Chưa cấu hình',
             'account_name' => $bank->account_name ?? 'Chưa cấu hình',
             'logo' => $bank->logo ? Storage::url($bank->logo) : null,
-            'qr_code' => $bank->qr_code ? Storage::url($bank->qr_code) : null,
+            'qr_code' => $qrCodeData ?: ($bank->qr_code ? Storage::url($bank->qr_code) : null),
         ];
+    }
+
+    /**
+     * Generate QR code for bank using VietQR API
+     */
+    private function generateBankQRCode($bank, $transactionCode, $amount)
+    {
+        try {
+            $accountNo = $bank->account_number;
+            $accountName = $bank->account_name;
+            $bankCode = $bank->code;
+            $description = $transactionCode;
+            
+            $qrData = $this->callVietQRAPI($bankCode, $accountNo, $accountName, $amount, $description);
+            
+            if ($qrData) {
+                return $qrData;
+            }
+            
+            return null;
+        } catch (\Exception $e) {
+            Log::error('Error generating QR code: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Call VietQR API to generate QR code
+     */
+    private function callVietQRAPI($bankCode, $accountNo, $accountName, $amount, $description)
+    {
+        try {
+            $url = "https://img.vietqr.io/image/{$bankCode}-{$accountNo}-compact2.jpg";
+            
+            $params = [
+                'amount' => (int)$amount,
+                'addInfo' => $description,
+                'accountName' => $accountName
+            ];
+            
+            $queryString = http_build_query($params);
+            $fullUrl = $url . '?' . $queryString;
+            
+            $ch = curl_init($fullUrl);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+            
+            $imageData = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            
+            if ($httpCode == 200 && !empty($imageData)) {
+                $base64 = base64_encode($imageData);
+                return 'data:image/jpeg;base64,' . $base64;
+            }
+            
+            return null;
+        } catch (\Exception $e) {
+            Log::error('VietQR API Exception: ' . $e->getMessage());
+            return null;
+        }
     }
 
     /**
