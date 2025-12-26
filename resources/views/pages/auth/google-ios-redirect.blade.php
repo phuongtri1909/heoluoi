@@ -74,11 +74,11 @@
 </div>
 
 <script>
-const googleLoginUrl = '{{ $googleLoginUrl }}';
+const googleOAuthUrl = '{{ $googleOAuthUrl }}';
 
 function copyLink() {
     if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(googleLoginUrl).then(function() {
+        navigator.clipboard.writeText(googleOAuthUrl).then(function() {
             document.getElementById('copySuccess').style.display = 'block';
             setTimeout(function() {
                 document.getElementById('copySuccess').style.display = 'none';
@@ -93,7 +93,7 @@ function copyLink() {
 
 function fallbackCopy() {
     const textArea = document.createElement('textarea');
-    textArea.value = googleLoginUrl;
+    textArea.value = googleOAuthUrl;
     textArea.style.position = 'fixed';
     textArea.style.opacity = '0';
     textArea.style.left = '-9999px';
@@ -106,18 +106,18 @@ function fallbackCopy() {
             document.getElementById('copySuccess').style.display = 'none';
         }, 5000);
     } catch(err) {
-        alert('Không thể sao chép. Vui lòng ghi nhớ liên kết: ' + googleLoginUrl);
+        alert('Không thể sao chép. Vui lòng ghi nhớ liên kết: ' + googleOAuthUrl);
     }
     document.body.removeChild(textArea);
 }
 
 function openInSafari() {
-    // Copy link trước
+    // Copy link trước (link Google OAuth trực tiếp)
     copyLink();
     
-    // Thử mở bằng window.open
+    // Thử mở bằng window.open (sẽ không hoạt động trong in-app browser)
     try {
-        const newWindow = window.open(googleLoginUrl, '_blank', 'noopener,noreferrer');
+        const newWindow = window.open(googleOAuthUrl, '_blank', 'noopener,noreferrer');
         if (newWindow && !newWindow.closed) {
             newWindow.focus();
             return;
@@ -126,8 +126,8 @@ function openInSafari() {
         console.log('Cannot open popup');
     }
     
-    // Nếu không mở được, hiển thị hướng dẫn
-    alert('Đã sao chép liên kết!\n\n📱 Hướng dẫn:\n1. Nhấn nút Home để thoát\n2. Mở Safari\n3. Nhấn vào thanh địa chỉ\n4. Nhấn giữ và chọn "Dán"\n5. Nhấn Enter để đăng nhập');
+    // Hiển thị hướng dẫn
+    alert('✅ Đã sao chép liên kết Google OAuth!\n\n📱 Hướng dẫn:\n1. Nhấn nút Home để thoát khỏi ứng dụng này\n2. Mở Safari\n3. Nhấn vào thanh địa chỉ\n4. Nhấn giữ và chọn "Dán"\n5. Nhấn Enter để đăng nhập Google');
 }
 </script>
 @endsection

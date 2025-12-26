@@ -37,11 +37,22 @@ class AuthController
                          strpos($userAgent, 'Messenger') !== false ||
                          strpos($userAgent, 'Instagram') !== false;
         
-        // Nếu là iOS và in-app browser, hiển thị view hướng dẫn
+        // Nếu là iOS và in-app browser, lấy Google OAuth URL trực tiếp và hiển thị view
         if ($isIOS && $isInAppBrowser) {
-            return view('pages.auth.google-ios-redirect', [
-                'googleLoginUrl' => route('login.google.direct')
-            ]);
+            try {
+                // Lấy Google OAuth URL trực tiếp (không redirect)
+                $redirectResponse = Socialite::driver('google')->redirect();
+                $googleOAuthUrl = $redirectResponse->getTargetUrl();
+                
+                return view('pages.auth.google-ios-redirect', [
+                    'googleOAuthUrl' => $googleOAuthUrl
+                ]);
+            } catch (\Exception $e) {
+                // Nếu có lỗi, fallback về route
+                return view('pages.auth.google-ios-redirect', [
+                    'googleOAuthUrl' => route('login.google.direct')
+                ]);
+            }
         }
         
         // Nếu không phải iOS in-app browser, redirect đến Google bình thường
@@ -49,24 +60,12 @@ class AuthController
     }
     
     /**
-     * Route trung gian để lấy Google OAuth URL (chỉ dùng cho iOS in-app browser)
-     */
-    public function getGoogleLoginUrl()
-    {
-        // Lấy authorization URL từ Socialite
-        $redirectResponse = Socialite::driver('google')->redirect();
-        $authorizationUrl = $redirectResponse->getTargetUrl();
-        
-        return response()->json([
-            'url' => $authorizationUrl
-        ]);
-    }
-    
-    /**
      * Route trực tiếp để redirect đến Google (dùng cho copy link)
+     * Route này KHÔNG detect, luôn redirect đến Google
      */
     public function redirectToGoogleDirect()
     {
+        // Luôn redirect đến Google, không detect
         return Socialite::driver('google')->redirect();
     }
 
