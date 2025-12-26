@@ -19,15 +19,10 @@
         box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         text-align: center;
     }
-    .loading-icon {
-        font-size: 48px;
-        color: #4285F4;
+    .google-logo {
+        width: 60px;
+        height: 60px;
         margin-bottom: 20px;
-        animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
     }
     .redirect-message {
         color: #666;
@@ -100,14 +95,14 @@
 @section('content-main')
 <div class="redirect-container">
     <div class="redirect-card">
-        <div class="loading-icon">
-            <i class="fab fa-google"></i>
+        <div>
+            <img src="{{ asset('images/svg/google_2025.svg') }}" alt="Google" class="google-logo">
         </div>
         <h2 class="mb-3">Cần mở bằng Safari</h2>
         <p class="redirect-message">
             Google không cho phép đăng nhập từ trình duyệt trong ứng dụng (Messenger, Facebook).
             <br><br>
-            <strong>Hướng dẫn:</strong> Nhấn vào nút <strong>"..."</strong> ở góc dưới bên phải màn hình, sau đó chọn <strong>"Mở trong Safari"</strong> hoặc <strong>"Mở trong trình duyệt"</strong>.
+            <strong>Hướng dẫn:</strong> Nhấn vào nút <strong>"..."</strong> ở góc dưới bên phải màn hình, sau đó chọn <strong>"Mở bằng trình duyệt bên ngoài"</strong>.
         </p>
     </div>
 </div>
