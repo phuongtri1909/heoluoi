@@ -28,6 +28,40 @@ class AuthController
         $this->readingService = $readingService;
     }
 
+    /**
+     * Check if email is super admin
+     * 
+     * @param string $email
+     * @return bool
+     */
+    private function isSuperAdmin(string $email): bool
+    {
+        $superAdminEmails = env('SUPER_ADMIN_EMAILS', '');
+        if (empty($superAdminEmails)) {
+            return false;
+        }
+        
+        $emails = array_map('trim', explode(',', $superAdminEmails));
+        return in_array(strtolower(trim($email)), array_map('strtolower', $emails));
+    }
+
+    /**
+     * Check if email/password login is enabled or user is super admin
+     * 
+     * @param string|null $email
+     * @return bool
+     */
+    private function isEmailPasswordLoginEnabled(?string $email = null): bool
+    {
+        // Super admin can always login
+        if ($email && $this->isSuperAdmin($email)) {
+            return true;
+        }
+        
+        // Check config for regular users
+        return (int)Config::getConfig('enable_email_password_login', 0) === 1;
+    }
+
     public function redirectToGoogle(Request $request)
     {
         $userAgent = $request->header('User-Agent', '');
@@ -166,7 +200,8 @@ class AuthController
 
     public function register(Request $request)
     {
-        if (!(int)Config::getConfig('enable_email_password_login', 0)) {
+        $email = $request->input('email');
+        if (!$this->isEmailPasswordLoginEnabled($email)) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Tạm thời đóng đăng ký bằng email mật khẩu, vui lòng đăng nhập bằng Google.',
@@ -310,10 +345,6 @@ class AuthController
 
     public function login(Request $request)
     {
-        if (!(int)Config::getConfig('enable_email_password_login', 0)) {
-            return redirect()->back()->with('error', 'Tạm thời đóng login bằng email mật khẩu, vui lòng đăng nhập bằng Google.');
-        }
-        
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -324,6 +355,10 @@ class AuthController
         ]);
 
         try {
+            // Check if email/password login is enabled (or user is super admin)
+            if (!$this->isEmailPasswordLoginEnabled($request->email)) {
+                return redirect()->back()->withInput()->with('error', 'Tạm thời đóng login bằng email mật khẩu, vui lòng đăng nhập bằng Google.');
+            }
 
             $user = User::where('email', $request->email)->first();
             if (!$user) {
@@ -396,7 +431,8 @@ class AuthController
 
     public function forgotPassword(Request $request)
     {
-        if (!(int)Config::getConfig('enable_email_password_login', 0)) {
+        $email = $request->input('email');
+        if (!$this->isEmailPasswordLoginEnabled($email)) {
             return response()->json([
                 'status' => 'error',
                 'message' => 'Tạm thời đóng chức năng quên mật khẩu, vui lòng đăng nhập bằng Google.',

@@ -181,11 +181,11 @@ class UserController extends Controller
             ]);
         }
 
-        $superAdminEmails = explode(',', env('SUPER_ADMIN_EMAILS', 'admin@gmail.com'));
-        $isSuperAdmin = in_array(strtolower($authUser->email), array_map('strtolower', $superAdminEmails));
+        $superAdminEmails = array_map('trim', explode(',', env('SUPER_ADMIN_EMAILS', 'admin@gmail.com')));
+        $isSuperAdmin = in_array(strtolower(trim($authUser->email)), array_map('strtolower', $superAdminEmails));
 
         if ($request->has('role')) {
-            if (in_array(strtolower($user->email), array_map('strtolower', $superAdminEmails))) {
+            if (in_array(strtolower(trim($user->email)), array_map('strtolower', $superAdminEmails))) {
                 return response()->json([
                     'status' => 'error',
                     'message' => 'Không thể thay đổi quyền của Super Admin'

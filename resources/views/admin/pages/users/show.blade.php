@@ -77,12 +77,12 @@
                             </div>
 
                             @php 
-                                $superAdminEmails = explode(',', env('SUPER_ADMIN_EMAILS', 'admin@gmail.com'));
-                                $isSuperAdmin = in_array(strtolower(auth()->user()->email), array_map('strtolower', $superAdminEmails));
+                                $superAdminEmails = array_map('trim', explode(',', env('SUPER_ADMIN_EMAILS', 'admin@gmail.com')));
+                                $isSuperAdmin = in_array(strtolower(trim(auth()->user()->email)), array_map('strtolower', $superAdminEmails));
                                 $canChangeRole = false;
                                 $availableRoles = [];
                                 
-                                if ($user->id !== auth()->id() && !in_array(strtolower($user->email), array_map('strtolower', $superAdminEmails))) {
+                                if ($user->id !== auth()->id() && !in_array(strtolower(trim($user->email)), array_map('strtolower', $superAdminEmails))) {
                                     if (auth()->user()->role === 'admin_main') {
                                         $canChangeRole = true;
                                         if ($isSuperAdmin) {
