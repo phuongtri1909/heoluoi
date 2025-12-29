@@ -58,7 +58,7 @@
         <div class="col-12">
             <div class="card mb-0 mx-0 mx-md-4 mb-md-4">
                 <div class="card-header pb-0">
-                    <h5 class="mb-0">Chỉnh sửa truyện</h5>
+                        <h5 class="mb-0">Chỉnh sửa truyện</h5>
                 </div>
                 <div class="card-body">
 
@@ -296,6 +296,95 @@
                             </div>
                         </div>
                     </form>
+
+                    {{-- Section để chỉnh sửa views của chapters --}}
+                    <div class="row mt-5">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Quản lý lượt xem các chương</h5>
+                                    <p class="text-sm mb-0 text-muted">Tổng lượt xem hiện tại: <strong id="total-story-views">{{ number_format($story->total_views ?? 0) }}</strong></p>
+                                </div>
+                                <div class="card-body">
+                                    {{-- Bulk update views --}}
+                                    <div class="alert alert-info mb-3">
+                                        <h6 class="mb-2">Điều chỉnh views hàng loạt:</h6>
+                                        <div class="row g-2">
+                                            <div class="col-md-3">
+                                                <select class="form-select form-select-sm" id="bulk-views-action">
+                                                    <option value="set">Set tất cả về</option>
+                                                    <option value="set_total">Set tổng views về</option>
+                                                    <option value="add">Tăng thêm</option>
+                                                    <option value="subtract">Giảm đi</option>
+                                                    <option value="multiply">Nhân với</option>
+                                                    <option value="divide">Chia cho</option>
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <input type="number" class="form-control form-control-sm" id="bulk-views-value" placeholder="Nhập số" min="0" step="0.01">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <button type="button" class="btn btn-sm btn-warning" id="bulk-update-views-btn" data-story-id="{{ $story->id }}">
+                                                    <i class="fa-solid fa-bolt"></i> Áp dụng cho tất cả
+                                                </button>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <small class="text-white d-block mt-1">
+                                                    <em id="bulk-views-hint">Ví dụ: "Set tất cả về 1000" sẽ set mỗi chương = 1000</em>
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th width="5%">STT</th>
+                                                    <th width="40%">Tên chương</th>
+                                                    <th width="20%">Lượt xem hiện tại</th>
+                                                    <th width="25%">Điều chỉnh lượt xem</th>
+                                                    <th width="10%">Thao tác</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach($chapters as $chapter)
+                                                <tr data-chapter-id="{{ $chapter->id }}">
+                                                    <td>{{ $chapter->number }}</td>
+                                                    <td>
+                                                        <a href="{{ route('admin.stories.chapters.show', ['story' => $story, 'chapter' => $chapter]) }}" target="_blank">
+                                                            {{ $chapter->title }}
+                                                        </a>
+                                                    </td>
+                                                    <td>
+                                                        <span class="current-views-{{ $chapter->id }}">{{ number_format($chapter->views) }}</span>
+                                                    </td>
+                                                    <td>
+                                                        <div class="input-group input-group-sm">
+                                                            <input type="number" 
+                                                                   class="form-control chapter-views-input" 
+                                                                   data-chapter-id="{{ $chapter->id }}"
+                                                                   value="{{ $chapter->views }}" 
+                                                                   min="0"
+                                                                   placeholder="Nhập số lượt xem">
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <button type="button" 
+                                                                class="btn btn-sm bg-gradient-primary update-chapter-views-btn" 
+                                                                data-chapter-id="{{ $chapter->id }}"
+                                                                data-story-id="{{ $story->id }}">
+                                                            Lưu
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -501,6 +590,248 @@
                 hiddenInput.value = categoryId;
                 document.querySelector('.category-tags-container').appendChild(hiddenInput);
             });
+        }
+
+        // Update hint text based on action
+        const bulkViewsAction = document.getElementById('bulk-views-action');
+        const bulkViewsHint = document.getElementById('bulk-views-hint');
+        if (bulkViewsAction && bulkViewsHint) {
+            bulkViewsAction.addEventListener('change', function() {
+                const hints = {
+                    'set': 'Ví dụ: "Set tất cả về 1000" sẽ set mỗi chương = 1000',
+                    'set_total': 'Ví dụ: "Set tổng views về 50000" sẽ phân bổ tổng 50000 views cho tất cả chương',
+                    'add': 'Ví dụ: "Tăng thêm 1000" sẽ cộng 1000 views vào mỗi chương',
+                    'subtract': 'Ví dụ: "Giảm đi 1000" sẽ trừ 1000 views từ mỗi chương',
+                    'multiply': 'Ví dụ: "Nhân với 2" sẽ nhân đôi views của mỗi chương',
+                    'divide': 'Ví dụ: "Chia cho 2" sẽ chia đôi views của mỗi chương'
+                };
+                bulkViewsHint.textContent = hints[this.value] || hints['set'];
+            });
+        }
+
+        // Bulk update chapter views
+        const bulkUpdateViewsBtn = document.getElementById('bulk-update-views-btn');
+        if (bulkUpdateViewsBtn) {
+            bulkUpdateViewsBtn.addEventListener('click', function() {
+                const storyId = this.getAttribute('data-story-id');
+                const action = document.getElementById('bulk-views-action').value;
+                const value = parseFloat(document.getElementById('bulk-views-value').value);
+
+                if (isNaN(value) || value < 0) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Cảnh báo',
+                        text: 'Vui lòng nhập giá trị hợp lệ (số >= 0)'
+                    });
+                    return;
+                }
+
+                const actionNames = {
+                    'set': 'Set tất cả về',
+                    'set_total': 'Set tổng views về',
+                    'add': 'Tăng thêm',
+                    'subtract': 'Giảm đi',
+                    'multiply': 'Nhân với',
+                    'divide': 'Chia cho'
+                };
+
+                Swal.fire({
+                    icon: 'question',
+                    title: 'Xác nhận',
+                    text: `Bạn có chắc chắn muốn ${actionNames[action]} ${value} cho tất cả các chương?`,
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Xác nhận',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (!result.isConfirmed) {
+                        return;
+                    }
+
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                    if (!csrfToken) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: 'Không tìm thấy CSRF token'
+                        });
+                        return;
+                    }
+
+                    // Disable button
+                    bulkUpdateViewsBtn.disabled = true;
+                    bulkUpdateViewsBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...';
+
+                    fetch(`/admin/stories/${storyId}/chapters/bulk-update-views`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({
+                            action: action,
+                            value: value
+                        })
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => Promise.reject(err));
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // Update all chapter views in the table
+                            data.chapters.forEach(chapter => {
+                                const currentViewsSpan = document.querySelector(`.current-views-${chapter.id}`);
+                                const input = document.querySelector(`.chapter-views-input[data-chapter-id="${chapter.id}"]`);
+                                if (currentViewsSpan) {
+                                    currentViewsSpan.textContent = number_format(chapter.views);
+                                }
+                                if (input) {
+                                    input.value = chapter.views;
+                                }
+                            });
+
+                            // Update total story views
+                            document.getElementById('total-story-views').textContent = number_format(data.total_views);
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Thành công',
+                                text: data.message || 'Đã cập nhật lượt xem thành công',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Lỗi',
+                                text: data.message || 'Có lỗi xảy ra'
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        let errorMessage = 'Có lỗi xảy ra khi cập nhật';
+                        if (error.message) {
+                            errorMessage = error.message;
+                        } else if (typeof error === 'object' && error.message) {
+                            errorMessage = error.message;
+                        }
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: errorMessage
+                        });
+                    })
+                    .finally(() => {
+                        bulkUpdateViewsBtn.disabled = false;
+                        bulkUpdateViewsBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> Áp dụng cho tất cả';
+                    });
+                });
+            });
+        }
+
+        // Update individual chapter views
+        document.querySelectorAll('.update-chapter-views-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const chapterId = this.getAttribute('data-chapter-id');
+                const storyId = this.getAttribute('data-story-id');
+                const input = document.querySelector(`.chapter-views-input[data-chapter-id="${chapterId}"]`);
+                const views = parseInt(input.value);
+                
+                if (isNaN(views) || views < 0) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Cảnh báo',
+                        text: 'Vui lòng nhập số lượt xem hợp lệ (số nguyên >= 0)'
+                    });
+                    return;
+                }
+
+                const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                if (!csrfToken) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: 'Không tìm thấy CSRF token'
+                    });
+                    return;
+                }
+
+                // Disable button
+                button.disabled = true;
+                button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang lưu...';
+
+                fetch(`/admin/stories/${storyId}/chapters/${chapterId}/update-views`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        views: views
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => Promise.reject(err));
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Update current views display
+                        document.querySelector(`.current-views-${chapterId}`).textContent = number_format(data.views);
+                        
+                        // Update total story views
+                        document.getElementById('total-story-views').textContent = number_format(data.total_views);
+                        
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Thành công',
+                            text: data.message || 'Đã cập nhật lượt xem thành công',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: data.message || 'Có lỗi xảy ra'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    let errorMessage = 'Có lỗi xảy ra khi lưu';
+                    if (error.message) {
+                        errorMessage = error.message;
+                    } else if (typeof error === 'object' && error.message) {
+                        errorMessage = error.message;
+                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi',
+                        text: errorMessage
+                    });
+                })
+                .finally(() => {
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fa-solid fa-save"></i> Lưu';
+                });
+            });
+        });
+
+        // Helper function to format numbers
+        function number_format(number) {
+            return new Intl.NumberFormat('vi-VN').format(number);
         }
     </script>
     <script src="{{ asset('ckeditor/ckeditor.js') }}"></script>

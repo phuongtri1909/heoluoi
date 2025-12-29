@@ -52,6 +52,7 @@ Route::group(['as' => 'admin.', 'middleware' => 'block.devtools.admin'], functio
             Route::get('users', [UserController::class, 'index'])->name('users.index');
             Route::get('users/{user}', [UserController::class, 'show'])->name('users.show');
             Route::PATCH('users/{user}', [UserController::class, 'update'])->name('users.update');
+            Route::post('users/{id}/unlock-rate-limit', [UserController::class, 'unlockRateLimit'])->name('users.unlock-rate-limit');
             Route::get('/users/{id}/load-more', [UserController::class, 'loadMoreData'])->name('users.load-more');
 
 
@@ -62,6 +63,9 @@ Route::group(['as' => 'admin.', 'middleware' => 'block.devtools.admin'], functio
                 Route::get('coins/{user}/create', [CoinController::class, 'create'])->name('coins.create');
                 Route::post('coins/{user}', [CoinController::class, 'store'])->name('coins.store');
                 Route::get('coin-transactions', [CoinController::class, 'transactions'])->name('coin.transactions');
+                
+                Route::get('rate-limit', [\App\Http\Controllers\Admin\RateLimitController::class, 'index'])->name('rate-limit.index');
+                Route::post('rate-limit/{id}/unlock', [\App\Http\Controllers\Admin\RateLimitController::class, 'unlock'])->name('rate-limit.unlock');
             });
 
             Route::resource('categories', CategoryController::class);
@@ -77,6 +81,8 @@ Route::group(['as' => 'admin.', 'middleware' => 'block.devtools.admin'], functio
             Route::post('stories/{story}/chapters/check-deletable', [ChapterController::class, 'checkDeletable'])->name('stories.chapters.check-deletable');
 
             Route::resource('stories.chapters', ChapterController::class);
+            Route::post('stories/{story}/chapters/{chapter}/update-views', [StoryController::class, 'updateChapterViews'])->name('stories.chapters.update-views');
+            Route::post('stories/{story}/chapters/bulk-update-views', [StoryController::class, 'bulkUpdateChapterViews'])->name('stories.chapters.bulk-update-views');
 
 
             Route::delete('comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
@@ -84,6 +90,8 @@ Route::group(['as' => 'admin.', 'middleware' => 'block.devtools.admin'], functio
 
             Route::post('comments/{comment}/approve', [CommentController::class, 'approve'])->name('comments.approve')->middleware('role:admin_main,mod');
             Route::post('comments/{comment}/reject', [CommentController::class, 'reject'])->name('comments.reject')->middleware('role:admin_main,mod');
+            Route::post('comments/batch-approve', [CommentController::class, 'approveBatch'])->name('comments.batch-approve')->middleware('role:admin_main,mod');
+            Route::post('comments/batch-reject', [CommentController::class, 'rejectBatch'])->name('comments.batch-reject')->middleware('role:admin_main,mod');
 
             Route::resource('banners', BannerController::class);
 

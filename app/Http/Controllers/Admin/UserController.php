@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Redis;
 use Intervention\Image\Facades\Image;
 use App\Services\ReadingHistoryService;
+use App\Services\RateLimitService;
 use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
@@ -54,6 +55,11 @@ class UserController extends Controller
                 ->orderByDesc('created_at')
                 ->paginate(5, ['*'], 'deposits_page');
 
+            $bankAutoDeposits = $user->bankAutoDeposits()
+                ->with(['bank'])
+                ->orderByDesc('created_at')
+                ->paginate(5, ['*'], 'bank_auto_deposits_page');
+
             $paypalDeposits = $user->paypalDeposits()
                 ->orderByDesc('created_at')
                 ->paginate(5, ['*'], 'paypal_deposits_page');
@@ -74,6 +80,7 @@ class UserController extends Controller
         } else {
             // admin_sub không cần dữ liệu này
             $deposits = collect();
+            $bankAutoDeposits = collect();
             $paypalDeposits = collect();
             $cardDeposits = collect();
             $chapterPurchases = collect();
@@ -104,6 +111,7 @@ class UserController extends Controller
             $counts = DB::select("
                 SELECT 
                     (SELECT COUNT(*) FROM deposits WHERE user_id = ?) as deposits,
+                    (SELECT COUNT(*) FROM bank_auto_deposits WHERE user_id = ?) as bank_auto_deposits,
                     (SELECT COUNT(*) FROM paypal_deposits WHERE user_id = ?) as paypal_deposits,
                     (SELECT COUNT(*) FROM card_deposits WHERE user_id = ?) as card_deposits,
                     (SELECT COUNT(*) FROM chapter_purchases WHERE user_id = ?) as chapter_purchases,
@@ -113,7 +121,7 @@ class UserController extends Controller
                     (SELECT COUNT(*) FROM user_daily_tasks WHERE user_id = ?) as user_daily_tasks,
                     (SELECT COUNT(*) FROM coin_histories WHERE user_id = ?) as coin_histories
             ", [
-                $user->id, $user->id, $user->id, $user->id, $user->id, 
+                $user->id, $user->id, $user->id, $user->id, $user->id, $user->id, 
                 $user->id, $user->id, $user->id, $user->id
             ])[0];
         } else {
@@ -121,6 +129,7 @@ class UserController extends Controller
             $counts = DB::select("
                 SELECT 
                     0 as deposits,
+                    0 as bank_auto_deposits,
                     0 as paypal_deposits,
                     0 as card_deposits,
                     0 as chapter_purchases,
@@ -142,6 +151,7 @@ class UserController extends Controller
             'user',
             'stats',
             'deposits',
+            'bankAutoDeposits',
             'paypalDeposits',
             'cardDeposits',
             'chapterPurchases',
@@ -330,6 +340,36 @@ class UserController extends Controller
         }
     }
 
+    /**
+     * Unlock user from rate limit ban
+     */
+    public function unlockRateLimit(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+        $rateLimitService = new RateLimitService();
+
+        try {
+            $unbanned = $rateLimitService->unbanUser($user);
+
+            if ($unbanned) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Đã mở khóa tài khoản thành công'
+                ]);
+            } else {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Tài khoản không bị khóa hoặc đã được mở khóa'
+                ], 400);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function index(Request $request)
     {
         $authUser = Auth::user();
@@ -386,6 +426,12 @@ class UserController extends Controller
                     ->with(['bank', 'approver:id,name'])
                     ->orderByDesc('created_at')
                     ->paginate(5, ['*'], 'deposits_page', $page);
+                break;
+            case 'bank-auto-deposits':
+                $data = $user->bankAutoDeposits()
+                    ->with(['bank'])
+                    ->orderByDesc('created_at')
+                    ->paginate(5, ['*'], 'bank_auto_deposits_page', $page);
                 break;
             case 'paypal-deposits':
                 $data = $user->paypalDeposits()

@@ -518,8 +518,14 @@ class BankAutoController extends Controller
             'timestamp' => now()->toISOString(),
         ];
         
-        // Lưu vào file để SSE endpoint có thể đọc
-        $filename = storage_path('app/sse_transaction_' . $transactionCode . '.json');
+        // Tạo thư mục nếu chưa tồn tại
+        $sseDir = storage_path('app/sse_transactions');
+        if (!file_exists($sseDir)) {
+            mkdir($sseDir, 0755, true);
+        }
+        
+        // Lưu vào file trong thư mục riêng
+        $filename = $sseDir . '/sse_transaction_' . $transactionCode . '.json';
         file_put_contents($filename, json_encode($sseData));
         
             // Log::info('SSE transaction update broadcasted', [
@@ -542,7 +548,8 @@ class BankAutoController extends Controller
         
         // Set headers cho SSE
         return response()->stream(function () use ($transactionCode) {
-            $filename = storage_path('app/sse_transaction_' . $transactionCode . '.json');
+            $sseDir = storage_path('app/sse_transactions');
+            $filename = $sseDir . '/sse_transaction_' . $transactionCode . '.json';
             $lastModified = 0;
             
             while (true) {

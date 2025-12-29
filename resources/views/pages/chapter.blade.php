@@ -135,9 +135,8 @@
                         <!-- Chapter Content -->
                         <div id="chapter-content" class="rounded-4 chapter-content mb-4 p-2">
                             @if (isset($hasAccess) && $hasAccess)
-                                <div style="line-height: 2;">
-                                    {!! nl2br(e($chapter->content)) !!}
-                                </div>
+                                <input type="hidden" id="chapter-id" value="{{ $chapter->id }}">
+                                <div id="chapter-canvas-content" style="line-height: 2;"></div>
                             @else
                                 <div class="chapter-preview">
                                     <!-- Hiển thị thông báo mua chương -->
@@ -672,6 +671,174 @@
 @push('scripts')
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Script render nội dung bằng canvas để chống copy -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Render một phần nội dung bằng canvas
+            function renderContentWithCanvas() {
+                const chapterIdInput = document.getElementById('chapter-id');
+                const canvasContent = document.getElementById('chapter-canvas-content');
+                
+                if (!chapterIdInput || !canvasContent) return;
+                
+                const chapterId = chapterIdInput.value;
+                
+                // Fetch content từ API
+                fetch(`/api/chapter/${chapterId}/content`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Không thể tải nội dung chapter.');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        const fullText = data.content;
+                        // Cache content để dùng khi resize
+                        window.cachedChapterContent = fullText;
+                        renderTextToCanvas(fullText, canvasContent);
+                    })
+                    .catch(error => {
+                        console.error('Error loading chapter content:', error);
+                        canvasContent.innerHTML = '<p class="text-danger">Không thể tải nội dung chapter. Vui lòng thử lại.</p>';
+                    });
+            }
+            
+            // Render text vào canvas
+            function renderTextToCanvas(fullText, canvasContent) {
+                // Chia thành các đoạn (theo dòng mới hoặc <br>)
+                const paragraphs = fullText.split(/\n\s*\n|<br\s*\/?>/i).filter(p => p.trim().length > 0);
+                
+                // Lấy font và color từ container (chapter-content)
+                const chapterContentContainer = canvasContent.closest('.chapter-content');
+                if (!chapterContentContainer) return;
+                
+                const computedStyle = window.getComputedStyle(chapterContentContainer);
+                const textColor = computedStyle.color;
+                const fontSize = parseFloat(computedStyle.fontSize) || 16;
+                const fontFamily = computedStyle.fontFamily || 'Arial, sans-serif';
+                const fontWeight = computedStyle.fontWeight || 'normal';
+                const fontStyle = computedStyle.fontStyle || 'normal';
+                const lineHeight = parseFloat(computedStyle.lineHeight) || fontSize * 2;
+                
+                // Tính maxWidth từ chapter-content container để đảm bảo responsive
+                // Lấy width thực tế của container, trừ padding
+                const containerStyle = window.getComputedStyle(chapterContentContainer);
+                const containerPaddingLeft = parseFloat(containerStyle.paddingLeft) || 0;
+                const containerPaddingRight = parseFloat(containerStyle.paddingRight) || 0;
+                const containerWidth = chapterContentContainer.offsetWidth;
+                const maxWidth = containerWidth - containerPaddingLeft - containerPaddingRight;
+                
+                paragraphs.forEach((paragraph, index) => {
+                    if (index % 2 === 0) {
+                        const canvas = document.createElement('canvas');
+                        canvas.className = 'canvas-text-paragraph';
+                        canvas.style.width = '100%';
+                        canvas.style.maxWidth = '100%';
+                        canvas.style.height = 'auto';
+                        canvas.style.display = 'block';
+                        canvas.style.userSelect = 'none';
+                        canvas.style.pointerEvents = 'none';
+                        canvas.style.boxSizing = 'border-box';
+                        
+                        // Disable context menu và các sự kiện copy
+                        canvas.addEventListener('contextmenu', e => e.preventDefault());
+                        canvas.addEventListener('copy', e => e.preventDefault());
+                        canvas.addEventListener('cut', e => e.preventDefault());
+                        canvas.addEventListener('selectstart', e => e.preventDefault());
+                        
+                        // Append canvas vào DOM trước để có thể đo width thực tế
+                        canvasContent.appendChild(canvas);
+                        
+                        // Lấy width thực tế của canvas sau khi append (đã áp dụng CSS 100%)
+                        const actualCanvasWidth = canvas.offsetWidth || maxWidth;
+                        
+                        const ctx = canvas.getContext('2d');
+                        // Sử dụng font và color từ CSS
+                        ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
+                        ctx.fillStyle = textColor;
+                        ctx.textBaseline = 'top';
+                        
+                        // Tính toán kích thước canvas - dùng actualCanvasWidth để đo text
+                        const words = paragraph.trim().split(/\s+/);
+                        const lines = [];
+                        let currentLine = '';
+                        
+                        words.forEach(word => {
+                            const testLine = currentLine + (currentLine ? ' ' : '') + word;
+                            const metrics = ctx.measureText(testLine);
+                            
+                            if (metrics.width > actualCanvasWidth && currentLine) {
+                                lines.push(currentLine);
+                                currentLine = word;
+                            } else {
+                                currentLine = testLine;
+                            }
+                        });
+                        if (currentLine) {
+                            lines.push(currentLine);
+                        }
+                        
+                        // Set canvas size với device pixel ratio để render sắc nét trên màn hình retina
+                        const dpr = window.devicePixelRatio || 1;
+                        // Set actual canvas width cho rendering (với DPR) - match với CSS width
+                        canvas.width = actualCanvasWidth * dpr;
+                        canvas.height = (lines.length * lineHeight + 20) * dpr;
+                        
+                        // Set display size (CSS) để responsive
+                        canvas.style.height = (lines.length * lineHeight + 20) + 'px';
+                        
+                        // Scale context để render sắc nét
+                        ctx.scale(dpr, dpr);
+                        
+                        // Re-set context sau khi scale với font chính xác
+                        ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
+                        ctx.fillStyle = textColor;
+                        ctx.textBaseline = 'top';
+                        
+                        // Vẽ text với padding
+                        lines.forEach((line, lineIndex) => {
+                            ctx.fillText(line, 0, (lineIndex * lineHeight) + 10);
+                        });
+                    } else {
+                        // Giữ HTML cho đoạn chẵn
+                        const p = document.createElement('p');
+                        p.style.marginBottom = '1rem';
+                        p.style.whiteSpace = 'pre-wrap';
+                        p.textContent = paragraph.trim();
+                        canvasContent.appendChild(p);
+                    }
+                });
+            }
+            
+            // Chạy khi DOM ready và window load để có width chính xác
+            function initCanvasRender() {
+                if (document.getElementById('chapter-id') && document.getElementById('chapter-canvas-content')) {
+                    // Đợi một chút để đảm bảo layout đã render
+                    setTimeout(() => {
+                        renderContentWithCanvas();
+                    }, 100);
+                }
+            }
+            
+            // Chạy khi DOM ready
+            initCanvasRender();
+            
+            // Re-render khi resize window (responsive)
+            let resizeTimer;
+            
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(function() {
+                    const canvasContent = document.getElementById('chapter-canvas-content');
+                    if (canvasContent && window.cachedChapterContent) {
+                        canvasContent.innerHTML = ''; // Clear old content
+                        renderTextToCanvas(window.cachedChapterContent, canvasContent);
+                    }
+                }, 250);
+            });
+        });
+    </script>
 
     <!-- Script xử lý đánh dấu trang (bookmark) -->
     <script>

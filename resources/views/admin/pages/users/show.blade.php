@@ -237,6 +237,12 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#bank-auto-deposits" role="tab">
+                                <i class="fas fa-university me-1"></i> Nạp cám (Bank Auto)
+                                <span class="badge bg-primary rounded-pill">{{ $counts['bank_auto_deposits'] ?? 0 }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" data-bs-toggle="tab" href="#paypal-deposits" role="tab">
                                 <i class="fab fa-paypal me-1"></i> Nạp PayPal
                                 <span class="badge bg-primary rounded-pill">{{ $counts['paypal_deposits'] }}</span>
@@ -339,6 +345,64 @@
                                     </div>
                                     <div class="text-center mt-3">
                                         <button class="btn btn-sm btn-primary load-more" data-type="deposits">
+                                            Xem thêm <i class="fas fa-chevron-down ms-1"></i>
+                                        </button>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                        
+                        <!-- Bank Auto Deposits Tab -->
+                        <div class="tab-pane" id="bank-auto-deposits" role="tabpanel">
+                            <div class="table-responsive mt-3">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Ngân hàng</th>
+                                            <th>Mã giao dịch</th>
+                                            <th>Số tiền</th>
+                                            <th>Số cám</th>
+                                            <th>Trạng thái</th>
+                                            <th>Ngày nạp</th>
+                                            <th>Ngày xử lý</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($bankAutoDeposits as $deposit)
+                                            <tr>
+                                                <td>{{ $deposit->id }}</td>
+                                                <td>{{ $deposit->bank->name ?? 'N/A' }}</td>
+                                                <td>{{ $deposit->transaction_code }}</td>
+                                                <td>{{ number_format($deposit->amount) }}đ</td>
+                                                <td>{{ number_format($deposit->total_coins) }}</td>
+                                                <td>
+                                                    @if($deposit->status === 'success')
+                                                        <span class="badge bg-success">Thành công</span>
+                                                    @elseif($deposit->status === 'failed')
+                                                        <span class="badge bg-danger">Thất bại</span>
+                                                    @elseif($deposit->status === 'cancelled')
+                                                        <span class="badge bg-secondary">Đã hủy</span>
+                                                    @else
+                                                        <span class="badge bg-warning">Đang xử lý</span>
+                                                    @endif
+                                                </td>
+                                                <td>{{ $deposit->created_at->format('d/m/Y H:i') }}</td>
+                                                <td>{{ $deposit->processed_at ? $deposit->processed_at->format('d/m/Y H:i') : 'N/A' }}</td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="8" class="text-center">Chưa có giao dịch nạp cám Bank Auto</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                                @if(($counts['bank_auto_deposits'] ?? 0) > 5)
+                                    <div class="d-flex justify-content-center mt-3">
+                                        <x-pagination :paginator="$bankAutoDeposits" />
+                                    </div>
+                                    <div class="text-center mt-3">
+                                        <button class="btn btn-sm btn-primary load-more" data-type="bank-auto-deposits">
                                             Xem thêm <i class="fas fa-chevron-down ms-1"></i>
                                         </button>
                                     </div>

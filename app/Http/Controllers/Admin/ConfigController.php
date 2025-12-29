@@ -66,14 +66,4 @@ class ConfigController extends Controller
             ->with('success', 'Cấu hình đã được cập nhật thành công.');
     }
 
-    /**
-     * Remove the specified configuration from storage.
-     */
-    public function destroy(Config $config)
-    {
-        $config->delete();
-
-        return redirect()->route('admin.configs.index')
-            ->with('success', 'Cấu hình đã được xóa thành công.');
-    }
 } 

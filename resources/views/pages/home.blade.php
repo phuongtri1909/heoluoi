@@ -1,5 +1,6 @@
 @extends('layouts.app')
 @section('content')
+    @include('components.toast')
     @include('components.banner_home')
     <section class="container-xl">
         @include('components.list_story_home', ['hotStories' => $hotStories])

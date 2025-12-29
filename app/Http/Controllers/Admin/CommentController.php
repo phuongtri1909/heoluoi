@@ -20,6 +20,7 @@ class CommentController extends Controller
         $userId = $request->user;
         $storyId = $request->story;
         $date = $request->date;
+        $approvalStatus = $request->approval_status;
 
         $query = Comment::with(['user', 'story', 'approver']);
 
@@ -34,7 +35,7 @@ class CommentController extends Controller
         $matchingChildIds = collect([]);
         $parentIdsToInclude = collect([]);
 
-        if ($search || $userId || $date) {
+        if ($search || $userId || $date || $approvalStatus) {
             $childQuery = clone $baseQuery;
 
             if ($search) {
@@ -47,6 +48,10 @@ class CommentController extends Controller
 
             if ($date) {
                 $childQuery->whereDate('created_at', $date);
+            }
+
+            if ($approvalStatus) {
+                $childQuery->where('approval_status', $approvalStatus);
             }
 
             $matchingChildIds = $childQuery->pluck('id');
@@ -101,6 +106,16 @@ class CommentController extends Controller
         if ($date) {
             $finalQuery->where(function ($q) use ($date, $parentIdsToInclude, $matchingChildIds) {
                 $q->whereDate('created_at', $date)
+                    ->orWhereIn('id', $parentIdsToInclude)
+                    ->orWhereIn('id', $matchingChildIds->filter(function ($id) {
+                        return Comment::find($id) && Comment::find($id)->reply_id === null;
+                    }));
+            });
+        }
+
+        if ($approvalStatus) {
+            $finalQuery->where(function ($q) use ($approvalStatus, $parentIdsToInclude, $matchingChildIds) {
+                $q->where('approval_status', $approvalStatus)
                     ->orWhereIn('id', $parentIdsToInclude)
                     ->orWhereIn('id', $matchingChildIds->filter(function ($id) {
                         return Comment::find($id) && Comment::find($id)->reply_id === null;
@@ -234,6 +249,108 @@ class CommentController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Đã từ chối bình luận'
+        ]);
+    }
+
+    /**
+     * Approve multiple comments at once
+     */
+    public function approveBatch(Request $request)
+    {
+        if (auth()->user()->role !== 'admin_main' && auth()->user()->role !== 'admin_sub') {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+        }
+
+        $commentIds = $request->input('comment_ids', []);
+        
+        if (empty($commentIds) || !is_array($commentIds)) {
+            return response()->json(['status' => 'error', 'message' => 'Không có bình luận nào được chọn'], 400);
+        }
+
+        $comments = Comment::with(['user', 'story'])->whereIn('id', $commentIds)->get();
+        $approvedCount = 0;
+
+        foreach ($comments as $comment) {
+            // Only approve comments that are pending and meet the criteria
+            if ($comment->approval_status === 'pending' && 
+                $comment->user && 
+                $comment->user->role !== 'admin_main' && 
+                $comment->user->role !== 'admin_sub' &&
+                $comment->story && 
+                $comment->story->user_id !== $comment->user_id) {
+                
+                $comment->update([
+                    'approval_status' => 'approved',
+                    'approved_at' => now(),
+                    'approved_by' => auth()->id()
+                ]);
+
+                // Complete daily task for comment when approved
+                if ($comment->user && $comment->user->role !== 'admin_main' && $comment->user->role !== 'admin_sub') {
+                    \App\Models\UserDailyTask::completeTask(
+                        $comment->user_id,
+                        \App\Models\DailyTask::TYPE_COMMENT,
+                        [
+                            'story_id' => $comment->story_id,
+                            'comment_id' => $comment->id,
+                            'comment_time' => $comment->approved_at->toISOString(),
+                        ],
+                        $request
+                    );
+                }
+
+                $approvedCount++;
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Đã duyệt {$approvedCount} bình luận",
+            'approved_count' => $approvedCount
+        ]);
+    }
+
+    /**
+     * Reject multiple comments at once
+     */
+    public function rejectBatch(Request $request)
+    {
+        if (auth()->user()->role !== 'admin_main' && auth()->user()->role !== 'admin_sub') {
+            return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
+        }
+
+        $commentIds = $request->input('comment_ids', []);
+        
+        if (empty($commentIds) || !is_array($commentIds)) {
+            return response()->json(['status' => 'error', 'message' => 'Không có bình luận nào được chọn'], 400);
+        }
+
+        $comments = Comment::with(['user', 'story'])->whereIn('id', $commentIds)->get();
+        $rejectedCount = 0;
+
+        foreach ($comments as $comment) {
+            // Only reject comments that are pending and meet the criteria
+            if ($comment->approval_status === 'pending' && 
+                $comment->user && 
+                $comment->user->role !== 'admin_main' && 
+                $comment->user->role !== 'admin_sub' &&
+                $comment->story && 
+                $comment->story->user_id !== $comment->user_id) {
+                
+                $comment->update([
+                    'approval_status' => 'rejected',
+                    'approved_at' => now(),
+                    'approved_by' => auth()->id()
+                ]);
+
+                $rejectedCount++;
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Đã từ chối {$rejectedCount} bình luận",
+            'rejected_count' => $rejectedCount
         ]);
     }
 }

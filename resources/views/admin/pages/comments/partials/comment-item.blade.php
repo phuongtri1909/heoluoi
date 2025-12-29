@@ -1,6 +1,17 @@
 <div class="comment-card {{ isset($highlight) && $highlight ? 'border border-primary' : '' }}">
     <div class="comment-header">
-        <div class="comment-user">
+        <div class="comment-user d-flex align-items-center gap-2">
+            <input type="checkbox" class="comment-checkbox form-check-input" name="comment_ids[]" value="{{ $comment->id }}" 
+                   data-comment-id="{{ $comment->id }}"
+                   @if($comment->approval_status === 'pending' && 
+                       $comment->user && 
+                       $comment->user->role !== 'admin_main' && 
+                       $comment->user->role !== 'admin_sub' && 
+                       $comment->story && 
+                       $comment->story->user_id !== $comment->user_id) 
+                   @else 
+                   disabled 
+                   @endif>
             @if($comment->user)
                 <a href="{{ route('admin.users.show', $comment->user->id) }}">{{ $comment->user->name }}</a>
                 <span class="badge bg-{{ $comment->user->role == 'admin_main' ? 'danger' : ($comment->user->role == 'admin_sub' ? 'warning' : 'info') }} text-white">

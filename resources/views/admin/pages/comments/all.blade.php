@@ -60,6 +60,66 @@
         padding: 3px 6px;
         margin-left: 5px;
     }
+    
+    .comment-checkbox,
+    #select-all-comments {
+        cursor: pointer;
+        width: 18px;
+        height: 18px;
+        border: 2px solid #6c757d;
+        border-radius: 3px;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        position: relative;
+        flex-shrink: 0;
+    }
+    
+    .comment-checkbox:checked,
+    #select-all-comments:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    
+    .comment-checkbox:checked::after,
+    #select-all-comments:checked::after {
+        content: '✓';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    
+    .comment-checkbox:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+        background-color: #e9ecef;
+        border-color: #ced4da;
+    }
+    
+    .comment-checkbox:hover:not(:disabled),
+    #select-all-comments:hover {
+        border-color: #0d6efd;
+    }
+    
+    #select-all-comments:indeterminate {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    
+    #select-all-comments:indeterminate::after {
+        content: '−';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 14px;
+        font-weight: bold;
+    }
 </style>
 @endpush
 
@@ -99,6 +159,13 @@
                                 @endforeach
                             </select>
                             
+                            <select name="approval_status" class="form-select form-select-sm">
+                                <option value="">Tất cả trạng thái</option>
+                                <option value="approved" {{ request('approval_status') == 'approved' ? 'selected' : '' }}>Đã duyệt</option>
+                                <option value="pending" {{ request('approval_status') == 'pending' ? 'selected' : '' }}>Chờ duyệt</option>
+                                <option value="rejected" {{ request('approval_status') == 'rejected' ? 'selected' : '' }}>Đã từ chối</option>
+                            </select>
+                            
                             <input type="date" name="date" 
                                    class="form-control form-control-sm" 
                                    value="{{ request('date') }}">
@@ -123,6 +190,21 @@
 
                 <div class="px-4">
                     @if($comments->count() > 0)
+                        <div class="mb-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="checkbox" id="select-all-comments" class="form-check-input">
+                                <label for="select-all-comments" class="form-check-label mb-0">Chọn tất cả</label>
+                                <span class="text-muted ms-2" id="selected-count">Đã chọn: 0</span>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-success btn-sm" id="approve-batch-btn" disabled>
+                                    <i class="fa-solid fa-check"></i> Duyệt hàng loạt
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm" id="reject-batch-btn" disabled>
+                                    <i class="fa-solid fa-times"></i> Từ chối hàng loạt
+                                </button>
+                            </div>
+                        </div>
                         @foreach($comments as $comment)
                             @include('admin.pages.comments.partials.comment-item', ['comment' => $comment, 'level' => 0])
                         @endforeach
@@ -172,9 +254,21 @@
         // Confirm delete
         document.querySelectorAll('.delete-comment-btn').forEach(button => {
             button.addEventListener('click', function(e) {
-                if (!confirm('Bạn có chắc chắn muốn xóa bình luận này?')) {
-                    e.preventDefault();
-                }
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Xác nhận xóa',
+                    text: 'Bạn có chắc chắn muốn xóa bình luận này?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Xóa',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        button.closest('form').submit();
+                    }
+                });
             });
         });
         
@@ -191,8 +285,18 @@
                     return;
                 }
                 
-                if (confirm('Bạn có chắc chắn muốn duyệt bình luận này?')) {
-                    fetch(`/admin/comments/${commentId}/approve`, {
+                Swal.fire({
+                    title: 'Xác nhận duyệt',
+                    text: 'Bạn có chắc chắn muốn duyệt bình luận này?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Duyệt',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/admin/comments/${commentId}/approve`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -217,8 +321,9 @@
                     .catch(error => {
                         console.error('Error:', error);
                         showToast('Có lỗi xảy ra khi duyệt bình luận: ' + error.message,'error');
-                    });
-                }
+                        });
+                    }
+                });
             }
         });
         
@@ -235,8 +340,18 @@
                     return;
                 }
                 
-                if (confirm('Bạn có chắc chắn muốn từ chối bình luận này?')) {
-                    fetch(`/admin/comments/${commentId}/reject`, {
+                Swal.fire({
+                    title: 'Xác nhận từ chối',
+                    text: 'Bạn có chắc chắn muốn từ chối bình luận này?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Từ chối',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch(`/admin/comments/${commentId}/reject`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -261,9 +376,180 @@
                     .catch(error => {
                         console.error('Error:', error);
                        showToast('Có lỗi xảy ra khi từ chối bình luận: ' + error.message,'error');
-                    });
-                }
+                        });
+                    }
+                });
             }
+        });
+        
+        // Select all checkbox
+        const selectAllCheckbox = document.getElementById('select-all-comments');
+        const commentCheckboxes = document.querySelectorAll('.comment-checkbox:not(:disabled)');
+        const approveBatchBtn = document.getElementById('approve-batch-btn');
+        const rejectBatchBtn = document.getElementById('reject-batch-btn');
+        const selectedCountSpan = document.getElementById('selected-count');
+        
+        function updateSelectedCount() {
+            const selected = document.querySelectorAll('.comment-checkbox:checked:not(:disabled)').length;
+            selectedCountSpan.textContent = `Đã chọn: ${selected}`;
+            approveBatchBtn.disabled = selected === 0;
+            rejectBatchBtn.disabled = selected === 0;
+            
+            // Update select all checkbox state
+            if (selected === 0) {
+                selectAllCheckbox.indeterminate = false;
+                selectAllCheckbox.checked = false;
+            } else if (selected === commentCheckboxes.length) {
+                selectAllCheckbox.indeterminate = false;
+                selectAllCheckbox.checked = true;
+            } else {
+                selectAllCheckbox.indeterminate = true;
+            }
+        }
+        
+        selectAllCheckbox.addEventListener('change', function() {
+            commentCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            updateSelectedCount();
+        });
+        
+        commentCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', updateSelectedCount);
+        });
+        
+        // Approve batch
+        approveBatchBtn.addEventListener('click', function() {
+            const selectedIds = Array.from(document.querySelectorAll('.comment-checkbox:checked:not(:disabled)'))
+                .map(cb => cb.value);
+            
+            if (selectedIds.length === 0) {
+                showToast('Vui lòng chọn ít nhất một bình luận', 'warning');
+                return;
+            }
+            
+            Swal.fire({
+                title: 'Xác nhận duyệt hàng loạt',
+                text: `Bạn có chắc chắn muốn duyệt ${selectedIds.length} bình luận đã chọn?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Duyệt',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (!result.isConfirmed) {
+                    return;
+                }
+                
+                const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                if (!csrfToken) {
+                    showToast('Không tìm thấy CSRF token', 'error');
+                    return;
+                }
+                
+                approveBatchBtn.disabled = true;
+                approveBatchBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...';
+                
+                fetch('/admin/comments/batch-approve', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ comment_ids: selectedIds })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        showToast(`Đã duyệt thành công ${data.approved_count} bình luận`, 'success');
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        showToast('Có lỗi xảy ra: ' + (data.message || 'Unknown error'), 'error');
+                        approveBatchBtn.disabled = false;
+                        approveBatchBtn.innerHTML = '<i class="fa-solid fa-check"></i> Duyệt hàng loạt';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Có lỗi xảy ra khi duyệt bình luận: ' + error.message, 'error');
+                    approveBatchBtn.disabled = false;
+                    approveBatchBtn.innerHTML = '<i class="fa-solid fa-check"></i> Duyệt hàng loạt';
+                });
+            });
+        });
+        
+        // Reject batch
+        rejectBatchBtn.addEventListener('click', function() {
+            const selectedIds = Array.from(document.querySelectorAll('.comment-checkbox:checked:not(:disabled)'))
+                .map(cb => cb.value);
+            
+            if (selectedIds.length === 0) {
+                showToast('Vui lòng chọn ít nhất một bình luận', 'warning');
+                return;
+            }
+            
+            Swal.fire({
+                title: 'Xác nhận từ chối hàng loạt',
+                text: `Bạn có chắc chắn muốn từ chối ${selectedIds.length} bình luận đã chọn?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Từ chối',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (!result.isConfirmed) {
+                    return;
+                }
+                
+                const csrfToken = document.querySelector('meta[name="csrf-token"]');
+                if (!csrfToken) {
+                    showToast('Không tìm thấy CSRF token', 'error');
+                    return;
+                }
+                
+                rejectBatchBtn.disabled = true;
+                rejectBatchBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang xử lý...';
+                
+                fetch('/admin/comments/batch-reject', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
+                    'Accept': 'application/json'
+                },
+                    body: JSON.stringify({ comment_ids: selectedIds })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        showToast(`Đã từ chối thành công ${data.rejected_count} bình luận`, 'success');
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        showToast('Có lỗi xảy ra: ' + (data.message || 'Unknown error'), 'error');
+                        rejectBatchBtn.disabled = false;
+                        rejectBatchBtn.innerHTML = '<i class="fa-solid fa-times"></i> Từ chối hàng loạt';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showToast('Có lỗi xảy ra khi từ chối bình luận: ' + error.message, 'error');
+                    rejectBatchBtn.disabled = false;
+                    rejectBatchBtn.innerHTML = '<i class="fa-solid fa-times"></i> Từ chối hàng loạt';
+                });
+            });
         });
     });
 

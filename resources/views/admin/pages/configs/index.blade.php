@@ -85,13 +85,6 @@
                                         <a href="{{ route('admin.configs.edit', $config->id) }}" class=" font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Edit config">
                                             <i class="fas fa-edit text-success"></i>
                                         </a>
-                                        <form action="{{ route('admin.configs.destroy', $config->id) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class=" font-weight-bold text-xs border-0 bg-transparent p-0" onclick="return confirm('Bạn có chắc chắn muốn xóa cấu hình này?')">
-                                                <i class="fas fa-trash text-danger"></i>
-                                            </button>
-                                        </form>
                                     </td>
                                 </tr>
                                 @endforeach

@@ -12,12 +12,17 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 
 class ChapterController extends Controller
 {
     public function index(Request $request, Story $story)
     {
+        $user = Auth::user();
+        if ($user->role === 'admin_sub' && $story->user_id != $user->id) {
+            abort(403, 'Bạn chỉ có thể xem chapter của truyện mình.');
+        }
 
         $search = $request->search;
         $status = $request->status;
@@ -62,6 +67,11 @@ class ChapterController extends Controller
 
     public function create(Story $story)
     {
+        $user = Auth::user();
+        if ($user->role === 'admin_sub' && $story->user_id != $user->id) {
+            abort(403, 'Bạn chỉ có thể tạo chapter cho truyện của mình.');
+        }
+
         $latestChapterNumber = $story->chapters()->max('number') ?? 0;
         $nextChapterNumber = $latestChapterNumber + 1;
 
@@ -70,6 +80,11 @@ class ChapterController extends Controller
 
     public function store(Request $request, Story $story)
     {
+        $user = Auth::user();
+        if ($user->role === 'admin_sub' && $story->user_id != $user->id) {
+            abort(403, 'Bạn chỉ có thể tạo chapter cho truyện của mình.');
+        }
+
         $request->validate([
             'title' => 'required',
             'content' => 'required',
@@ -130,11 +145,22 @@ class ChapterController extends Controller
 
     public function edit(Story $story, Chapter $chapter)
     {
+        $user = Auth::user();
+        // admin_sub chỉ có thể sửa chapter của truyện mình
+        if ($user->role === 'admin_sub' && $story->user_id != $user->id) {
+            abort(403, 'Bạn chỉ có thể sửa chapter của truyện mình.');
+        }
+
         return view('admin.pages.chapters.edit', compact('story', 'chapter'));
     }
 
     public function update(Request $request, Story $story, Chapter $chapter)
     {
+        $user = Auth::user();
+        if ($user->role === 'admin_sub' && $story->user_id != $user->id) {
+            abort(403, 'Bạn chỉ có thể sửa chapter của truyện mình.');
+        }
+
         $request->validate([
             'title' => 'required',
             'content' => 'required',
@@ -217,11 +243,21 @@ class ChapterController extends Controller
 
     public function show(Story $story, Chapter $chapter)
     {
+        $user = Auth::user();
+        if ($user->role === 'admin_sub' && $story->user_id != $user->id) {
+            abort(403, 'Bạn chỉ có thể xem chapter của truyện mình.');
+        }
+
         return view('admin.pages.chapters.show', compact('story', 'chapter'));
     }
 
     public function destroy(Story $story, Chapter $chapter)
     {
+        $user = Auth::user();
+        if ($user->role === 'admin_sub' && $story->user_id != $user->id) {
+            abort(403, 'Bạn chỉ có thể xóa chapter của truyện mình.');
+        }
+
         try {
             $canDelete = $this->canDeleteChapter($chapter);
             

@@ -26,8 +26,9 @@ class DashboardController extends Controller
         // Get story view statistics
         $storyViews = $this->getStoryViewStats($dateFilter);
         
+        // Đã đóng - Nhiệm Vụ Hàng Ngày
         // Get daily task statistics
-        $dailyTaskStats = $this->getDailyTaskStats($dateFilter);
+        // $dailyTaskStats = $this->getDailyTaskStats($dateFilter);
         
         // Check if user is admin_main to show revenue-related data
         $isAdminMain = Auth::user()->role === 'admin_main';
@@ -35,7 +36,7 @@ class DashboardController extends Controller
         $data = compact(
             'basicStats',
             'storyViews',
-            'dailyTaskStats',
+            // 'dailyTaskStats', // Đã đóng
             'year',
             'month',
             'day',
@@ -46,14 +47,16 @@ class DashboardController extends Controller
         if ($isAdminMain) {
             $revenueStats = $this->getRevenueStats($dateFilter);
             // $coinStats = $this->getCoinStats($dateFilter); // Đã đóng
-            $depositStats = $this->getDepositStats($dateFilter);
-            $manualCoinStats = $this->getManualCoinStats($dateFilter);
+            // Đã đóng - Thống Kê Nạp Cám
+            // $depositStats = $this->getDepositStats($dateFilter);
+            // Đã đóng - Giao Dịch Cám Thủ Công
+            // $manualCoinStats = $this->getManualCoinStats($dateFilter);
             
             $data = array_merge($data, compact(
                 'revenueStats',
                 // 'coinStats', // Đã đóng
-                'depositStats',
-                'manualCoinStats'
+                // 'depositStats', // Đã đóng
+                // 'manualCoinStats' // Đã đóng
             ));
         }
         
@@ -74,7 +77,8 @@ class DashboardController extends Controller
         $data = [
             'basicStats' => $this->getBasicStats($dateFilter),
             'storyViews' => $this->getStoryViewStats($dateFilter),
-            'dailyTaskStats' => $this->getDailyTaskStats($dateFilter),
+            // Đã đóng - Nhiệm Vụ Hàng Ngày
+            // 'dailyTaskStats' => $this->getDailyTaskStats($dateFilter),
         ];
         
         // Only include revenue data for admin_main
@@ -82,8 +86,10 @@ class DashboardController extends Controller
             $data = array_merge($data, [
                 'revenueStats' => $this->getRevenueStats($dateFilter),
                 // 'coinStats' => $this->getCoinStats($dateFilter), // Đã đóng
-                'depositStats' => $this->getDepositStats($dateFilter),
-                'manualCoinStats' => $this->getManualCoinStats($dateFilter),
+                // Đã đóng - Thống Kê Nạp Cám
+                // 'depositStats' => $this->getDepositStats($dateFilter),
+                // Đã đóng - Giao Dịch Cám Thủ Công
+                // 'manualCoinStats' => $this->getManualCoinStats($dateFilter),
             ]);
         }
         
@@ -235,99 +241,102 @@ class DashboardController extends Controller
     //     return (array) $coinStats;
     // }
     
-    private function getDepositStats($dateFilter)
-    {
-        // Get deposit statistics by type
-        $depositStats = DB::select("
-            SELECT 
-                'bank' as type,
-                COUNT(*) as count,
-                COALESCE(SUM(total_coins), 0) as total_amount,
-                COALESCE(AVG(total_coins), 0) as avg_amount
-            FROM deposits 
-            WHERE status = 'approved' AND created_at BETWEEN ? AND ?
-            
-            UNION ALL
-            
-            SELECT 
-                'paypal' as type,
-                COUNT(*) as count,
-                COALESCE(SUM(total_coins), 0) as total_amount,
-                COALESCE(AVG(total_coins), 0) as avg_amount
-            FROM paypal_deposits 
-            WHERE status = 'approved' AND created_at BETWEEN ? AND ?
-            
-            UNION ALL
-            
-            SELECT 
-                'card' as type,
-                COUNT(*) as count,
-                COALESCE(SUM(total_coins), 0) as total_amount,
-                COALESCE(AVG(total_coins), 0) as avg_amount
-            FROM card_deposits 
-            WHERE status = 'success' AND created_at BETWEEN ? AND ?
-            
-            UNION ALL
-            
-            SELECT 
-                'bank_auto' as type,
-                COUNT(*) as count,
-                COALESCE(SUM(total_coins), 0) as total_amount,
-                COALESCE(AVG(total_coins), 0) as avg_amount
-            FROM bank_auto_deposits 
-            WHERE status = 'success' AND created_at BETWEEN ? AND ?
-        ", [
-            $dateFilter['start'], $dateFilter['end'],
-            $dateFilter['start'], $dateFilter['end'],
-            $dateFilter['start'], $dateFilter['end'],
-            $dateFilter['start'], $dateFilter['end']
-        ]);
-        
-        return $depositStats;
-    }
+    // Đã đóng - Thống Kê Nạp Cám
+    // private function getDepositStats($dateFilter)
+    // {
+    //     // Get deposit statistics by type
+    //     $depositStats = DB::select("
+    //         SELECT 
+    //             'bank' as type,
+    //             COUNT(*) as count,
+    //             COALESCE(SUM(total_coins), 0) as total_amount,
+    //             COALESCE(AVG(total_coins), 0) as avg_amount
+    //         FROM deposits 
+    //         WHERE status = 'approved' AND created_at BETWEEN ? AND ?
+    //         
+    //         UNION ALL
+    //         
+    //         SELECT 
+    //             'paypal' as type,
+    //             COUNT(*) as count,
+    //             COALESCE(SUM(total_coins), 0) as total_amount,
+    //             COALESCE(AVG(total_coins), 0) as avg_amount
+    //         FROM paypal_deposits 
+    //         WHERE status = 'approved' AND created_at BETWEEN ? AND ?
+    //         
+    //         UNION ALL
+    //         
+    //         SELECT 
+    //             'card' as type,
+    //             COUNT(*) as count,
+    //             COALESCE(SUM(total_coins), 0) as total_amount,
+    //             COALESCE(AVG(total_coins), 0) as avg_amount
+    //         FROM card_deposits 
+    //         WHERE status = 'success' AND created_at BETWEEN ? AND ?
+    //         
+    //         UNION ALL
+    //         
+    //         SELECT 
+    //             'bank_auto' as type,
+    //             COUNT(*) as count,
+    //             COALESCE(SUM(total_coins), 0) as total_amount,
+    //             COALESCE(AVG(total_coins), 0) as avg_amount
+    //         FROM bank_auto_deposits 
+    //         WHERE status = 'success' AND created_at BETWEEN ? AND ?
+    //     ", [
+    //         $dateFilter['start'], $dateFilter['end'],
+    //         $dateFilter['start'], $dateFilter['end'],
+    //         $dateFilter['start'], $dateFilter['end'],
+    //         $dateFilter['start'], $dateFilter['end']
+    //     ]);
+    //     
+    //     return $depositStats;
+    // }
     
-    private function getDailyTaskStats($dateFilter)
-    {
-        // Get daily task statistics
-        $dailyTaskStats = DB::select("
-            SELECT 
-                dt.name,
-                dt.type,
-                COUNT(udt.id) as completion_count,
-                COALESCE(AVG(udt.coin_reward), 0) as avg_coins_per_task,
-                COALESCE(SUM(udt.coin_reward * udt.completed_count), 0) as total_coins_distributed
-            FROM daily_tasks dt
-            LEFT JOIN user_daily_tasks udt ON dt.id = udt.daily_task_id 
-                AND udt.created_at BETWEEN ? AND ?
-            WHERE dt.active = 1
-            GROUP BY dt.id, dt.name, dt.type
-            ORDER BY completion_count DESC
-        ", [
-            $dateFilter['start'], $dateFilter['end']
-        ]);
-        
-        return $dailyTaskStats;
-    }
+    // Đã đóng - Nhiệm Vụ Hàng Ngày
+    // private function getDailyTaskStats($dateFilter)
+    // {
+    //     // Get daily task statistics
+    //     $dailyTaskStats = DB::select("
+    //         SELECT 
+    //             dt.name,
+    //             dt.type,
+    //             COUNT(udt.id) as completion_count,
+    //             COALESCE(AVG(udt.coin_reward), 0) as avg_coins_per_task,
+    //             COALESCE(SUM(udt.coin_reward * udt.completed_count), 0) as total_coins_distributed
+    //         FROM daily_tasks dt
+    //         LEFT JOIN user_daily_tasks udt ON dt.id = udt.daily_task_id 
+    //             AND udt.created_at BETWEEN ? AND ?
+    //         WHERE dt.active = 1
+    //         GROUP BY dt.id, dt.name, dt.type
+    //         ORDER BY completion_count DESC
+    //     ", [
+    //         $dateFilter['start'], $dateFilter['end']
+    //     ]);
+    //     
+    //     return $dailyTaskStats;
+    // }
     
-    private function getManualCoinStats($dateFilter)
-    {
-        // Get manual coin transaction statistics
-        $manualCoinStats = DB::select("
-            SELECT 
-                ct.type,
-                COUNT(*) as transaction_count,
-                COALESCE(SUM(ct.amount), 0) as total_amount,
-                COALESCE(AVG(ct.amount), 0) as avg_amount,
-                u.name as admin_name
-            FROM coin_transactions ct
-            LEFT JOIN users u ON ct.admin_id = u.id
-            WHERE ct.created_at BETWEEN ? AND ?
-            GROUP BY ct.type, u.name
-            ORDER BY ct.type, total_amount DESC
-        ", [
-            $dateFilter['start'], $dateFilter['end']
-        ]);
-        
-        return $manualCoinStats;
-    }
+    // Đã đóng - Giao Dịch Cám Thủ Công
+    // private function getManualCoinStats($dateFilter)
+    // {
+    //     // Get manual coin transaction statistics
+    //     $manualCoinStats = DB::select("
+    //         SELECT 
+    //             ct.type,
+    //             COUNT(*) as transaction_count,
+    //             COALESCE(SUM(ct.amount), 0) as total_amount,
+    //             COALESCE(AVG(ct.amount), 0) as avg_amount,
+    //             u.name as admin_name
+    //         FROM coin_transactions ct
+    //         LEFT JOIN users u ON ct.admin_id = u.id
+    //         WHERE ct.created_at BETWEEN ? AND ?
+    //         GROUP BY ct.type, u.name
+    //         ORDER BY ct.type, total_amount DESC
+    //     ", [
+    //         $dateFilter['start'], $dateFilter['end']
+    //     ]);
+    //     
+    //     return $manualCoinStats;
+    // }
 }

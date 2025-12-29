@@ -165,15 +165,18 @@
     <div class="deposit-container" id="depositContainer">
         <div class="row">
             <div class="col-lg-8">
-                <!-- Bank Auto Info Section -->
-                <div class="card-info-section mb-3">
-                    <div class="deposit-card-header">
-                        <p class="text-muted mt-2 mb-0">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Thanh toán tự động, nhận cám ngay lập tức với nhiều ưu đãi hấp dẫn
-                        </p>
-                    </div>
+
+                <div class="mb-2">
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Thanh toán tự động, nhận cám ngay lập tức với nhiều ưu đãi hấp dẫn.
+                    </p>
+                    <p class="text-muted mb-0">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Bạn đã chuyển khoản nhưng không thấy cộng cám? => liên hệ <a class="color-7 fw-semibold" href="https://www.facebook.com/profile.php?id=61572454674711" target="_blank" rel="noopener noreferrer">fan page</a> gửi bill và tài khoản của bạn để hỗ trợ.
+                    </p>
                 </div>
+
 
                 <!-- Bank Auto Form -->
                 <div id="depositContainer">
@@ -186,7 +189,8 @@
                                     <i class="fas fa-university me-2"></i>Chọn ngân hàng
                                 </label>
                                 <br>
-                                <span class="text-muted font-italic mb-3">Đây là ngân hàng thụ hưởng, không phải ngân hàng của bạn</span>
+                                <span class="text-muted font-italic mb-3">Đây là ngân hàng thụ hưởng, không phải ngân hàng
+                                    của bạn</span>
                                 <div class="row">
                                     @foreach ($banks as $bank)
                                         <div class="col-6">
@@ -430,9 +434,12 @@
                                 success: function(response) {
                                     if (response.success) {
                                         const data = response.data;
-                                        $('#baseCoinsPreview').text(data.base_coins.toLocaleString('vi-VN'));
-                                        $('#bonusCoinsPreview').text(data.bonus_coins.toLocaleString('vi-VN'));
-                                        $('#totalCoinsPreview').text(data.total_coins.toLocaleString('vi-VN'));
+                                        $('#baseCoinsPreview').text(data.base_coins.toLocaleString(
+                                        'vi-VN'));
+                                        $('#bonusCoinsPreview').text(data.bonus_coins.toLocaleString(
+                                            'vi-VN'));
+                                        $('#totalCoinsPreview').text(data.total_coins.toLocaleString(
+                                            'vi-VN'));
                                     } else {
                                         $('#baseCoinsPreview').text('0');
                                         $('#bonusCoinsPreview').text('0');
@@ -486,7 +493,7 @@
                     } else if (amount % 10000 !== 0) {
                         $('.amount-error').show().text(
                             'Số tiền phải là bội số của 10.000 VNĐ (ví dụ: 50.000, 100.000, 200.000, 500.000, 1.000.000...)'
-                            );
+                        );
                         valid = false;
                     } else if (amount > 99999999) {
                         $('.amount-error').show().text('Số tiền tối đa là 99.999.999 VNĐ');
@@ -652,13 +659,13 @@
                                 </div>
                                 
                                 ${bankInfo.qr_code ? `
-                                        <div class="text-center mb-3">
-                                            <div class="payment-qr-code mb-3">
-                                                <img src="${bankInfo.qr_code}" alt="QR Code" class="img-fluid" style="max-height: 240px;">
-                                            </div>
-                                            <p class="text-muted">Quét mã QR để thực hiện thanh toán</p>
-                                        </div>
-                                        ` : ''}
+                                                <div class="text-center mb-3">
+                                                    <div class="payment-qr-code mb-3">
+                                                        <img src="${bankInfo.qr_code}" alt="QR Code" class="img-fluid" style="max-height: 240px;">
+                                                    </div>
+                                                    <p class="text-muted">Quét mã QR để thực hiện thanh toán</p>
+                                                </div>
+                                                ` : ''}
                                 
                                 <div class="alert alert-warning mt-3">
                                     <h6><i class="fas fa-exclamation-triangle me-2"></i>Lưu ý quan trọng:</h6>
@@ -699,8 +706,7 @@
                         .catch(() => {
                             copyUsingExecCommand(text, $button, originalText);
                         });
-                }
-                else {
+                } else {
                     copyUsingExecCommand(text, $button, originalText);
                 }
             }
@@ -729,6 +735,7 @@
                 $button.innerHTML = '<i class="fas fa-check"></i>';
                 setTimeout(() => $button.innerHTML = originalText, 1000);
             }
+
             function showCopyFailure($button, originalText) {
                 $button.innerHTML = '<i class="fas fa-times"></i>';
 

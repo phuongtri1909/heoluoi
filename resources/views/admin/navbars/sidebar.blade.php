@@ -254,6 +254,38 @@
             </li>
 
             @if (Auth::user()->role === 'admin_main')
+            <li class="nav-item">
+                <a class="nav-link {{ Route::currentRouteNamed('admin.rate-limit.*') ? 'active' : '' }}"
+                    href="{{ route('admin.rate-limit.index') }}">
+                    <div
+                        class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="fa-solid fa-gauge-high text-dark icon-sidebar"></i>
+                    </div>
+                    <span class="nav-link-text ms-1">Rate Limit
+                        @php
+                            try {
+                                $bannedRateLimitCount = \App\Models\User::whereHas('userBan', function($q) {
+                                    $q->where(function($subQ) {
+                                        $subQ->where('read', true)
+                                             ->orWhere(function($tempQ) {
+                                                 $tempQ->whereNotNull('read_banned_until')
+                                                       ->where('read_banned_until', '>', now());
+                                             });
+                                    });
+                                })->where('role', 'user')->count();
+                            } catch (\Exception $e) {
+                                $bannedRateLimitCount = 0;
+                            }
+                        @endphp
+                        @if ($bannedRateLimitCount > 0)
+                            <span class="badge bg-danger ms-2">{{ $bannedRateLimitCount }}</span>
+                        @endif
+                    </span>
+                </a>
+            </li>
+            @endif
+
+            @if (Auth::user()->role === 'admin_main')
                 <li class="nav-item">
                     <a class="nav-link {{ Route::currentRouteNamed('admin.coins.*') ? 'active' : '' }}"
                         href="{{ route('admin.coins.index') }}">

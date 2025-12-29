@@ -90,6 +90,11 @@ class User extends Authenticatable
         ]);
     }
 
+    public function rateLimitViolations()
+    {
+        return $this->hasMany(RateLimitViolation::class);
+    }
+
     public function banIps()
     {
         return $this->hasMany(BanIp::class);
@@ -194,11 +199,13 @@ class User extends Authenticatable
     }
 
     /**
-     * Get total amount deposited
+     * Get total amount deposited (including bank manual and bank auto)
      */
     public function getTotalDepositsAttribute()
     {
-        return $this->deposits()->where('status', 'approved')->sum('coins');
+        $bankManual = $this->deposits()->where('status', 'approved')->sum('coins');
+        $bankAuto = $this->bankAutoDeposits()->where('status', 'success')->sum('total_coins');
+        return $bankManual + $bankAuto;
     }
 
     /**
@@ -257,6 +264,14 @@ class User extends Authenticatable
     public function cardDeposits()
     {
         return $this->hasMany(CardDeposit::class);
+    }
+
+    /**
+     * Get bank auto deposits made by this user
+     */
+    public function bankAutoDeposits()
+    {
+        return $this->hasMany(BankAutoDeposit::class);
     }
 
     /**

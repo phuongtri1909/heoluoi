@@ -2170,10 +2170,25 @@ class HomeController extends Controller
 
         if (Auth::check()) {
             $user = Auth::user();
-            if (in_array($user->role, ['admin_main', 'admin_sub'])) {
+            if ($user->role === 'admin_main') {
                 $hasAccess = true;
+            } elseif ($user->role === 'admin_sub') {
+                if ($data['story']->user_id == $user->id) {
+                    $hasAccess = true;
+                } else {
+                    $hasPurchasedChapter = ChapterPurchase::where('user_id', $user->id)
+                        ->where('chapter_id', $chapterId)
+                        ->select('id')
+                        ->exists();
+
+                    $hasPurchasedStory = StoryPurchase::where('user_id', $user->id)
+                        ->where('story_id', $storyId)
+                        ->select('id')
+                        ->exists();
+
+                    $hasAccess = $hasPurchasedChapter || $hasPurchasedStory;
+                }
             } else {
-                // Batch check purchases - chỉ select id để tối ưu
                 $hasPurchasedChapter = ChapterPurchase::where('user_id', $user->id)
                     ->where('chapter_id', $chapterId)
                     ->select('id')
@@ -2399,7 +2414,9 @@ class HomeController extends Controller
     private function loadChapterData($storySlug, $chapterSlug)
     {
         $isNumber = is_numeric($chapterSlug);
-        $isAdmin = Auth::check() && in_array(Auth::user()->role, ['admin_main', 'admin_sub']);
+        $user = Auth::user();
+        $isAdmin = $user && $user->role === 'admin_main';
+        $isAuthor = $user && $user->role === 'admin_sub' && $user->id;
 
         // Load story với categories và user - chỉ select columns cần thiết
         $story = Story::where('slug', $storySlug)
@@ -2428,7 +2445,10 @@ class HomeController extends Controller
         }
 
         if (!$isAdmin) {
-            $chapterQuery->where('status', 'published');
+            if ($isAuthor && $story->user_id == $user->id) {
+            } else {
+                $chapterQuery->where('status', 'published');
+            }
         }
 
         $chapter = $chapterQuery
@@ -2545,8 +2565,20 @@ class HomeController extends Controller
         }
 
         // Visibility check
-        if (!Auth::check() || !in_array(Auth::user()->role, ['admin_main', 'admin_sub'])) {
-            $query->where('status', 'published');
+        $user = Auth::user();
+        $isAdminMain = $user && $user->role === 'admin_main';
+        
+        if (!$isAdminMain) {
+            if ($user && $user->role === 'admin_sub') {
+                $query->where(function($q) use ($user) {
+                    $q->where('status', 'published')
+                      ->orWhereHas('story', function($sq) use ($user) {
+                          $sq->where('user_id', $user->id);
+                      });
+                });
+            } else {
+                $query->where('status', 'published');
+            }
         }
 
         if ($searchTerm) {
@@ -2680,5 +2712,47 @@ class HomeController extends Controller
         }
 
         return $query;
+    }
+
+    /**
+     * API endpoint để lấy nội dung chapter (ẩn khỏi HTML source)
+     */
+    public function getChapterContent($id)
+    {
+        $chapter = Chapter::select('id', 'story_id', 'content', 'status', 'price', 'is_free')
+            ->findOrFail($id);
+        
+        $user = Auth::user();
+        $story = Story::select('id', 'user_id')->findOrFail($chapter->story_id);
+        
+        $hasAccess = false;
+        
+        if ($user) {
+            if ($user->role === 'admin_main') {
+                $hasAccess = true;
+            }
+            elseif ($user->role === 'admin_sub' && $story->user_id == $user->id) {
+                $hasAccess = true;
+            }
+            else {
+                $hasAccess = $chapter->is_free || 
+                    ChapterPurchase::where('chapter_id', $chapter->id)
+                        ->where('user_id', $user->id)
+                        ->exists() ||
+                    StoryPurchase::where('story_id', $story->id)
+                        ->where('user_id', $user->id)
+                        ->exists();
+            }
+        } else {
+            $hasAccess = $chapter->is_free;
+        }
+        
+        if (!$hasAccess) {
+            return response()->json(['error' => 'Bạn không có quyền truy cập chapter này.'], 403);
+        }
+        
+        return response()->json([
+            'content' => $chapter->content
+        ]);
     }
 }

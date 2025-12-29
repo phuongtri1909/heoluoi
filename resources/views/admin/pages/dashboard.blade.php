@@ -358,7 +358,8 @@
     @endif
 </div>
 
-@if($isAdminMain)
+{{-- Đã đóng - Thống Kê Nạp Cám --}}
+{{-- @if($isAdminMain)
 <!-- Deposit Statistics -->
 <div class="row mb-4">
     <div class="col-lg-6 mb-4">
@@ -403,9 +404,10 @@
         </div>
     </div>
 </div>
-@endif
+@endif --}}
 
-<!-- Daily Tasks -->
+{{-- Đã đóng - Nhiệm Vụ Hàng Ngày --}}
+{{-- <!-- Daily Tasks -->
 <div class="row">
     <div class="col-lg-6 mb-4">
         <div class="card">
@@ -496,7 +498,7 @@
         </div>
     </div>
     @endif
-</div>
+</div> --}}
 @endsection
 
 @push('scripts-admin')
@@ -581,18 +583,21 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update tables
         updateTable('storyViewsTable', data.storyViews, 'story');
-        updateTable('dailyTaskTable', data.dailyTaskStats, 'task');
+        // Đã đóng - Nhiệm Vụ Hàng Ngày
+        // updateTable('dailyTaskTable', data.dailyTaskStats, 'task');
         
         // Update revenue tables (only if admin_main)
         if (data.revenueStats) {
             updateTable('revenueTable', data.revenueStats, 'revenue');
         }
-        if (data.depositStats) {
-            updateTable('depositTable', data.depositStats, 'deposit');
-        }
-        if (data.manualCoinStats) {
-            updateTable('manualCoinTable', data.manualCoinStats, 'manual');
-        }
+        // Đã đóng - Thống Kê Nạp Cám
+        // if (data.depositStats) {
+        //     updateTable('depositTable', data.depositStats, 'deposit');
+        // }
+        // Đã đóng - Giao Dịch Cám Thủ Công
+        // if (data.manualCoinStats) {
+        //     updateTable('manualCoinTable', data.manualCoinStats, 'manual');
+        // }
     }
     
     // Function to update table data

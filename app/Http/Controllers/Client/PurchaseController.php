@@ -53,10 +53,18 @@ class PurchaseController extends Controller
 
             $story = $chapter->story;
 
-            if (in_array($user->role, ['admin_main', 'admin_sub'])) {
+            if ($user->role === 'admin_main') {
                 return response()->json([
                     'success' => true,
                     'message' => 'Bạn có quyền quản trị, không cần mua chương này.',
+                    'redirect' => route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug])
+                ]);
+            }
+
+            if ($user->role === 'admin_sub' && $story->user_id == $user->id) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Bạn là tác giả của truyện này, không cần mua chương.',
                     'redirect' => route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug])
                 ]);
             }
@@ -211,10 +219,18 @@ class PurchaseController extends Controller
             $user = Auth::user();
             $story = Story::findOrFail($request->story_id);
 
-            if (in_array($user->role, ['admin_main', 'admin_sub'])) {
+            if ($user->role === 'admin_main') {
                 return response()->json([
                     'success' => true,
                     'message' => 'Bạn có quyền quản trị, không cần mua truyện này.',
+                    'redirect' => route('show.page.story', $story->slug)
+                ]);
+            }
+
+            if ($user->role === 'admin_sub' && $story->user_id == $user->id) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Bạn là tác giả của truyện này, không cần mua.',
                     'redirect' => route('show.page.story', $story->slug)
                 ]);
             }

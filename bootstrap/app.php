@@ -29,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'check.active' => \App\Http\Middleware\CheckActive::class,
             'block.devtools' => \App\Http\Middleware\BlockDevTools::class,
             'block.devtools.admin' => \App\Http\Middleware\BlockDevToolsAdmin::class,
+            'rate.limit' => \App\Http\Middleware\CheckRateLimit::class,
         ]);
 
         $middleware->web([

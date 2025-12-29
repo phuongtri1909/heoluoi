@@ -59,13 +59,14 @@ Route::middleware(['ban:login', 'block.devtools'])->group(function () {
     Route::get('/banner/{banner}', [BannerController::class, 'click'])->name('banner.click');
 
     Route::middleware(['ban:read'])->group(function () {
-        Route::get('/story/{storySlug}/chapter/{chapterSlug}', [HomeController::class, 'chapterByStory'])->name('chapter');
+        Route::get('/story/{storySlug}/chapter/{chapterSlug}', [HomeController::class, 'chapterByStory'])->middleware('rate.limit')->name('chapter');
         Route::post('/story/{storySlug}/{chapterSlug}/check-password', [HomeController::class, 'checkChapterPassword'])->name('chapter.check-password');
         Route::get('/search-chapters', [HomeController::class, 'searchChapters'])->name('chapters.search');
         Route::post('/reading/save-progress', [ReadingController::class, 'saveProgress'])
             ->name('reading.save-progress');
+        Route::get('/api/chapter/{id}/content', [HomeController::class, 'getChapterContent'])->name('api.chapter.content');
     });
-
+    
     // Chapter Report Routes
     Route::middleware(['auth'])->group(function () {
         Route::post('/chapter-report', [App\Http\Controllers\Client\ChapterReportController::class, 'store'])->name('chapter.report.store');

@@ -8,7 +8,11 @@ class UserBan extends Model
 {
     protected $table = 'user_bans';
 
-    protected $fillable = ['user_id', 'login', 'comment', 'rate', 'read'];
+    protected $fillable = ['user_id', 'login', 'comment', 'rate', 'read', 'read_banned_until'];
+
+    protected $casts = [
+        'read_banned_until' => 'datetime',
+    ];
 
     public function user()
     {

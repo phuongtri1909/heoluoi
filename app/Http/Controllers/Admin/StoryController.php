@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Story;
 use App\Models\Category;
+use App\Models\Chapter;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -54,14 +55,26 @@ class StoryController extends Controller
 
     public function index(Request $request)
     {
+        $user = Auth::user();
         $query = Story::with(['user', 'categories', 'editor:id,name'])
             ->withCount('chapters');
 
+        if ($user->role === 'admin_sub') {
+            $query->where('user_id', $user->id);
+        }
+
        
-        $totalStories = Story::count();
-        $publishedStories = Story::where('status', 'published')->count();
-        $draftStories = Story::where('status', 'draft')->count();
-        $featuredStories = Story::where('is_featured', true)->count();
+        if ($user->role === 'admin_sub') {
+            $totalStories = Story::where('user_id', $user->id)->count();
+            $publishedStories = Story::where('user_id', $user->id)->where('status', 'published')->count();
+            $draftStories = Story::where('user_id', $user->id)->where('status', 'draft')->count();
+            $featuredStories = Story::where('user_id', $user->id)->where('is_featured', true)->count();
+        } else {
+            $totalStories = Story::count();
+            $publishedStories = Story::where('status', 'published')->count();
+            $draftStories = Story::where('status', 'draft')->count();
+            $featuredStories = Story::where('is_featured', true)->count();
+        }
 
         // Apply status filter
         if ($request->status) {
@@ -247,13 +260,24 @@ class StoryController extends Controller
 
     public function edit(Story $story)
     {
+        $user = Auth::user();
+        if ($user->role === 'admin_sub' && $story->user_id != $user->id) {
+            abort(403, 'Bạn chỉ có thể sửa truyện của mình.');
+        }
+
         $categories = Category::all();
         $adminUsers = \App\Models\User::whereIn('role', ['admin_main', 'admin_sub'])->get();
-        return view('admin.pages.story.edit', compact('story', 'categories', 'adminUsers'));
+        $chapters = $story->chapters()->orderBy('number', 'asc')->get();
+        return view('admin.pages.story.edit', compact('story', 'categories', 'adminUsers', 'chapters'));
     }
 
     public function update(Request $request, Story $story)
     {
+        $user = Auth::user();
+        if ($user->role === 'admin_sub' && $story->user_id != $user->id) {
+            abort(403, 'Bạn chỉ có thể sửa truyện của mình.');
+        }
+
         $request->validate([
             'title' => 'required|max:255',
             'slug' => 'nullable|string|max:255|unique:stories,slug,' . $story->id,
@@ -388,6 +412,11 @@ class StoryController extends Controller
 
     public function toggleFeatured(Story $story)
     {
+        $user = Auth::user();
+        if ($user->role === 'admin_sub' && $story->user_id != $user->id) {
+            abort(403, 'Bạn chỉ có thể thay đổi trạng thái đề cử cho truyện của mình.');
+        }
+
         DB::beginTransaction();
         try {
             if ($story->is_featured) {
@@ -421,11 +450,22 @@ class StoryController extends Controller
      */
     public function bulkUpdateFeatured(Request $request)
     {
+        $user = Auth::user();
         $request->validate([
             'story_ids' => 'required|array',
             'story_ids.*' => 'exists:stories,id',
             'action' => 'required|in:feature,unfeature',
         ]);
+
+        if ($user->role === 'admin_sub') {
+            $userStoryIds = Story::where('user_id', $user->id)->pluck('id')->toArray();
+            $requestedIds = $request->story_ids;
+            $unauthorizedIds = array_diff($requestedIds, $userStoryIds);
+            
+            if (!empty($unauthorizedIds)) {
+                abort(403, 'Bạn chỉ có thể thay đổi trạng thái đề cử cho truyện của mình.');
+            }
+        }
 
         DB::beginTransaction();
         try {
@@ -463,6 +503,11 @@ class StoryController extends Controller
 
     public function show(Story $story)
     {
+        $user = Auth::user();
+        if ($user->role === 'admin_sub' && $story->user_id != $user->id) {
+            abort(403, 'Bạn chỉ có thể xem truyện của mình.');
+        }
+
         $story->load(['user', 'categories']);
         $story->loadCount('chapters');
 
@@ -507,6 +552,11 @@ class StoryController extends Controller
 
     public function destroy(Story $story)
     {
+        $user = Auth::user();
+        if ($user->role === 'admin_sub' && $story->user_id != $user->id) {
+            abort(403, 'Bạn chỉ có thể xóa truyện của mình.');
+        }
+
         DB::beginTransaction();
 
         try {
@@ -531,5 +581,164 @@ class StoryController extends Controller
 
         return redirect()->route('admin.stories.index')
             ->with('success', 'Truyện đã được xóa thành công.');
+    }
+
+    /**
+     * Update views of a chapter
+     */
+    public function updateChapterViews(Request $request, Story $story, Chapter $chapter)
+    {
+        $user = Auth::user();
+        if ($user->role === 'admin_sub' && $story->user_id != $user->id) {
+            abort(403, 'Bạn chỉ có thể cập nhật lượt xem cho chapter của truyện mình.');
+        }
+
+        $request->validate([
+            'views' => 'required|integer|min:0',
+        ], [
+            'views.required' => 'Lượt xem không được để trống.',
+            'views.integer' => 'Lượt xem phải là số nguyên.',
+            'views.min' => 'Lượt xem không được âm.',
+        ]);
+
+        try {
+            $chapter->update([
+                'views' => $request->views
+            ]);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Đã cập nhật lượt xem thành công',
+                    'views' => $chapter->views,
+                    'total_views' => $story->fresh()->total_views
+                ]);
+            }
+
+            return redirect()->back()
+                ->with('success', 'Đã cập nhật lượt xem chương ' . $chapter->number . ' thành công');
+        } catch (\Exception $e) {
+            Log::error('Error updating chapter views:', ['error' => $e->getMessage()]);
+            
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->back()
+                ->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Bulk update views of all chapters - Optimized with raw SQL
+     */
+    public function bulkUpdateChapterViews(Request $request, Story $story)
+    {
+        $user = Auth::user();
+        if ($user->role === 'admin_sub' && $story->user_id != $user->id) {
+            abort(403, 'Bạn chỉ có thể cập nhật lượt xem cho chapter của truyện mình.');
+        }
+
+        $request->validate([
+            'action' => 'required|in:set,set_total,add,subtract,multiply,divide',
+            'value' => 'required|numeric|min:0',
+        ], [
+            'action.required' => 'Vui lòng chọn hành động.',
+            'action.in' => 'Hành động không hợp lệ.',
+            'value.required' => 'Vui lòng nhập giá trị.',
+            'value.numeric' => 'Giá trị phải là số.',
+            'value.min' => 'Giá trị không được âm.',
+        ]);
+
+        try {
+            $action = $request->action;
+            $value = (float) $request->value;
+            $storyId = $story->id;
+
+            DB::beginTransaction();
+
+            // Optimized: Use raw SQL for bulk update instead of looping
+            if ($action === 'set_total') {
+                // Set total views: distribute evenly or proportionally
+                $totalChapters = $story->chapters()->count();
+                if ($totalChapters > 0) {
+                    $viewsPerChapter = (int) ($value / $totalChapters);
+                    $remainder = (int) ($value % $totalChapters);
+                    
+                    // Update all chapters with base views
+                    DB::table('chapters')
+                        ->where('story_id', $storyId)
+                        ->update(['views' => $viewsPerChapter]);
+                    
+                    // Distribute remainder to first N chapters
+                    if ($remainder > 0) {
+                        DB::table('chapters')
+                            ->where('story_id', $storyId)
+                            ->orderBy('number', 'asc')
+                            ->limit($remainder)
+                            ->update([
+                                'views' => DB::raw('views + 1')
+                            ]);
+                    }
+                }
+            } else {
+                // Use raw SQL for other actions - much faster than looping
+                $sql = match($action) {
+                    'set' => "UPDATE chapters SET views = ? WHERE story_id = ?",
+                    'add' => "UPDATE chapters SET views = GREATEST(0, views + ?) WHERE story_id = ?",
+                    'subtract' => "UPDATE chapters SET views = GREATEST(0, views - ?) WHERE story_id = ?",
+                    'multiply' => "UPDATE chapters SET views = GREATEST(0, FLOOR(views * ?)) WHERE story_id = ?",
+                    'divide' => "UPDATE chapters SET views = GREATEST(0, FLOOR(views / ?)) WHERE story_id = ? AND ? > 0",
+                    default => null
+                };
+
+                if ($sql) {
+                    if ($action === 'divide') {
+                        DB::statement($sql, [$value, $storyId, $value]);
+                    } else {
+                        DB::statement($sql, [$value, $storyId]);
+                    }
+                }
+            }
+
+            DB::commit();
+
+            // Refresh story to get updated total views
+            $story->refresh();
+            $chapters = $story->chapters()->select('id', 'views')->get();
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'status' => 'success',
+                    'message' => 'Đã cập nhật lượt xem cho tất cả chương thành công',
+                    'total_views' => $story->total_views,
+                    'chapters' => $chapters->map(function($chapter) {
+                        return [
+                            'id' => $chapter->id,
+                            'views' => $chapter->views
+                        ];
+                    })
+                ]);
+            }
+
+            return redirect()->back()
+                ->with('success', 'Đã cập nhật lượt xem cho tất cả chương thành công');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error bulk updating chapter views:', ['error' => $e->getMessage()]);
+            
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->back()
+                ->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
+        }
     }
 }
