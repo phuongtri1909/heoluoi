@@ -80,7 +80,7 @@ class CommentController extends Controller
         }
 
         $finalQuery = Comment::with(['user', 'story', 'approver'])
-            ->with(['replies.user', 'replies.approver', 'replies.replies.user', 'replies.replies.approver', 'replies.replies.replies.user', 'replies.replies.replies.approver'])
+            ->with(['replies.user', 'replies.story', 'replies.approver', 'replies.replies.user', 'replies.replies.story', 'replies.replies.approver', 'replies.replies.replies.user', 'replies.replies.replies.story', 'replies.replies.replies.approver'])
             ->whereNull('reply_id');
 
         if ($search) {
@@ -175,7 +175,7 @@ class CommentController extends Controller
     public function destroy($comment)
     {
         $authUser = auth()->user();
-        $comment = Comment::find($comment);
+        $comment = Comment::with(['user', 'story'])->find($comment);
         if (!$comment) {
             return redirect()->route('admin.comments.all')->with('error', 'Không tìm thấy bình luận này');
         }
@@ -196,7 +196,7 @@ class CommentController extends Controller
      */
     public function approve($commentId)
     {
-        $comment = Comment::with('user')->findOrFail($commentId);
+        $comment = Comment::with(['user', 'story'])->findOrFail($commentId);
         
         if (auth()->user()->role !== 'admin_main' && auth()->user()->role !== 'admin_sub') {
             return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
@@ -234,7 +234,7 @@ class CommentController extends Controller
      */
     public function reject($commentId)
     {
-        $comment = Comment::findOrFail($commentId);
+        $comment = Comment::with(['user', 'story'])->findOrFail($commentId);
         
         if (auth()->user()->role !== 'admin_main' && auth()->user()->role !== 'admin_sub') {
             return response()->json(['status' => 'error', 'message' => 'Unauthorized'], 403);
