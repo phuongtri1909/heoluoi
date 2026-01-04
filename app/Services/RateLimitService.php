@@ -8,6 +8,7 @@ use App\Models\RateLimitViolation;
 use App\Models\UserBan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class RateLimitService
@@ -28,6 +29,7 @@ class RateLimitService
     {
         // Check if rate limit is enabled
         if ((int) Config::getConfig('rate_limit_enabled', 1) === 0) {
+            Log::info("Rate limit disabled for user {$user->id}");
             return ['allowed' => true];
         }
 
@@ -52,6 +54,19 @@ class RateLimitService
         $lastAccessTime = Cache::get($lastAccessKey);
 
         $now = now()->timestamp;
+        
+        // Lưu lại giá trị ban đầu để dùng khi check filter (sau khi có thể clear)
+        $originalLastDelayTime = $lastDelayTime;
+        $originalLastAccessTime = $lastAccessTime;
+        
+        Log::info("Rate limit check for user {$user->id}", [
+            'maxPages' => $maxPages,
+            'timeWindow' => $timeWindow,
+            'accessHistoryCount' => count($accessHistory),
+            'lastDelayTime' => $lastDelayTime,
+            'lastAccessTime' => $lastAccessTime,
+            'now' => $now
+        ]);
         
         // Nếu đang trong thời gian delay, chưa cho vào trang
         if ($lastDelayTime) {
@@ -82,9 +97,17 @@ class RateLimitService
             if ($delayElapsed < ($delaySeconds + $delayCooldown)) {
                 // Trong thời gian cooldown, user có thể request bình thường
                 // Nhưng nếu vi phạm tiếp (7 lần trong 30 giây) → Reset delay và ghi nhận vi phạm mới
-            } else {
-                // Hết cooldown → Clear delay time
+                // Clear lastDelayTime để các request tiếp theo không bị delay nữa
                 Cache::forget($lastDelayKey);
+                $lastDelayTime = null; // Update local variable
+            } else {
+                // Hết cooldown → Clear delay time và lastAccessTime (reset về bình thường)
+                Cache::forget($lastDelayKey);
+                Cache::forget($lastAccessKey);
+                $lastDelayTime = null; // Update local variable
+                $lastAccessTime = null; // Update local variable
+                $originalLastDelayTime = null; // Update để không filter
+                $originalLastAccessTime = null; // Update để không filter
             }
         }
         
@@ -93,23 +116,48 @@ class RateLimitService
             return ($now - $timestamp) < $timeWindow;
         });
 
-        // Count pages accessed in time window (chỉ tính từ lúc load được vào trang)
-        // Nếu có lastAccessTime, chỉ tính các access sau lastAccessTime
-        // Nhưng nếu đã hết cooldown, tính tất cả
-        if ($lastAccessTime && $lastDelayTime) {
-            $delayElapsed = $now - $lastDelayTime;
-            if ($delayElapsed < ($delaySeconds + $delayCooldown)) {
-                // Vẫn trong cooldown, chỉ tính access sau lastAccessTime
-                $accessHistory = array_filter($accessHistory, function($timestamp) use ($lastAccessTime) {
-                    return $timestamp >= $lastAccessTime;
-                });
+        $historyAfterFilter = count($accessHistory);
+        Log::info("User {$user->id} access history after time window filter", [
+            'count' => $historyAfterFilter
+        ]);
+
+        // Count pages accessed in time window
+        // CHỈ filter theo lastAccessTime nếu đang trong cooldown period (có lastDelayTime đã hết delay)
+        // Dùng originalLastDelayTime và originalLastAccessTime để check (trước khi clear)
+        $shouldFilterByLastAccess = false;
+        if ($originalLastDelayTime && $originalLastAccessTime) {
+            $delayElapsed = $now - $originalLastDelayTime;
+            // Chỉ filter nếu đang trong cooldown (đã hết delay nhưng chưa hết cooldown)
+            if ($delayElapsed >= $delaySeconds && $delayElapsed < ($delaySeconds + $delayCooldown)) {
+                $shouldFilterByLastAccess = true;
             }
+        }
+        
+        if ($shouldFilterByLastAccess) {
+            $accessHistory = array_filter($accessHistory, function($timestamp) use ($originalLastAccessTime) {
+                return $timestamp >= $originalLastAccessTime;
+            });
+            Log::info("User {$user->id} filtering by lastAccessTime (in cooldown)", [
+                'lastAccessTime' => $originalLastAccessTime,
+                'countAfterFilter' => count($accessHistory)
+            ]);
         }
 
         // Count pages accessed in time window
         $pagesInWindow = count($accessHistory);
+        
+        Log::info("User {$user->id} pages in window", [
+            'pagesInWindow' => $pagesInWindow,
+            'maxPages' => $maxPages,
+            'willViolate' => $pagesInWindow >= $maxPages
+        ]);
 
         if ($pagesInWindow >= $maxPages) {
+            Log::info("User {$user->id} RATE LIMIT VIOLATION", [
+                'pagesInWindow' => $pagesInWindow,
+                'maxPages' => $maxPages
+            ]);
+            
             // Rate limit exceeded - 7 lần request trong 30 giây = 1 lần vi phạm
             $this->recordViolation($user, $ipAddress);
             
@@ -120,6 +168,11 @@ class RateLimitService
             // Get violation count today
             $violationCount = $this->getViolationCountToday($user);
             
+            Log::info("User {$user->id} violation count today", [
+                'violationCount' => $violationCount,
+                'banThreshold' => $banThreshold
+            ]);
+            
             // Calculate stages
             // (threshold - 1) violations are split into delay and temp ban
             // Last violation is permanent ban
@@ -128,8 +181,15 @@ class RateLimitService
             $delayCount = ceil($preBanViolations / 2);
             $tempBanCount = floor($preBanViolations / 2);
             
+            Log::info("User {$user->id} ban stages", [
+                'delayCount' => $delayCount,
+                'tempBanCount' => $tempBanCount,
+                'violationCount' => $violationCount
+            ]);
+            
             // Determine action based on violation count
             if ($violationCount >= $banThreshold) {
+                Log::info("User {$user->id} PERMANENT BAN");
                 // Permanent ban (last violation)
                 $this->banUser($user);
                 return [
@@ -139,16 +199,18 @@ class RateLimitService
                     'action' => 'permanent_ban'
                 ];
             } elseif ($violationCount > $delayCount) {
+                Log::info("User {$user->id} TEMPORARY BAN");
                 // Temporary ban
                 $this->tempBanUser($user);
                 return [
                     'allowed' => false,
-                    'message' => "Bạn đã bị chặn tạm thời {$tempBanMinutes} phút do vi phạm rate limit.",
+                    'message' => "Bạn đang bị chặn tạm thời {$tempBanMinutes} phút vì chuyển trang liên tục nhiều lần.",
                     'banned' => false,
                     'action' => 'temp_ban',
                     'temp_ban_until' => now()->addMinutes($tempBanMinutes)->toIso8601String()
                 ];
             } else {
+                Log::info("User {$user->id} DELAY response");
                 // Delay response (first stage)
                 // Lưu thời gian delay để track
                 Cache::put($lastDelayKey, $now, $delaySeconds + $delayCooldown);
@@ -164,6 +226,10 @@ class RateLimitService
                 $accessHistory[] = $accessTime;
                 Cache::put($cacheKey, $accessHistory, $timeWindow);
                 
+                Log::info("User {$user->id} delayed, access added", [
+                    'accessTime' => $accessTime
+                ]);
+                
                 return [
                     'allowed' => true,
                     'message' => 'Bạn đang chuyển trang quá nhanh. Vui lòng chờ một chút.',
@@ -174,15 +240,39 @@ class RateLimitService
         }
 
         // Add current access to history (khi chưa vi phạm)
-        // Chỉ thêm vào history nếu đã load được vào trang (không trong delay)
-        if (!$lastDelayTime || (now()->timestamp - $lastDelayTime) >= $delaySeconds) {
+        // Chỉ thêm vào history nếu không đang trong delay period
+        $shouldAddToHistory = true;
+        if ($lastDelayTime) {
+            $delayElapsed = $now - $lastDelayTime;
+            // Chỉ thêm vào history nếu đã hết delay period (>= delaySeconds)
+            if ($delayElapsed < $delaySeconds) {
+                $shouldAddToHistory = false;
+                Log::info("User {$user->id} skipping add to history (still in delay)", [
+                    'delayElapsed' => $delayElapsed,
+                    'delaySeconds' => $delaySeconds
+                ]);
+            }
+        }
+        
+        if ($shouldAddToHistory) {
             $accessHistory[] = $now;
             Cache::put($cacheKey, $accessHistory, $timeWindow);
             
             // Cập nhật lastAccessTime
             Cache::put($lastAccessKey, $now, $delayCooldown);
+            
+            Log::info("User {$user->id} access added to history", [
+                'accessTime' => $now,
+                'newHistoryCount' => count($accessHistory)
+            ]);
+        } else {
+            Log::info("User {$user->id} access NOT added to history", [
+                'shouldAddToHistory' => $shouldAddToHistory,
+                'lastDelayTime' => $lastDelayTime
+            ]);
         }
 
+        Log::info("User {$user->id} rate limit check completed - ALLOWED");
         return ['allowed' => true];
     }
 
@@ -221,7 +311,15 @@ class RateLimitService
 
         $tempBanMinutes = (int) Config::getConfig('rate_limit_temp_ban_minutes', 30);
         $userBan = $user->userBan()->firstOrCreate(['user_id' => $user->id]);
+        
+        // Chỉ tăng counter khi thực sự khóa mới (không phải đang có temp ban đang active)
+        $hasActiveTempBan = $userBan->read_banned_until && $userBan->read_banned_until->isFuture();
+        if (!$hasActiveTempBan) {
+            $userBan->temp_ban_count = ($userBan->temp_ban_count ?? 0) + 1;
+        }
+        
         $userBan->read_banned_until = now()->addMinutes($tempBanMinutes);
+        $userBan->rate_limit_ban = true; // Đánh dấu là ban từ rate limit
         $userBan->save();
         
         // Clear rate limit cache
@@ -244,6 +342,7 @@ class RateLimitService
         $userBan->read = true; // Ban đọc nội dung
         $userBan->login = true; // Ban đăng nhập
         $userBan->read_banned_until = null; // Clear temp ban if exists
+        $userBan->rate_limit_ban = true; // Đánh dấu là ban từ rate limit
         $userBan->save();
         
         // Clear rate limit cache
@@ -280,10 +379,12 @@ class RateLimitService
     {
         $userBan = $user->userBan;
         
-        if ($userBan && ($userBan->read || $userBan->read_banned_until)) {
+        // Chỉ unban nếu là ban từ rate limit
+        if ($userBan && $userBan->rate_limit_ban && ($userBan->read || $userBan->read_banned_until)) {
             $userBan->read = false;
             $userBan->login = false; // Unban login nếu bị ban do rate limit
             $userBan->read_banned_until = null;
+            $userBan->rate_limit_ban = false; // Clear flag rate limit ban
             $userBan->save();
 
             // Clear rate limit cache for this user

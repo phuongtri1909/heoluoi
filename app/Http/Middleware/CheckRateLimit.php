@@ -34,9 +34,24 @@ class CheckRateLimit
             return $next($request);
         }
 
+        // Check if user is permanently banned (for rate limit)
+        $userBan = $user->userBan;
+        if ($userBan && $userBan->read && $userBan->rate_limit_ban) {
+            $message = "Bạn đã bị khóa tài khoản vĩnh viễn vì chuyển trang liên tục nhiều lần.";
+            
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'message' => $message,
+                    'banned' => true,
+                    'action' => 'permanent_ban'
+                ], 403);
+            }
+
+            return response()->view('pages.rate-limit-ban', ['message' => $message], 403);
+        }
+
         // Check if user is temporarily banned
         if ($this->rateLimitService->isTemporarilyBanned($user)) {
-            $userBan = $user->userBan;
             $bannedUntil = $userBan->read_banned_until;
             
             // Tính số phút và giây còn lại
