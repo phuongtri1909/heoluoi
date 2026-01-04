@@ -142,6 +142,36 @@
         .deposit-table .table-primary td {
             border-color: rgba(13, 110, 253, 0.3);
         }
+
+        .deposit-info-alert {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 6px;
+            padding: 12px 15px;
+            margin-top: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .deposit-info-alert:hover {
+            background-color: #ffeaa7;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .deposit-info-alert i {
+            color: #ff9800;
+            font-size: 16px;
+        }
+
+        .deposit-info-alert a {
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .deposit-info-alert a:hover {
+            text-decoration: underline;
+        }
     </style>
 @endpush
 
@@ -173,8 +203,9 @@
                     </p>
                     <p class="text-muted mb-0">
                         <i class="fas fa-info-circle me-1"></i>
-                        Bạn đã chuyển khoản nhưng không thấy cộng cám? => liên hệ <a class="color-7 fw-semibold" href="https://www.facebook.com/profile.php?id=61572454674711" target="_blank" rel="noopener noreferrer">fan page</a> gửi bill và tài khoản của bạn để hỗ trợ.
+                        <a class="color-7 fw-semibold" href="{{ route('guide.show') }}" target="_blank" rel="noopener noreferrer">Hướng dẫn nạp</a>
                     </p>
+                    
                 </div>
 
 
@@ -664,6 +695,10 @@
                                                         <img src="${bankInfo.qr_code}" alt="QR Code" class="img-fluid" style="max-height: 240px;">
                                                     </div>
                                                     <p class="text-muted">Quét mã QR để thực hiện thanh toán</p>
+                                                    <p class="text-muted mb-0 deposit-info-alert">
+                                                        <i class="fas fa-info-circle me-1"></i>
+                                                        Bạn đã chuyển khoản nhưng không thấy cộng cám? => liên hệ <a class="color-7 fw-semibold" href="https://www.facebook.com/profile.php?id=61572454674711" target="_blank" rel="noopener noreferrer">fan page</a> gửi bill và tài khoản của bạn để hỗ trợ.
+                                                    </p>
                                                 </div>
                                                 ` : ''}
                                 
@@ -673,7 +708,7 @@
                                         <li>Nội dung chuyển khoản phải chính xác: <strong>${transactionCode}</strong></li>
                                         <li>Số tiền chuyển khoản phải đúng: <strong>${amount.toLocaleString('vi-VN')} VNĐ</strong></li>
                                         <li>Sau khi chuyển khoản, hệ thống sẽ tự động cộng cám trong vòng 1-5 phút</li>
-                                        <li>Nếu không nhận được cám sau 10 phút, vui lòng liên hệ hỗ trợ</li>
+                                        <li>Nếu không nhận được cám sau 10 phút, vui lòng liên hệ <a class="color-7 fw-semibold" href="https://www.facebook.com/profile.php?id=61572454674711" target="_blank" rel="noopener noreferrer">fan page</a> hỗ trợ</li>
                                     </ul>
                                 </div>
                                 

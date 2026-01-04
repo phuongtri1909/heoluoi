@@ -64,6 +64,14 @@ class AuthController
 
     public function redirectToGoogle(Request $request)
     {
+        $redirectUrl = $request->query('redirect');
+        if (!$redirectUrl) {
+            $redirectUrl = $request->headers->get('referer');
+        }
+        if ($redirectUrl && $redirectUrl !== route('login') && $redirectUrl !== route('register') && $redirectUrl !== route('forgot-password')) {
+            session(['url.intended' => $redirectUrl]);
+        }
+        
         $userAgent = $request->header('User-Agent', '');
         $isIOS = (strpos($userAgent, 'iPhone') !== false || strpos($userAgent, 'iPad') !== false);
         $isInAppBrowser = strpos($userAgent, 'FBAN') !== false || 
@@ -128,6 +136,11 @@ class AuthController
                     return redirect()->route('admin.dashboard');
                 }
 
+                $intendedUrl = session()->pull('url.intended');
+                if ($intendedUrl && $intendedUrl !== route('login') && $intendedUrl !== route('register') && $intendedUrl !== route('forgot-password')) {
+                    return redirect($intendedUrl);
+                }
+
                 return redirect()->route('home');
             } else {
                 $user = new User();
@@ -164,6 +177,11 @@ class AuthController
                     ['login_time' => now()->toISOString()],
                     request()
                 );
+
+                $intendedUrl = session()->pull('url.intended');
+                if ($intendedUrl && $intendedUrl !== route('login') && $intendedUrl !== route('register') && $intendedUrl !== route('forgot-password')) {
+                    return redirect($intendedUrl);
+                }
 
                 return redirect()->route('home');
             }
@@ -410,6 +428,10 @@ class AuthController
                 return redirect()->route('admin.dashboard');
             }
 
+            $intendedUrl = session()->pull('url.intended');
+            if ($intendedUrl && $intendedUrl !== route('login') && $intendedUrl !== route('register') && $intendedUrl !== route('forgot-password')) {
+                return redirect($intendedUrl);
+            }
 
             return redirect()->route('home');
         } catch (Exception $e) {

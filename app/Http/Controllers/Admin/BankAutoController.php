@@ -41,7 +41,7 @@ class BankAutoController extends Controller
             'status' => 'boolean'
         ]);
 
-        $data = $request->all();
+        $data = $request->only(['name', 'code', 'account_number', 'account_name', 'logo', 'qr_code']);
         $data['status'] = $request->has('status');
 
         // Handle logo upload
@@ -91,7 +91,7 @@ class BankAutoController extends Controller
             'status' => 'boolean'
         ]);
 
-        $data = $request->all();
+        $data = $request->only(['name', 'code', 'account_number', 'account_name', 'logo', 'qr_code']);
         $data['status'] = $request->has('status');
 
         // Handle logo upload

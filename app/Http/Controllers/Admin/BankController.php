@@ -42,7 +42,7 @@ class BankController extends Controller
             'qr_code' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $data = $request->except(['logo', 'qr_code']);
+        $data = $request->only(['name', 'code', 'account_number', 'account_name']);
 
         if ($request->hasFile('logo')) {
             $data['logo'] = $this->processAndSaveImage($request->file('logo'), 'banks/logos');
@@ -90,7 +90,7 @@ class BankController extends Controller
             'qr_code' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $data = $request->except(['logo', 'qr_code']);
+        $data = $request->only(['name', 'code', 'account_number', 'account_name']);
 
         if ($request->hasFile('logo')) {
             if ($bank->logo) {

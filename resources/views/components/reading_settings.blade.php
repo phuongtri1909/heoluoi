@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Theme toggle functionality
+            // Theme toggle functionality
     if (themeBtn) {
         themeBtn.addEventListener('click', function() {
             document.body.classList.toggle('dark-mode');
@@ -73,6 +73,13 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 themeBtn.innerHTML = '<i class="fas fa-moon"></i>';
                 localStorage.setItem('dark-mode', 'false');
+            }
+            
+            // Update canvas ngay lập tức khi đổi theme
+            if (typeof window.updateCanvasContent === 'function') {
+                requestAnimationFrame(() => {
+                    window.updateCanvasContent(true);
+                });
             }
         });
     }
@@ -135,19 +142,28 @@ document.addEventListener('DOMContentLoaded', function() {
         if (fontIncreaseBtn && fontDecreaseBtn && chapterContent) {
             let currentFontSize = parseInt(window.getComputedStyle(chapterContent).fontSize);
 
+            function updateFontSize(newSize) {
+                currentFontSize = newSize;
+                chapterContent.style.fontSize = currentFontSize + 'px';
+                localStorage.setItem('chapter-font-size', currentFontSize);
+                // Update canvas ngay lập tức với scroll position preservation
+                if (typeof window.updateCanvasContent === 'function') {
+                    // Sử dụng requestAnimationFrame để đảm bảo CSS đã được áp dụng
+                    requestAnimationFrame(() => {
+                        window.updateCanvasContent(true);
+                    });
+                }
+            }
+
             fontIncreaseBtn.addEventListener('click', function() {
                 if (currentFontSize < 64) {
-                    currentFontSize += 1;
-                    chapterContent.style.fontSize = currentFontSize + 'px';
-                    localStorage.setItem('chapter-font-size', currentFontSize);
+                    updateFontSize(currentFontSize + 1);
                 }
             });
 
             fontDecreaseBtn.addEventListener('click', function() {
                 if (currentFontSize > 12) {
-                    currentFontSize -= 1;
-                    chapterContent.style.fontSize = currentFontSize + 'px';
-                    localStorage.setItem('chapter-font-size', currentFontSize);
+                    updateFontSize(currentFontSize - 1);
                 }
             });
         }
@@ -194,6 +210,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     // Close dropdown
                     fontFamilyDropdown.classList.remove('active');
+                    
+                    // Update canvas ngay lập tức khi đổi font
+                    if (typeof window.updateCanvasContent === 'function') {
+                        requestAnimationFrame(() => {
+                            window.updateCanvasContent(true);
+                        });
+                    }
                 });
             });
 
@@ -287,6 +310,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     // Close dropdown
                     backgroundColorDropdown.classList.remove('active');
+                    
+                    // Update canvas ngay lập tức khi đổi background (màu text có thể thay đổi)
+                    if (typeof window.updateCanvasContent === 'function') {
+                        requestAnimationFrame(() => {
+                            window.updateCanvasContent(true);
+                        });
+                    }
                 });
             });
 
@@ -316,6 +346,13 @@ document.addEventListener('DOMContentLoaded', function() {
             const savedBackgroundColor = localStorage.getItem('chapter-background-color');
             if (savedBackgroundColor && savedBackgroundColor !== 'default' && chapterContent) {
                 chapterContent.classList.add(savedBackgroundColor);
+            }
+            
+            // Update canvas sau khi load preferences (đợi một chút để CSS được áp dụng)
+            if (typeof window.updateCanvasContent === 'function') {
+                setTimeout(() => {
+                    window.updateCanvasContent(false); // Không preserve scroll khi load lần đầu
+                }, 200);
             }
         }
 

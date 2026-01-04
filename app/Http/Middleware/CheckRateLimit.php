@@ -47,13 +47,15 @@ class CheckRateLimit
             // Hiển thị đẹp hơn
             if ($minutesRemaining > 0) {
                 if ($secondsRemaining > 0) {
-                    $message = "Bạn đang bị chặn tạm thời. Vui lòng thử lại sau {$minutesRemaining} phút {$secondsRemaining} giây.";
+                    $timeMessage = "{$minutesRemaining} phút {$secondsRemaining} giây";
                 } else {
-                    $message = "Bạn đang bị chặn tạm thời. Vui lòng thử lại sau {$minutesRemaining} phút.";
+                    $timeMessage = "{$minutesRemaining} phút";
                 }
             } else {
-                $message = "Bạn đang bị chặn tạm thời. Vui lòng thử lại sau {$secondsRemaining} giây.";
+                $timeMessage = "{$secondsRemaining} giây";
             }
+            
+            $message = "Bạn đang bị chặn tạm thời {$timeMessage} vì chuyển trang liên tục nhiều lần.";
 
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
@@ -64,23 +66,31 @@ class CheckRateLimit
                 ], 403);
             }
 
-            // Redirect về trang chủ thay vì back() để tránh vòng lặp redirect
-            return redirect()->route('home')->with('error', $message);
+            return response()->view('pages.rate-limit-ban', ['message' => $message], 403);
         }
 
         $result = $this->rateLimitService->checkRateLimit($user, $request->ip());
 
         if (!$result['allowed']) {
+            $message = $result['message'];
+            
+            // Update message for permanent ban
+            if (isset($result['action']) && $result['action'] === 'permanent_ban') {
+                $message = "Bạn đã bị khóa tài khoản vĩnh viễn vì chuyển trang liên tục nhiều lần.";
+            } elseif (isset($result['action']) && $result['action'] === 'temp_ban') {
+                // Message already formatted in service
+                $message = $result['message'] ?? "Bạn đang bị chặn tạm thời vì chuyển trang liên tục nhiều lần.";
+            }
+            
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
-                    'message' => $result['message'],
+                    'message' => $message,
                     'banned' => $result['banned'] ?? false,
                     'action' => $result['action'] ?? null
-                ], 429);
+                ], 403);
             }
 
-            // Redirect về trang chủ thay vì back() để tránh vòng lặp redirect
-            return redirect()->route('home')->with('error', $result['message']);
+            return response()->view('pages.rate-limit-ban', ['message' => $message], 403);
         }
 
         return $next($request);

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Client\AuthController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\UserController;
@@ -152,7 +153,14 @@ Route::middleware(['ban:login', 'block.devtools'])->group(function () {
     });
 
     Route::group(['middleware' => 'guest'], function () {
-        Route::get('/login', function () {
+        Route::get('/login', function (Request $request) {
+            $redirectUrl = $request->query('redirect');
+            if (!$redirectUrl) {
+                $redirectUrl = $request->headers->get('referer');
+            }
+            if ($redirectUrl && $redirectUrl !== route('login') && $redirectUrl !== route('register') && $redirectUrl !== route('forgot-password')) {
+                session(['url.intended' => $redirectUrl]);
+            }
             return view('pages.auth.login');
         })->name('login');
         Route::post('/login', [AuthController::class, 'login'])->name('login.post');

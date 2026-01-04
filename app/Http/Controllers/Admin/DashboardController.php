@@ -12,10 +12,10 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        // Default to current year, no month filter to show all data
+        // Default to current day
         $year = $request->get('year', date('Y'));
-        $month = $request->get('month', null); // No default month
-        $day = $request->get('day', null);
+        $month = $request->get('month', date('m'));
+        $day = $request->get('day', date('d'));
         
         // Build date filter
         $dateFilter = $this->buildDateFilter($year, $month, $day);
@@ -67,7 +67,7 @@ class DashboardController extends Controller
     {
         $year = $request->get('year', date('Y'));
         $month = $request->get('month', date('m'));
-        $day = $request->get('day', null);
+        $day = $request->get('day', date('d'));
         
         $dateFilter = $this->buildDateFilter($year, $month, $day);
         
@@ -167,46 +167,44 @@ class DashboardController extends Controller
     
     private function getRevenueStats($dateFilter)
     {
-        // Get revenue by story and chapter
+        // Get revenue by story - combine story purchases and chapter purchases for each story
         $revenueStats = DB::select("
             SELECT 
-                'story' as type,
                 s.id,
                 s.title,
                 s.author_name,
-                COUNT(sp.id) as purchase_count,
-                COALESCE(SUM(sp.amount_paid), 0) as total_revenue,
-                COALESCE(SUM(sp.amount_received), 0) as author_revenue
+                COALESCE(story_revenue.total_revenue, 0) + COALESCE(chapter_revenue.total_revenue, 0) as total_revenue,
+                COALESCE(story_revenue.author_revenue, 0) + COALESCE(chapter_revenue.author_revenue, 0) as author_revenue,
+                COALESCE(story_revenue.purchase_count, 0) + COALESCE(chapter_revenue.purchase_count, 0) as purchase_count
             FROM stories s
-            LEFT JOIN story_purchases sp ON s.id = sp.story_id 
-                AND sp.created_at BETWEEN ? AND ?
+            LEFT JOIN (
+                SELECT 
+                    sp.story_id,
+                    COALESCE(SUM(sp.amount_paid), 0) as total_revenue,
+                    COALESCE(SUM(sp.amount_received), 0) as author_revenue,
+                    COUNT(sp.id) as purchase_count
+                FROM story_purchases sp
+                WHERE sp.created_at BETWEEN ? AND ?
+                GROUP BY sp.story_id
+            ) story_revenue ON s.id = story_revenue.story_id
+            LEFT JOIN (
+                SELECT 
+                    s2.id as story_id,
+                    COALESCE(SUM(cp.amount_paid), 0) as total_revenue,
+                    COALESCE(SUM(cp.amount_received), 0) as author_revenue,
+                    COUNT(cp.id) as purchase_count
+                FROM stories s2
+                INNER JOIN chapters c ON s2.id = c.story_id
+                INNER JOIN chapter_purchases cp ON c.id = cp.chapter_id
+                WHERE cp.created_at BETWEEN ? AND ?
+                GROUP BY s2.id
+            ) chapter_revenue ON s.id = chapter_revenue.story_id
             WHERE s.status = 'published'
-            GROUP BY s.id, s.title, s.author_name
-            HAVING total_revenue > 0
-            
-            UNION ALL
-            
-            SELECT 
-                'chapter' as type,
-                s.id,
-                s.title,
-                s.author_name,
-                COUNT(cp.id) as purchase_count,
-                COALESCE(SUM(cp.amount_paid), 0) as total_revenue,
-                COALESCE(SUM(cp.amount_received), 0) as author_revenue
-            FROM stories s
-            LEFT JOIN chapters c ON s.id = c.story_id
-            LEFT JOIN chapter_purchases cp ON c.id = cp.chapter_id 
-                AND cp.created_at BETWEEN ? AND ?
-            WHERE s.status = 'published'
-            GROUP BY s.id, s.title, s.author_name
-            HAVING total_revenue > 0
-            
+                AND (COALESCE(story_revenue.total_revenue, 0) + COALESCE(chapter_revenue.total_revenue, 0) > 0)
             ORDER BY total_revenue DESC
-            LIMIT 20
         ", [
-            $dateFilter['start'], $dateFilter['end'],
-            $dateFilter['start'], $dateFilter['end']
+            $dateFilter['start']->format('Y-m-d H:i:s'), $dateFilter['end']->format('Y-m-d H:i:s'),
+            $dateFilter['start']->format('Y-m-d H:i:s'), $dateFilter['end']->format('Y-m-d H:i:s')
         ]);
         
         return $revenueStats;

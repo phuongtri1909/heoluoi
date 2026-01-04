@@ -39,7 +39,7 @@
 @section('content-auth')
     <div class="row">
         <div class="col-12">
-            <div class="card mb-0 mx-0 mx-md-4 mb-md-4">
+            <div class="card mb-0 mb-md-4">
                 <div class="card-header pb-0">
                     <div class="d-flex flex-row justify-content-between">
                         <h5 class="mb-0">Chi tiết người dùng</h5>
@@ -125,7 +125,12 @@
                                     <div class="form-check form-switch">
                                         <input class="form-check-input ban-toggle" type="checkbox" data-type="login"
                                             {{ $user->userBan->login ? 'checked' : '' }}>
-                                        <label class="form-check-label">Cấm đăng nhập</label>
+                                        <label class="form-check-label">
+                                            Cấm đăng nhập
+                                            @if($user->userBan->login && $user->userBan->rate_limit_ban)
+                                                <span class="badge bg-warning text-dark ms-1" title="Ban do rate limit">RL</span>
+                                            @endif
+                                        </label>
                                     </div>
                                     <div class="form-check form-switch">
                                         <input class="form-check-input ban-toggle" type="checkbox" data-type="comment"
@@ -140,7 +145,12 @@
                                     <div class="form-check form-switch">
                                         <input class="form-check-input ban-toggle" type="checkbox" data-type="read"
                                             {{ $user->userBan->read ? 'checked' : '' }}>
-                                        <label class="form-check-label">Cấm đọc truyện</label>
+                                        <label class="form-check-label">
+                                            Cấm đọc truyện
+                                            @if($user->userBan->read && $user->userBan->rate_limit_ban)
+                                                <span class="badge bg-warning text-dark ms-1" title="Ban do rate limit">RL</span>
+                                            @endif
+                                        </label>
                                     </div>
 
                                     @if (auth()->user()->role === 'admin_main' || auth()->user()->role === 'admin_sub')

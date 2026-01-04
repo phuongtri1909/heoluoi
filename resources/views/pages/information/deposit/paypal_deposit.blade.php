@@ -64,6 +64,12 @@
         </a>
     </div>
 
+    <div class="card-info-section mb-3">
+        <p class="text-muted mb-0">
+            <i class="fas fa-info-circle me-1"></i>
+            <a class="color-7 fw-semibold" href="{{ route('guide.show') }}" target="_blank" rel="noopener noreferrer">Hướng dẫn nạp</a>
+        </p>
+    </div>
     <!-- PayPal Form -->
     <div class="row">
         <div class="col-lg-8">

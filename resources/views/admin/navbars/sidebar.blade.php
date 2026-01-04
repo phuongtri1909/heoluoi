@@ -264,15 +264,23 @@
                     <span class="nav-link-text ms-1">Rate Limit
                         @php
                             try {
+                                // Chỉ đếm user đang bị khóa HIỆN TẠI từ rate limit (tạm thời hoặc vĩnh viễn)
+                                // Không đếm user chỉ có vi phạm nhưng chưa bị ban
+                                // Không đếm user đã bị mở khóa
+                                // Không đếm user đang trong giai đoạn delay
                                 $bannedRateLimitCount = \App\Models\User::whereHas('userBan', function($q) {
-                                    $q->where(function($subQ) {
+                                    $q->where('rate_limit_ban', true)
+                                      ->where(function($subQ) {
+                                        // Permanent ban (read = true)
                                         $subQ->where('read', true)
+                                             // Hoặc temporary ban đang active (read_banned_until > now() và read = false)
                                              ->orWhere(function($tempQ) {
                                                  $tempQ->whereNotNull('read_banned_until')
-                                                       ->where('read_banned_until', '>', now());
+                                                       ->where('read_banned_until', '>', now())
+                                                       ->where('read', false);
                                              });
                                     });
-                                })->where('role', 'user')->count();
+                                })->whereIn('role', ['user', 'admin_sub'])->count();
                             } catch (\Exception $e) {
                                 $bannedRateLimitCount = 0;
                             }

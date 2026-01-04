@@ -46,7 +46,7 @@
 @section('content-auth')
     <div class="row">
         <div class="col-12">
-            <div class="card mb-0 mx-0 mx-md-4 mb-md-4">
+            <div class="card mb-0 mb-md-4">
                 <div class="card-header pb-0">
                     <div class="d-flex justify-content-between">
                         <div>

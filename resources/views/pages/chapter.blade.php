@@ -145,6 +145,12 @@
                                             <p class="mb-0">Bạn cần ủng hộ <span class="fw-semibold color-7">{{ $chapter->price }} Cám</span>  để đọc
                                                 chương
                                                 này</p>
+                                            @if ($story->has_combo && $story->combo_price > 0 && $story->total_chapter_price > 0 && $story->combo_price < $story->total_chapter_price)
+                                                @php
+                                                    $discountPercent = round((($story->total_chapter_price - $story->combo_price) / $story->total_chapter_price) * 100);
+                                                @endphp
+                                                <p class="mb-0 mt-2">Hoặc ủng hộ <span class="fw-semibold color-7">{{ number_format($story->combo_price) }} Cám</span> để đọc trọn bộ (<span class="text-danger fw-bold">Giảm {{ $discountPercent }}%</span> so với mua lẻ từng chương)</p>
+                                            @endif
                                             @auth
                                                 <p class="mb-0">
                                                     Hiện bạn đang có <span class="fw-semibold color-7">{{ auth()->user()->coins }} Cám</span>
@@ -674,8 +680,13 @@
 
     <!-- Script render nội dung bằng canvas để chống copy -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Render một phần nội dung bằng canvas
+        (function() {
+            window.canvasChapterRenderer = {
+                cachedContent: null,
+                isRendering: false,
+                updateTimer: null
+            };
+
             function renderContentWithCanvas() {
                 const chapterIdInput = document.getElementById('chapter-id');
                 const canvasContent = document.getElementById('chapter-canvas-content');
@@ -684,7 +695,6 @@
                 
                 const chapterId = chapterIdInput.value;
                 
-                // Fetch content từ API
                 fetch(`/api/chapter/${chapterId}/content`)
                     .then(response => {
                         if (!response.ok) {
@@ -694,150 +704,210 @@
                     })
                     .then(data => {
                         const fullText = data.content;
-                        // Cache content để dùng khi resize
-                        window.cachedChapterContent = fullText;
-                        renderTextToCanvas(fullText, canvasContent);
+                        window.canvasChapterRenderer.cachedContent = fullText;
+                        updateCanvasContent();
                     })
                     .catch(error => {
                         console.error('Error loading chapter content:', error);
-                        canvasContent.innerHTML = '<p class="text-danger">Không thể tải nội dung chapter. Vui lòng thử lại.</p>';
+                        const canvasContent = document.getElementById('chapter-canvas-content');
+                        if (canvasContent) {
+                            canvasContent.innerHTML = '<p class="text-danger">Không thể tải nội dung chapter. Vui lòng thử lại.</p>';
+                        }
                     });
             }
             
-            // Render text vào canvas
-            function renderTextToCanvas(fullText, canvasContent) {
-                // Chia thành các đoạn (theo dòng mới hoặc <br>)
-                const paragraphs = fullText.split(/\n\s*\n|<br\s*\/?>/i).filter(p => p.trim().length > 0);
+            function renderTextToCanvas(fullText, canvasContent, preserveScroll = false) {
+                if (!fullText || !canvasContent) return;
                 
-                // Lấy font và color từ container (chapter-content)
+                let scrollPosition = 0;
+                let scrollElement = null;
+                if (preserveScroll) {
+                    scrollPosition = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop || 0;
+                    scrollElement = window;
+                }
+                
                 const chapterContentContainer = canvasContent.closest('.chapter-content');
                 if (!chapterContentContainer) return;
                 
-                const computedStyle = window.getComputedStyle(chapterContentContainer);
-                const textColor = computedStyle.color;
-                const fontSize = parseFloat(computedStyle.fontSize) || 16;
-                const fontFamily = computedStyle.fontFamily || 'Arial, sans-serif';
-                const fontWeight = computedStyle.fontWeight || 'normal';
-                const fontStyle = computedStyle.fontStyle || 'normal';
-                const lineHeight = parseFloat(computedStyle.lineHeight) || fontSize * 2;
+                canvasContent.innerHTML = '';
                 
-                // Tính maxWidth từ chapter-content container để đảm bảo responsive
-                // Lấy width thực tế của container, trừ padding
-                const containerStyle = window.getComputedStyle(chapterContentContainer);
-                const containerPaddingLeft = parseFloat(containerStyle.paddingLeft) || 0;
-                const containerPaddingRight = parseFloat(containerStyle.paddingRight) || 0;
-                const containerWidth = chapterContentContainer.offsetWidth;
-                const maxWidth = containerWidth - containerPaddingLeft - containerPaddingRight;
+                const paragraphs = fullText.split(/\n\s*\n|<br\s*\/?>/i).filter(p => p.trim().length > 0);
                 
-                paragraphs.forEach((paragraph, index) => {
-                    if (index % 2 === 0) {
-                        const canvas = document.createElement('canvas');
-                        canvas.className = 'canvas-text-paragraph';
-                        canvas.style.width = '100%';
-                        canvas.style.maxWidth = '100%';
-                        canvas.style.height = 'auto';
-                        canvas.style.display = 'block';
-                        canvas.style.userSelect = 'none';
-                        canvas.style.pointerEvents = 'none';
-                        canvas.style.boxSizing = 'border-box';
-                        
-                        // Disable context menu và các sự kiện copy
-                        canvas.addEventListener('contextmenu', e => e.preventDefault());
-                        canvas.addEventListener('copy', e => e.preventDefault());
-                        canvas.addEventListener('cut', e => e.preventDefault());
-                        canvas.addEventListener('selectstart', e => e.preventDefault());
-                        
-                        // Append canvas vào DOM trước để có thể đo width thực tế
-                        canvasContent.appendChild(canvas);
-                        
-                        // Lấy width thực tế của canvas sau khi append (đã áp dụng CSS 100%)
-                        const actualCanvasWidth = canvas.offsetWidth || maxWidth;
-                        
-                        const ctx = canvas.getContext('2d');
-                        // Sử dụng font và color từ CSS
-                        ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
-                        ctx.fillStyle = textColor;
-                        ctx.textBaseline = 'top';
-                        
-                        // Tính toán kích thước canvas - dùng actualCanvasWidth để đo text
-                        const words = paragraph.trim().split(/\s+/);
-                        const lines = [];
-                        let currentLine = '';
-                        
-                        words.forEach(word => {
-                            const testLine = currentLine + (currentLine ? ' ' : '') + word;
-                            const metrics = ctx.measureText(testLine);
+                requestAnimationFrame(() => {
+                    const computedStyle = window.getComputedStyle(chapterContentContainer);
+                    let textColor = computedStyle.color || '#212529';
+                    if (!textColor || textColor === 'rgba(0, 0, 0, 0)' || textColor === 'transparent') {
+                        textColor = '#212529';
+                    }
+                    const fontSize = parseFloat(computedStyle.fontSize) || 16;
+                    const fontFamily = computedStyle.fontFamily || 'Arial, sans-serif';
+                    let fontWeight = computedStyle.fontWeight || 'normal';
+                    console.log(fontWeight);
+                    if (fontWeight === '400' || fontWeight === 400) {
+                        fontWeight = 'normal';
+                    } else if (fontWeight === '700' || fontWeight === 700) {
+                        fontWeight = 'bold';
+                    } else if (typeof fontWeight === 'number') {
+                        fontWeight = fontWeight.toString();
+                    }
+                    const fontStyle = computedStyle.fontStyle || 'normal';
+                    const lineHeight = parseFloat(computedStyle.lineHeight) || fontSize * 2;
+                    
+                    const containerStyle = window.getComputedStyle(chapterContentContainer);
+                    const containerPaddingLeft = parseFloat(containerStyle.paddingLeft) || 0;
+                    const containerPaddingRight = parseFloat(containerStyle.paddingRight) || 0;
+                    const containerWidth = chapterContentContainer.offsetWidth;
+                    const maxWidth = containerWidth - containerPaddingLeft - containerPaddingRight;
+                    
+                    const fragment = document.createDocumentFragment();
+                    const canvasElements = [];
+                    
+                    paragraphs.forEach((paragraph, index) => {
+                        if (index % 2 === 0) {
+                            const canvas = document.createElement('canvas');
+                            canvas.className = 'canvas-text-paragraph';
+                            canvas.style.width = '100%';
+                            canvas.style.maxWidth = '100%';
+                            canvas.style.height = 'auto';
+                            canvas.style.display = 'block';
+                            canvas.style.userSelect = 'none';
+                            canvas.style.pointerEvents = 'none';
+                            canvas.style.boxSizing = 'border-box';
                             
-                            if (metrics.width > actualCanvasWidth && currentLine) {
-                                lines.push(currentLine);
-                                currentLine = word;
-                            } else {
-                                currentLine = testLine;
+                            canvas.addEventListener('contextmenu', e => e.preventDefault());
+                            canvas.addEventListener('copy', e => e.preventDefault());
+                            canvas.addEventListener('cut', e => e.preventDefault());
+                            canvas.addEventListener('selectstart', e => e.preventDefault());
+                            
+                            fragment.appendChild(canvas);
+                            canvasElements.push({ canvas, paragraph, index });
+                        } else {
+                            const p = document.createElement('p');
+                            p.style.marginBottom = '1rem';
+                            p.style.whiteSpace = 'pre-wrap';
+                            p.textContent = paragraph.trim();
+                            fragment.appendChild(p);
+                        }
+                    });
+                    
+                    canvasContent.appendChild(fragment);
+                    
+                    requestAnimationFrame(() => {
+                        canvasElements.forEach(({ canvas, paragraph }) => {
+                            const actualCanvasWidth = canvas.offsetWidth || maxWidth;
+                            
+                            const ctx = canvas.getContext('2d', { alpha: true });
+                            
+                            ctx.imageSmoothingEnabled = true;
+                            ctx.imageSmoothingQuality = 'high';
+                            
+                            if (ctx.textRenderingOptimization !== undefined) {
+                                ctx.textRenderingOptimization = 'optimizeQuality';
                             }
+                            
+                            ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
+                            ctx.fillStyle = textColor;
+                            ctx.textBaseline = 'top';
+                            ctx.textAlign = 'left';
+                            
+                            const words = paragraph.trim().split(/\s+/);
+                            const lines = [];
+                            let currentLine = '';
+                            
+                            words.forEach(word => {
+                                const testLine = currentLine + (currentLine ? ' ' : '') + word;
+                                const metrics = ctx.measureText(testLine);
+                                
+                                if (metrics.width > actualCanvasWidth && currentLine) {
+                                    lines.push(currentLine);
+                                    currentLine = word;
+                                } else {
+                                    currentLine = testLine;
+                                }
+                            });
+                            if (currentLine) {
+                                lines.push(currentLine);
+                            }
+                            
+                            const dpr = window.devicePixelRatio || 1;
+                            canvas.width = actualCanvasWidth * dpr;
+                            canvas.height = (lines.length * lineHeight + 20) * dpr;
+                            
+                            canvas.style.height = (lines.length * lineHeight + 20) + 'px';
+                            
+                            ctx.scale(dpr, dpr);
+                            
+                            ctx.imageSmoothingEnabled = true;
+                            ctx.imageSmoothingQuality = 'high';
+                            
+                            if (ctx.textRenderingOptimization !== undefined) {
+                                ctx.textRenderingOptimization = 'optimizeQuality';
+                            }
+                            
+                            ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
+                            ctx.fillStyle = textColor;
+                            ctx.textBaseline = 'top';
+                            ctx.textAlign = 'left';
+                            
+                            lines.forEach((line, lineIndex) => {
+                                ctx.fillText(line, 0.5, (lineIndex * lineHeight) + 10.5);
+                            });
                         });
-                        if (currentLine) {
-                            lines.push(currentLine);
+                        
+                        if (preserveScroll && scrollElement) {
+                            requestAnimationFrame(() => {
+                                window.scrollTo(0, scrollPosition);
+                            });
                         }
                         
-                        // Set canvas size với device pixel ratio để render sắc nét trên màn hình retina
-                        const dpr = window.devicePixelRatio || 1;
-                        // Set actual canvas width cho rendering (với DPR) - match với CSS width
-                        canvas.width = actualCanvasWidth * dpr;
-                        canvas.height = (lines.length * lineHeight + 20) * dpr;
-                        
-                        // Set display size (CSS) để responsive
-                        canvas.style.height = (lines.length * lineHeight + 20) + 'px';
-                        
-                        // Scale context để render sắc nét
-                        ctx.scale(dpr, dpr);
-                        
-                        // Re-set context sau khi scale với font chính xác
-                        ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
-                        ctx.fillStyle = textColor;
-                        ctx.textBaseline = 'top';
-                        
-                        // Vẽ text với padding
-                        lines.forEach((line, lineIndex) => {
-                            ctx.fillText(line, 0, (lineIndex * lineHeight) + 10);
-                        });
-                    } else {
-                        // Giữ HTML cho đoạn chẵn
-                        const p = document.createElement('p');
-                        p.style.marginBottom = '1rem';
-                        p.style.whiteSpace = 'pre-wrap';
-                        p.textContent = paragraph.trim();
-                        canvasContent.appendChild(p);
-                    }
+                        window.canvasChapterRenderer.isRendering = false;
+                    });
                 });
             }
             
-            // Chạy khi DOM ready và window load để có width chính xác
+            window.updateCanvasContent = function(preserveScroll = true) {
+                const canvasContent = document.getElementById('chapter-canvas-content');
+                if (!canvasContent || !window.canvasChapterRenderer.cachedContent) return;
+                
+                if (window.canvasChapterRenderer.updateTimer) {
+                    clearTimeout(window.canvasChapterRenderer.updateTimer);
+                }
+                
+                if (window.canvasChapterRenderer.isRendering) {
+                    window.canvasChapterRenderer.updateTimer = setTimeout(() => {
+                        window.updateCanvasContent(preserveScroll);
+                    }, 10);
+                    return;
+                }
+                
+                requestAnimationFrame(() => {
+                    window.canvasChapterRenderer.isRendering = true;
+                    renderTextToCanvas(window.canvasChapterRenderer.cachedContent, canvasContent, preserveScroll);
+                });
+            };
+            
             function initCanvasRender() {
                 if (document.getElementById('chapter-id') && document.getElementById('chapter-canvas-content')) {
-                    // Đợi một chút để đảm bảo layout đã render
                     setTimeout(() => {
                         renderContentWithCanvas();
                     }, 100);
                 }
             }
             
-            // Chạy khi DOM ready
-            initCanvasRender();
-            
-            // Re-render khi resize window (responsive)
-            let resizeTimer;
-            
-            window.addEventListener('resize', function() {
-                clearTimeout(resizeTimer);
-                resizeTimer = setTimeout(function() {
-                    const canvasContent = document.getElementById('chapter-canvas-content');
-                    if (canvasContent && window.cachedChapterContent) {
-                        canvasContent.innerHTML = ''; // Clear old content
-                        renderTextToCanvas(window.cachedChapterContent, canvasContent);
-                    }
-                }, 250);
+            document.addEventListener('DOMContentLoaded', function() {
+                initCanvasRender();
+                
+                let resizeTimer;
+                window.addEventListener('resize', function() {
+                    clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(function() {
+                        if (window.canvasChapterRenderer.cachedContent) {
+                            window.updateCanvasContent(true);
+                        }
+                    }, 250);
+                });
             });
-        });
+        })();
     </script>
 
     <!-- Script xử lý đánh dấu trang (bookmark) -->
@@ -845,13 +915,10 @@
         document.addEventListener('DOMContentLoaded', function() {
                 const bookmarkBtn = document.querySelector('.bookmark-btn');
                 @auth
-                // Kiểm tra trạng thái bookmark khi tải trang
                 checkBookmarkStatus();
 
-                // Xử lý sự kiện click bookmark
                 bookmarkBtn.addEventListener('click', toggleBookmark);
             @else
-                // Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
                 bookmarkBtn.addEventListener('click', function() {
                     Swal.fire({
                         title: 'Cần đăng nhập',
@@ -892,7 +959,6 @@
 
         function toggleBookmark() {
             @auth
-            // CSRF token
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
             fetch('{{ route('user.bookmark.toggle') }}', {
@@ -913,8 +979,6 @@
                         bookmarkBtn.classList.add('active');
                         bookmarkBtn.title = 'Bỏ đánh dấu';
 
-
-                        // Hiển thị thông báo thành công
                         Swal.fire({
                             title: 'Thành công!',
                             text: data.message,
@@ -926,8 +990,6 @@
                         bookmarkBtn.classList.remove('active');
                         bookmarkBtn.title = 'Đánh dấu trang';
 
-
-                        // Hiển thị thông báo đã xóa
                         Swal.fire({
                             title: 'Đã xóa!',
                             text: data.message,
@@ -940,7 +1002,6 @@
                 .catch(error => {
                     console.error('Error toggling bookmark:', error);
 
-                    // Hiển thị thông báo lỗi
                     Swal.fire({
                         title: 'Lỗi!',
                         text: 'Đã xảy ra lỗi khi thực hiện đánh dấu truyện',
@@ -952,10 +1013,8 @@
         });
     </script>
 
-    <!-- Script xử lý cài đặt đọc truyện -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Xử lý form nhập mật khẩu chương
             const passwordForm = document.getElementById('passwordForm');
             if (passwordForm) {
                 passwordForm.addEventListener('submit', function(e) {
@@ -971,13 +1030,11 @@
                         return;
                     }
 
-                    // Hiển thị loading
                     const submitBtn = passwordForm.querySelector('button[type="submit"]');
                     const originalText = submitBtn.innerHTML;
                     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Đang kiểm tra...';
                     submitBtn.disabled = true;
 
-                    // Gửi request kiểm tra mật khẩu
                     fetch('{{ route('chapter.check-password', ['storySlug' => $story->slug, 'chapterSlug' => $chapter->slug]) }}', {
                             method: 'POST',
                             headers: {
@@ -999,7 +1056,6 @@
                                     timer: 1500,
                                     showConfirmButton: false
                                 }).then(() => {
-                                    // Reload trang để hiển thị nội dung
                                     window.location.reload();
                                 });
                             } else {
@@ -1019,26 +1075,21 @@
                             });
                         })
                         .finally(() => {
-                            // Khôi phục button
                             submitBtn.innerHTML = originalText;
                             submitBtn.disabled = false;
                         });
                 });
             }
 
-            // Fix dropdown positioning
             const dropdownButtons = document.querySelectorAll('.chapter-list-dropdown .btn');
             dropdownButtons.forEach(button => {
                 button.addEventListener('click', function() {
-                    // Đợi Bootstrap mở dropdown
                     setTimeout(() => {
                         const dropdown = this.nextElementSibling;
                         if (dropdown && dropdown.classList.contains('show')) {
-                            // Kiểm tra xem dropdown có bị tràn ra khỏi viewport không
                             const rect = dropdown.getBoundingClientRect();
                             const windowHeight = window.innerHeight;
 
-                            // Nếu dropdown sẽ tràn ra khỏi màn hình
                             if (rect.bottom > windowHeight) {
                                 dropdown.style.top = 'auto';
                                 dropdown.style.bottom = 'calc(100% + 5px)';
@@ -1047,7 +1098,6 @@
                                 dropdown.style.bottom = 'auto';
                             }
 
-                            // Đảm bảo dropdown không bị che khuất bởi nội dung
                             dropdown.style.zIndex = '9999';
                         }
                     }, 0);

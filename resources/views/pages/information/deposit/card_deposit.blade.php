@@ -65,9 +65,10 @@
         <div class="col-lg-8">
             <!-- Card Info Section -->
             <div class="card-info-section mb-3">
-                <div class="deposit-card-header">
-                    <h5 class="mb-0">Nạp cám bằng thẻ cào</h5>
-                </div>
+                <p class="text-muted mb-0">
+                    <i class="fas fa-info-circle me-1"></i>
+                    <a class="color-7 fw-semibold" href="{{ route('guide.show') }}" target="_blank" rel="noopener noreferrer">Hướng dẫn nạp</a>
+                </p>
             </div>
 
             <!-- Card Form -->

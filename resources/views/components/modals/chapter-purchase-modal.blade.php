@@ -13,6 +13,7 @@
                     <div class="purchase-item-info mb-3">
                         <h5 id="purchase-item-title" class="fw-bold mb-2"></h5>
                         <p class="fw-semibold mb-0 " id="purchase-item-price">Bạn cần ủng hộ <span class="fw-bold color-7"></span> Cám để đọc chương này</p>
+                        <p class="fw-semibold mb-0 mt-2" id="purchase-combo-info" style="display: none;"></p>
                     </div>
 
                     <div class="user-balance mt-3 p-3 bg-light rounded-3">
@@ -127,6 +128,7 @@
             const modalTitle = document.getElementById('purchaseModalLabel');
             const itemTitle = document.getElementById('purchase-item-title');
             const itemPrice = document.getElementById('purchase-item-price');
+            const comboInfo = document.getElementById('purchase-combo-info');
             const itemId = document.getElementById('purchase-item-id');
             const purchaseType = document.getElementById('purchase-type');
             const purchaseForm = document.getElementById('purchase-form');
@@ -164,11 +166,14 @@
                     Number(comboPrice) < Number(totalChapterPrice)) {
                     
                     const discountPercent = Math.round(((Number(totalChapterPrice) - Number(comboPrice)) / Number(totalChapterPrice)) * 100);
+                    
+                    comboInfo.style.display = 'block';
+                    comboInfo.innerHTML = 'Hoặc ủng hộ <span class="fw-bold color-7">' + new Intl.NumberFormat().format(comboPrice) + '</span> Cám để đọc trọn bộ (<span class="text-danger fw-bold">Giảm ' + discountPercent + '%</span> so với mua lẻ từng chương)';
                     const comboBtn = document.createElement('button');
                     comboBtn.type = 'button';
                     comboBtn.className = 'btn bg-7 me-2';
                     comboBtn.id = 'purchase-combo-btn';
-                    comboBtn.innerHTML = '<i class="fas fa-gift me-1"></i> Mua trọn bộ <span class="badge bg-light text-success ms-1">-' + discountPercent + '%</span>';
+                    comboBtn.innerHTML = '<i class="fas fa-gift me-1"></i> Mua trọn bộ <span class="badge bg-light text-danger ms-1">-' + discountPercent + '%</span>';
                     
                     comboBtn.setAttribute('data-story-id', storyId);
                     comboBtn.setAttribute('data-story-title', storyTitle || '');
@@ -198,6 +203,7 @@
                     const confirmBtn = document.getElementById('confirm-purchase-btn');
                     modalFooter.insertBefore(comboBtn, confirmBtn);
                 } else {
+                    comboInfo.style.display = 'none';
                     console.log('Combo button not shown - conditions not met');
                 }
             } else if (type === 'story') {
@@ -205,6 +211,7 @@
                 if (existingComboBtn) {
                     existingComboBtn.remove();
                 }
+                comboInfo.style.display = 'none';
                 modalTitle.textContent = 'Xác nhận mua trọn bộ';
                 itemTitle.textContent = 'Trọn bộ: ' + title;
                 purchaseForm.action = "{{ route('purchase.story.combo') }}";

@@ -271,6 +271,9 @@ class UserController extends Controller
                     $userBan->$type = $request->boolean($field);
                 }
             }
+            
+            // Nếu admin ban thì set rate_limit_ban = false để phân biệt
+            $userBan->rate_limit_ban = false;
 
             try {
                 $userBan->save();

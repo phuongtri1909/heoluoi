@@ -86,7 +86,7 @@
     <h2 class="fw-bold mb-0">Dashboard Thống Kê</h2>
     
     <!-- Date Filter -->
-    <div class="d-flex gap-2 mt-2">
+    <div class="d-flex gap-2 mt-2 flex-wrap">
         <select id="yearSelect" class="form-select form-select-sm" style="width: 100px;">
             @for($i = date('Y'); $i >= 2020; $i--)
                 <option value="{{ $i }}" {{ $year == $i ? 'selected' : '' }}>{{ $i }}</option>
@@ -94,10 +94,17 @@
         </select>
         
         <select id="monthSelect" class="form-select form-select-sm" style="width: 120px;">
-            <option value="" {{ $month == null ? 'selected' : '' }}>Cả năm</option>
             @for($i = 1; $i <= 12; $i++)
                 <option value="{{ $i }}" {{ $month == $i ? 'selected' : '' }}>
                     Tháng {{ $i }}
+                </option>
+            @endfor
+        </select>
+        
+        <select id="daySelect" class="form-select form-select-sm" style="width: 100px;">
+            @for($i = 1; $i <= 31; $i++)
+                <option value="{{ $i }}" {{ $day == $i ? 'selected' : '' }}>
+                    Ngày {{ $i }}
                 </option>
             @endfor
         </select>
@@ -324,7 +331,6 @@
                         <thead>
                             <tr>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder">Truyện</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Loại</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder">Doanh Thu</th>
                             </tr>
                         </thead>
@@ -338,11 +344,6 @@
                                             <p class="text-xs text-secondary mb-0">{{ $revenue->author_name }}</p>
                                         </div>
                                     </div>
-                                </td>
-                                <td class="align-middle text-center text-sm">
-                                    <span class="badge badge-sm bg-{{ $revenue->type == 'story' ? 'success' : 'info' }}">
-                                        {{ $revenue->type == 'story' ? 'Truyện' : 'Chương' }}
-                                    </span>
                                 </td>
                                 <td class="align-middle text-center text-sm">
                                     <span class="text-xs font-weight-bold">{{ number_format($revenue->total_revenue) }}</span>
@@ -506,8 +507,41 @@
 document.addEventListener('DOMContentLoaded', function() {
     const yearSelect = document.getElementById('yearSelect');
     const monthSelect = document.getElementById('monthSelect');
+    const daySelect = document.getElementById('daySelect');
     const refreshBtn = document.getElementById('refreshBtn');
     const loadingOverlay = document.getElementById('loadingOverlay');
+    
+    // Update day options based on selected month and year
+    function updateDayOptions() {
+        const year = parseInt(yearSelect.value);
+        const month = parseInt(monthSelect.value);
+        const currentDay = parseInt(daySelect.value) || 1;
+        
+        const daysInMonth = new Date(year, month, 0).getDate();
+        daySelect.innerHTML = '';
+        
+        for (let i = 1; i <= daysInMonth; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = `Ngày ${i}`;
+            if (i === currentDay) {
+                option.selected = true;
+            }
+            daySelect.appendChild(option);
+        }
+    }
+    
+    // Initialize day options
+    updateDayOptions();
+    
+    // Update day options when year or month changes
+    yearSelect.addEventListener('change', function() {
+        updateDayOptions();
+    });
+    
+    monthSelect.addEventListener('change', function() {
+        updateDayOptions();
+    });
     
     // Function to show loading
     function showLoading() {
@@ -525,13 +559,15 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateURL() {
         const year = yearSelect.value;
         const month = monthSelect.value;
+        const day = daySelect.value;
         const url = new URL(window.location);
         
         url.searchParams.set('year', year);
-        if (month) {
-            url.searchParams.set('month', month);
+        url.searchParams.set('month', month);
+        if (day) {
+            url.searchParams.set('day', day);
         } else {
-            url.searchParams.delete('month');
+            url.searchParams.delete('day');
         }
         
         window.history.pushState({}, '', url);
@@ -543,13 +579,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const year = yearSelect.value;
         const month = monthSelect.value;
+        const day = daySelect.value;
         
         const params = new URLSearchParams({
-            year: year
+            year: year,
+            month: month
         });
         
-        if (month) {
-            params.append('month', month);
+        if (day) {
+            params.append('day', day);
         }
         
         fetch(`/admin/dashboard/data?${params}`)
@@ -646,11 +684,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <p class="text-xs text-secondary mb-0">${item.author_name}</p>
                             </div>
                         </div>
-                    </td>
-                    <td class="align-middle text-center text-sm">
-                        <span class="badge badge-sm bg-${item.type == 'story' ? 'success' : 'info'}">
-                            ${item.type == 'story' ? 'Truyện' : 'Chương'}
-                        </span>
                     </td>
                     <td class="align-middle text-center text-sm">
                         <span class="text-xs font-weight-bold">${formatNumber(item.total_revenue)}</span>
@@ -768,11 +801,18 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Event listeners
     yearSelect.addEventListener('change', function() {
+        updateDayOptions();
         updateURL();
         window.location.reload();
     });
     
     monthSelect.addEventListener('change', function() {
+        updateDayOptions();
+        updateURL();
+        window.location.reload();
+    });
+    
+    daySelect.addEventListener('change', function() {
         updateURL();
         window.location.reload();
     });
