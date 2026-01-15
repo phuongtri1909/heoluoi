@@ -256,7 +256,7 @@ class CardDepositController extends Controller
     private function callTSRApi(CardDeposit $cardDeposit)
     {
         try {
-            $url = 'https://thesieure88.com/chargingws/v2';
+            $url = 'https://thegiatot.com/chargingws/v2';
 
             $signature = md5($this->tsrPartnerKey . $cardDeposit->pin . $cardDeposit->serial);
 

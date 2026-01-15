@@ -112,7 +112,7 @@
                                 <i class="fas fa-server me-2"></i>Domain
                             </label>
                             <input type="text" class="form-control" name="domain" 
-                                   value="thesieure88.com" required>
+                                   value="thegiatot.com" required>
                             <small class="text-muted">Không cần http://</small>
                         </div>
                         <div class="col-md-6">

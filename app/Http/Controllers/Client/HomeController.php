@@ -1442,10 +1442,10 @@ class HomeController extends Controller
         $chaptersCacheKey = 'story_chapters_' . $data['story']->id . '_page_' . request()->get('page', 1);
         $chapters = Cache::remember($chaptersCacheKey, 300, function () use ($data) {
             return Chapter::where('story_id', $data['story']->id)
-                ->published()
+            ->published()
                 ->select('id', 'story_id', 'number', 'slug', 'title', 'price', 'is_free', 'status', 'views', 'created_at')
-                ->orderBy('number', 'asc')
-                ->paginate(50);
+            ->orderBy('number', 'asc')
+            ->paginate(50);
         });
 
         // Load user-specific data: chapter purchases, bookmark, rating, story purchase
@@ -1463,14 +1463,14 @@ class HomeController extends Controller
             if ($chapterIds->isNotEmpty()) {
                 $purchasedChapterIds = ChapterPurchase::whereIn('chapter_id', $chapterIds)
                     ->where('user_id', $userId)
-                    ->pluck('chapter_id')
-                    ->toArray();
-                
-                foreach ($chapterIds as $chapterId) {
-                    $chapterPurchaseStatus[$chapterId] = in_array($chapterId, $purchasedChapterIds);
-                }
+                ->pluck('chapter_id')
+                ->toArray();
+
+            foreach ($chapterIds as $chapterId) {
+                $chapterPurchaseStatus[$chapterId] = in_array($chapterId, $purchasedChapterIds);
             }
-            
+        }
+
             // Batch check: bookmark, rating, story purchase trong 1 query
             $bookmark = \App\Models\Bookmark::where('user_id', $userId)
                 ->where('story_id', $storyId)
@@ -1736,6 +1736,7 @@ class HomeController extends Controller
             ->where('status', 'published')
             ->where('created_at', '>=', now()->subHours(24))
             ->select('id', 'story_id', 'number', 'title', 'slug', 'created_at')
+            ->with(['story:id,slug'])
             ->orderBy('created_at', 'desc')
             ->take(4)
             ->get();
@@ -1891,6 +1892,7 @@ class HomeController extends Controller
             ->where('status', 'published')
             ->where('created_at', '>=', now()->subHours(24))
             ->select('id', 'story_id', 'number', 'title', 'slug', 'created_at')
+            ->with(['story:id,slug'])
             ->orderBy('created_at', 'desc')
             ->take(4)
             ->get();
@@ -2069,7 +2071,7 @@ class HomeController extends Controller
         // Load chapters list
         $story->load(['chapters' => function ($q) {
             $q->select('id', 'story_id', 'number', 'slug', 'title')
-                ->orderBy('number', 'asc');
+            ->orderBy('number', 'asc');
         }]);
         
         // Load comments count
@@ -2174,14 +2176,14 @@ class HomeController extends Controller
                 $hasAccess = true;
             } elseif ($user->role === 'admin_sub') {
                 if ($data['story']->user_id == $user->id) {
-                    $hasAccess = true;
-                } else {
-                    $hasPurchasedChapter = ChapterPurchase::where('user_id', $user->id)
+                $hasAccess = true;
+            } else {
+                $hasPurchasedChapter = ChapterPurchase::where('user_id', $user->id)
                         ->where('chapter_id', $chapterId)
                         ->select('id')
-                        ->exists();
+                    ->exists();
 
-                    $hasPurchasedStory = StoryPurchase::where('user_id', $user->id)
+                $hasPurchasedStory = StoryPurchase::where('user_id', $user->id)
                         ->where('story_id', $storyId)
                         ->select('id')
                         ->exists();
@@ -2244,12 +2246,12 @@ class HomeController extends Controller
                 'reactions:id,comment_id,user_id,type'
             ])
                 ->where('story_id', $storyId)
-                ->whereNull('reply_id')
-                ->where('is_pinned', true)
-                ->approved()
+            ->whereNull('reply_id')
+            ->where('is_pinned', true)
+            ->approved()
                 ->select('id', 'user_id', 'comment', 'story_id', 'reply_id', 'is_pinned', 'pinned_at', 'created_at')
-                ->latest('pinned_at')
-                ->get();
+            ->latest('pinned_at')
+            ->get();
 
             $regularComments = Comment::with([
                 'user:id,name,avatar,role',
@@ -2270,13 +2272,13 @@ class HomeController extends Controller
                 'reactions:id,comment_id,user_id,type'
             ])
                 ->where('story_id', $storyId)
-                ->whereNull('reply_id')
-                ->where('is_pinned', false)
-                ->approved()
+            ->whereNull('reply_id')
+            ->where('is_pinned', false)
+            ->approved()
                 ->select('id', 'user_id', 'comment', 'story_id', 'reply_id', 'is_pinned', 'created_at')
-                ->latest()
-                ->paginate(10);
-            
+            ->latest()
+            ->paginate(10);
+
             // Unset relationships và detach connection trong comments để tránh PDO serialization issues
             $pinnedComments->each(function ($comment) {
                 foreach (['user', 'approvedReplies', 'reactions'] as $relation) {
@@ -2546,10 +2548,10 @@ class HomeController extends Controller
     public function checkChapterPassword(Request $request, $storySlug, $chapterSlug)
     {
         // Password feature không có trong database, trả về lỗi
-        return response()->json([
-            'success' => false,
+            return response()->json([
+                'success' => false,
             'message' => 'Tính năng mật khẩu chưa được kích hoạt.'
-        ], 400);
+            ], 400);
     }
 
     public function searchChapters(Request $request)
@@ -2577,7 +2579,7 @@ class HomeController extends Controller
                       });
                 });
             } else {
-                $query->where('status', 'published');
+            $query->where('status', 'published');
             }
         }
 
