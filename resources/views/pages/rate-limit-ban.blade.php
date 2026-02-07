@@ -237,7 +237,7 @@
                 <p class="mb-2 fw-semibold">{{ $message }}</p>
                 <p class="mb-0">
                     Nếu đây là sự cố ngoài ý muốn, vui lòng liên hệ 
-                    <a href="https://www.facebook.com/HeoLuoiChamDocTruyen/" target="_blank" rel="noopener noreferrer" class="ban-link">
+                    <a href="{{ \App\Models\Config::getConfig('facebook_page_url', 'https://www.facebook.com/profile.php?id=61572454674711') }}" target="_blank" rel="noopener noreferrer" class="ban-link">
                         fan page
                     </a> 
                     để được hỗ trợ sớm nhất.

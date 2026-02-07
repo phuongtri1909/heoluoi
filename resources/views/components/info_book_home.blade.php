@@ -21,11 +21,11 @@
                             {{ number_format($stats['ratings']['average'], 1) }}
                         </span>
                         <span class="fw-semibold d-flex align-items-center bookmark-count">
-                            <img src="{{ asset('images/svg/bookmark.svg') }}" alt="eye" class="img-fluid">
+                            <i class="far fa-bookmark me-1"></i>
                             {{ number_format($stats['total_bookmarks']) }}
                         </span>
                         <span class="fw-semibold d-flex align-items-center view-count">
-                            <img src="{{ asset('images/svg/view.svg') }}" alt="eye" class="img-fluid">
+                            <i class="fas fa-eye me-1"></i>
                             {{ number_format($stats['total_views']) }}
                         </span>
                     </div>
@@ -132,29 +132,34 @@
                             </div>
                         </div>
 
-                        <div class="d-flex">
+                        <div class="d-flex align-items-center gap-2">
                             <a href="#all-chapter"
-                                class="btn btn-md bg-7 text-decoration-none fw-semibold rounded-0 me-3">
+                                class="btn btn-md rounded-0 text-decoration-none fw-semibold me-2"
+                                style="background-color: #a4a68e; color: #1a1a1a;">
                                 Đọc truyện
                             </a>
 
-                            <button
-                                class="btn btn-md btn-outline-dark rounded-0 text-decoration-none fw-semibold bookmark-toggle-btn"
+                            @php
+                                $showMoTruyen = $story->has_combo && (!auth()->check() || !\App\Models\StoryPurchase::hasUserPurchased(auth()->id(), $story->id));
+                            @endphp
+                            @if ($showMoTruyen)
+                                @guest
+                                    <a href="{{ route('login') }}" class="btn btn-md btn-outline-dark rounded-0 text-decoration-none fw-semibold">
+                                        Mở truyện
+                                    </a>
+                                @else
+                                    <button type="button" class="btn btn-md btn-outline-dark rounded-0 text-decoration-none fw-semibold"
+                                        onclick="showPurchaseModal('story', {{ $story->id }}, {{ json_encode($story->title) }}, {{ $story->combo_price ?? 0 }})">
+                                        Mở truyện
+                                    </button>
+                                @endguest
+                            @endif
+
+                            <button type="button"
+                                class="border-0 bookmark-toggle-btn d-flex align-items-center justify-content-center p-2"
                                 data-story-id="{{ $story->id }}"
                                 title="@auth @if ($isBookmarked) Bỏ theo dõi @else Theo dõi @endif @else Đăng nhập để theo dõi @endauth">
-                                <span class="bookmark-label">
-                                    <i class="fa-regular fa-bookmark"></i>
-                                    @auth
-                                        @if ($isBookmarked)
-                                            Bỏ theo dõi
-                                        @else
-                                            Theo dõi
-                                        @endif
-                                    @else
-                                        Theo dõi
-                                    @endauth
-                                </span>
-                                <span class="bookmark-count ms-1">({{ $stats['total_bookmarks'] ?? 0 }})</span>
+                                <i class="fa-2xl fa-{{ $isBookmarked ? 'solid' : 'regular' }} fa-bookmark bookmark-icon {{ $isBookmarked ? 'text-danger' : '' }}"></i>
                             </button>
                         </div>
 
@@ -566,23 +571,23 @@
             bookmarkBtn.addEventListener('click', function() {
                     @auth
                     const storyId = this.getAttribute('data-story-id');
-                    const bookmarkLabel = this.querySelector('.bookmark-label');
-                    const bookmarkCount = this.querySelector('.bookmark-count');
-                    const isBookmarked = bookmarkLabel.textContent.trim() === 'Bỏ theo dõi';
+                    const bookmarkIcon = this.querySelector('.bookmark-icon');
+                    const isBookmarked = bookmarkIcon && bookmarkIcon.classList.contains('fa-solid');
 
                     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-                    let currentCount = parseInt(bookmarkCount.textContent.replace(/[()]/g, '')) || 0;
-
-                    if (isBookmarked) {
-                        bookmarkLabel.innerHTML = '<i class="fa-regular fa-bookmark"></i> Theo dõi';
-                        this.setAttribute('title', 'Theo dõi');
-                        bookmarkCount.textContent = `(${Math.max(0, currentCount - 1)})`;
-                    } else {
-                        bookmarkLabel.innerHTML = '<i class="fa-regular fa-bookmark"></i> Bỏ theo dõi';
-                        this.setAttribute('title', 'Bỏ theo dõi');
-                        bookmarkCount.textContent = `(${currentCount + 1})`;
+                    function updateIcon(booked) {
+                        if (!bookmarkIcon) return;
+                        bookmarkIcon.classList.remove('fa-regular', 'fa-solid', 'text-danger');
+                        if (booked) {
+                            bookmarkIcon.classList.add('fa-solid', 'text-danger');
+                        } else {
+                            bookmarkIcon.classList.add('fa-regular');
+                        }
+                        bookmarkBtn.setAttribute('title', booked ? 'Bỏ theo dõi' : 'Theo dõi');
                     }
+
+                    updateIcon(!isBookmarked);
 
                     fetch('{{ route('user.bookmark.toggle') }}', {
                             method: 'POST',
@@ -600,10 +605,10 @@
                             const coverBookmarkCount = document.querySelector(
                                 '.col-12.col-md-6.col-lg-4.col-xl-3 .bookmark-count');
                             if (coverBookmarkCount && data.total_bookmarks !== undefined) {
-                                const img = coverBookmarkCount.querySelector('img');
+                                const icon = coverBookmarkCount.querySelector('i');
                                 coverBookmarkCount.innerHTML = '';
-                                if (img) {
-                                    coverBookmarkCount.appendChild(img);
+                                if (icon) {
+                                    coverBookmarkCount.appendChild(icon);
                                 }
                                 coverBookmarkCount.appendChild(document.createTextNode(' ' + data.total_bookmarks));
                             }
@@ -612,17 +617,7 @@
                         })
                         .catch(error => {
                             console.error('Error toggling bookmark:', error);
-
-                            if (isBookmarked) {
-                                bookmarkLabel.innerHTML = '<i class="fa-regular fa-bookmark"></i> Bỏ theo dõi';
-                                this.setAttribute('title', 'Bỏ theo dõi');
-                                bookmarkCount.textContent = `(${currentCount})`;
-                            } else {
-                                bookmarkLabel.innerHTML = '<i class="fa-regular fa-bookmark"></i> Theo dõi';
-                                this.setAttribute('title', 'Theo dõi');
-                                bookmarkCount.textContent = `(${Math.max(0, currentCount - 1)})`;
-                            }
-
+                            updateIcon(isBookmarked);
                             showToast('Đã xảy ra lỗi khi thực hiện thao tác này.', 'error');
                         });
                 @else

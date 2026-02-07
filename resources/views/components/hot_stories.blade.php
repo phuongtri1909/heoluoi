@@ -1,9 +1,9 @@
-<div class="sidebar-widget recent-reads rounded-4 border-5 border border-color-3 shadow-sm mt-4 mt-md-0">
+<div class="sidebar-widget recent-reads mt-4 mt-md-0">
     <div class="widget-header border-bottom-0">
         <div class="text-center">
-            <h2 class="fs-3 text-center m-0 text-dark fw-bold title-dark font-svn-apple">BẢNG XẾP HẠNG</h2>
+            <h2 class="fs-3 text-center m-0 color-8 fw-bold title-dark font-FzAstila">BẢNG XẾP HẠNG</h2>
         </div>
-        <div class="d-flex justify-content-evenly mt-3 font-svn-apple" id="hotStoriesTabs" role="tablist">
+        <div class="d-flex justify-content-evenly mt-3 font-FzAstila" id="hotStoriesTabs" role="tablist">
             <button class="tab-button active fs-5" id="daily-tab" data-bs-toggle="tab" data-bs-target="#daily"
                 type="button" role="tab">
                 NGÀY
@@ -81,7 +81,7 @@
 
             .hot-story-thumb {
                 width: 90px;
-                height: 120px;
+                height: 130px;
                 object-fit: cover;
             }
 
@@ -110,7 +110,7 @@
                 border: 2px solid transparent;
                 padding: 5px 30px;
                 margin: 0 4px;
-                border-radius: 15px;
+                border-radius: 40px;
                 font-size: 0.9rem;
                 font-weight: 500;
                 color: #666;
@@ -139,46 +139,46 @@
 
             /* Ngày - Color 7 - Outline */
             #daily-tab {
-                border-color: var(--primary-color-7);
-                color: var(--primary-color-7);
+                border-color: var(--primary-color-9);
+                color: var(--primary-color-9);
             }
 
             /* Tuần - Color 1 - Outline */
             #weekly-tab {
-                border-color: var(--primary-color-4);
-                color: var(--primary-color-4);
+                border-color: var(--primary-color-9);
+                color: var(--primary-color-9);
             }
 
             /* Tháng - Color 6 - Outline */
             #monthly-tab {
-                border-color: var(--primary-color-6);
-                color: var(--primary-color-6);
+                border-color: var(--primary-color-9);
+                color: var(--primary-color-9);
             }
 
             .tab-button:hover {
-                color: var(--primary-color-3);
-                background-color: rgba(0, 0, 0, 0.05);
+                color: var(--primary-color-10) !important;
+                background-color: var(--primary-color-9);
             }
 
             /* Ngày - Color 7 */
             #daily-tab.active {
-                color: #000;
-                background-color: var(--primary-color-7);
-                border-color: var(--primary-color-7);
+                color: var(--primary-color-10);
+                background-color: var(--primary-color-9);
+                border-color: var(--primary-color-9);
             }
 
             /* Tuần - Color 1 */
             #weekly-tab.active {
-                color: #000;
-                background-color: var(--primary-color-1);
-                border-color: var(--primary-color-1);
+                color: var(--primary-color-10) !important;
+                background-color: var(--primary-color-9);
+                border-color: var(--primary-color-9);
             }
 
             /* Tháng - Color 6 */
             #monthly-tab.active {
-                color: #000;
-                background-color: var(--primary-color-6);
-                border-color: var(--primary-color-6);
+                color: var(--primary-color-10) !important;
+                background-color: var(--primary-color-9);
+                border-color: var(--primary-color-9);
             }
 
             /* Dark mode styles */
@@ -196,46 +196,46 @@
 
             /* Dark mode - Ngày - Color 7 - Outline */
             body.dark-mode #daily-tab {
-                border-color: var(--primary-color-7);
-                color: var(--primary-color-7);
+                border-color: var(--primary-color-9);
+                color: var(--primary-color-9);
             }
 
             /* Dark mode - Tuần - Color 1 - Outline */
             body.dark-mode #weekly-tab {
-                border-color: var(--primary-color-1);
-                color: var(--primary-color-1);
+                border-color: var(--primary-color-9);
+                color: var(--primary-color-9);
             }
 
             /* Dark mode - Tháng - Color 6 - Outline */
             body.dark-mode #monthly-tab {
-                border-color: var(--primary-color-6);
-                color: var(--primary-color-6);
+                border-color: var(--primary-color-9);
+                color: var(--primary-color-9);
             }
 
             body.dark-mode .tab-button:hover {
-                color: var(--primary-color-3);
+                color: var(--primary-color-10);
                 background-color: rgba(255, 255, 255, 0.1);
             }
 
             /* Dark mode - Ngày - Color 7 */
             body.dark-mode #daily-tab.active {
                 color: #000;
-                background-color: var(--primary-color-7);
-                border-color: var(--primary-color-7);
+                background-color: var(--primary-color-9);
+                border-color: var(--primary-color-9);
             }
 
             /* Dark mode - Tuần - Color 1 */
             body.dark-mode #weekly-tab.active {
                 color: #000;
-                background-color: var(--primary-color-1);
-                border-color: var(--primary-color-1);
+                background-color: var(--primary-color-9);
+                border-color: var(--primary-color-9);
             }
 
             /* Dark mode - Tháng - Color 6 */
             body.dark-mode #monthly-tab.active {
                 color: #000;
-                background-color: var(--primary-color-6);
-                border-color: var(--primary-color-6);
+                background-color: var(--primary-color-9);
+                border-color: var(--primary-color-9);
             }
 
             body.dark-mode .hot-stories-list {
@@ -256,8 +256,8 @@
 
             body.dark-mode .story-rank {
                 background-color: #404040 !important;
-                border-color: var(--primary-color-3) !important;
-                color: var(--primary-color-3) !important;
+                border-color: var(--primary-color-9) !important;
+                color: var(--primary-color-9) !important;
             }
 
             body.dark-mode #hotStoriesTabs .nav-link {

@@ -86,6 +86,12 @@ class UserController extends Controller
         $user->reset_password_at = now();
         $user->save();
 
+        if (empty($user->email)) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Tài khoản đăng nhập bằng Google/Facebook/Zalo không có email. Không thể gửi OTP đổi mật khẩu.',
+            ], 422);
+        }
         Mail::to($user->email)->send(new OTPUpdateUserMail($otp, 'password'));
         return response()->json([
             'status' => 'success',

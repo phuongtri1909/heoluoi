@@ -697,7 +697,7 @@
                                                     <p class="text-muted">Quét mã QR để thực hiện thanh toán</p>
                                                     <p class="text-muted mb-0 deposit-info-alert">
                                                         <i class="fas fa-info-circle me-1"></i>
-                                                        Bạn đã chuyển khoản nhưng không thấy cộng cám? => liên hệ <a class="color-7 fw-semibold" href="https://www.facebook.com/profile.php?id=61572454674711" target="_blank" rel="noopener noreferrer">fan page</a> gửi bill và tài khoản của bạn để hỗ trợ.
+                                                        Bạn đã chuyển khoản nhưng không thấy cộng cám? => liên hệ <a class="color-7 fw-semibold" href="{{ \App\Models\Config::getConfig('facebook_page_url', 'https://www.facebook.com/profile.php?id=61572454674711') }}" target="_blank" rel="noopener noreferrer">fan page</a> gửi bill và tài khoản của bạn để hỗ trợ.
                                                     </p>
                                                 </div>
                                                 ` : ''}
@@ -708,7 +708,7 @@
                                         <li>Nội dung chuyển khoản phải chính xác: <strong>${transactionCode}</strong></li>
                                         <li>Số tiền chuyển khoản phải đúng: <strong>${amount.toLocaleString('vi-VN')} VNĐ</strong></li>
                                         <li>Sau khi chuyển khoản, hệ thống sẽ tự động cộng cám trong vòng 1-5 phút</li>
-                                        <li>Nếu không nhận được cám sau 10 phút, vui lòng liên hệ <a class="color-7 fw-semibold" href="https://www.facebook.com/profile.php?id=61572454674711" target="_blank" rel="noopener noreferrer">fan page</a> hỗ trợ</li>
+                                        <li>Nếu không nhận được cám sau 10 phút, vui lòng liên hệ <a class="color-7 fw-semibold" href="{{ \App\Models\Config::getConfig('facebook_page_url', 'https://www.facebook.com/profile.php?id=61572454674711') }}" target="_blank" rel="noopener noreferrer">fan page</a> hỗ trợ</li>
                                     </ul>
                                 </div>
                                 

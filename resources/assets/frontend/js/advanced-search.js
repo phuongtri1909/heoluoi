@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Add focus effects to selects
+    // Add focus effects to selects (visual only, no transform animation)
     const selectWrappers = document.querySelectorAll('.advanced-search-container .select-wrapper');
     selectWrappers.forEach(wrapper => {
         const select = wrapper.querySelector('.filter-select');
@@ -42,12 +42,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (select && arrow) {
             select.addEventListener('focus', function() {
-                wrapper.style.transform = 'translateY(-2px)';
                 arrow.style.color = 'var(--primary-color-3)';
             });
             
             select.addEventListener('blur', function() {
-                wrapper.style.transform = 'translateY(0)';
                 arrow.style.color = 'var(--primary-color-5)';
             });
         }
@@ -96,19 +94,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Add smooth scroll to results when form is submitted
+    // Scroll to results when form is submitted
     const form = document.querySelector('.advanced-search-container #advanced-search-form');
     if (form) {
         form.addEventListener('submit', function() {
-            setTimeout(() => {
-                const resultsSection = document.querySelector('.col-12.col-md-7');
-                if (resultsSection) {
-                    resultsSection.scrollIntoView({ 
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            }, 100);
+            const resultsSection = document.querySelector('.col-12.col-md-8');
+            if (resultsSection) {
+                resultsSection.scrollIntoView({ block: 'start' });
+            }
         });
     }
 });

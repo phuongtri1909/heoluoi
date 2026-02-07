@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             ConfigSeeder::class,
             DailyTaskSeeder::class,
             EmailPasswordLoginSeeder::class,
+            EnableRegisterSeeder::class,
             RateLimitConfigSeeder::class,
         ]);
     }

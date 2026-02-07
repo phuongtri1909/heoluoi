@@ -146,15 +146,6 @@
                     @include('components.info_book_home')
 
                     <div class=" mt-4">
-
-
-                        @if (isset($story) && $story->has_combo)
-                            @include('components.combo_story', ['story' => $story])
-                        @else
-                            @include('components.latest_chapters', ['latestChapters' => $latestChapters])
-                        @endif
-
-
                         <div class="" id="chapters">
                             @if (!Auth()->check() || (Auth()->check() && Auth()->user()->ban_read == false))
                                 @include('components.all_chapter', [

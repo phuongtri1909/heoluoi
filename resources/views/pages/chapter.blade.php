@@ -6,7 +6,7 @@
 
 @section('meta')
     <meta property="og:type" content="article">
-    <meta property="og:title" content="Chương {{ $chapter->number }}: {{ $chapter->title }} - {{ $story->title }}">
+    <meta property="og:title" content="{{ $story->title }}">
     <meta property="og:description" content="{{ Str::limit(html_entity_decode(strip_tags($chapter->content)), 100) }}">
     <meta property="og:image"
         content="{{ $story->cover ? url(Storage::url($story->cover)) : url(asset('images/logo/logo-site.png')) }}">
@@ -31,7 +31,7 @@
 
     {{-- Twitter Card Meta Tags --}}
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Chương {{ $chapter->number }}: {{ $chapter->title }} - {{ $story->title }}">
+    <meta name="twitter:title" content="{{ $story->title }}">
     <meta name="twitter:description" content="{{ Str::limit(strip_tags($chapter->content), 160) }}">
     <meta name="twitter:image"
         content="{{ $story->cover ? url(Storage::url($story->cover)) : url(asset('images/logo/logo-site.png')) }}">
@@ -44,10 +44,10 @@
     <section id="chapter" class="mt-80 mb-5 py-5">
         <div class="container">
 
-            <div class="p-2 p-md-5 pt-md-0 pb-1">
+            <div class="pt-md-0 pb-1">
 
-                <div class="p-2 p-md-5">
-                    <div class="p-0 p-md-5 pt-md-0">
+                <div class="p-md-5">
+                    <div class="pt-md-0">
                         <nav style="--bs-breadcrumb-divider: url(&#34;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='%236c757d'/%3E%3C/svg%3E&#34;);"
                             aria-label="breadcrumb">
                             <ol class="breadcrumb">
@@ -133,7 +133,7 @@
                         </div>
 
                         <!-- Chapter Content -->
-                        <div id="chapter-content" class="rounded-4 chapter-content mb-4 p-2">
+                        <div id="chapter-content" class="rounded-4 chapter-content mb-4">
                             @if (isset($hasAccess) && $hasAccess)
                                 <input type="hidden" id="chapter-id" value="{{ $chapter->id }}">
                                 <div id="chapter-canvas-content" style="line-height: 2;"></div>
@@ -187,7 +187,7 @@
                                                     </li>
                                                     <li>
                                                         Nếu có thắc mắc hoặc cần hỗ trợ nạp liên hệ <a
-                                                            href="https://www.facebook.com/profile.php?id=61572454674711"
+                                                            href="{{ \App\Models\Config::getConfig('facebook_page_url', 'https://www.facebook.com/profile.php?id=61572454674711') }}"
                                                             class="fw-semibold color-7">Facebook</a>.
                                                     </li>
                                                 </ul>

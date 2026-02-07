@@ -16,13 +16,13 @@
                         @endforeach
                     </div>
                     <div class="footer-links">
-                        <a href="{{ route('home') }}" class="text-decoration-none fw-semibold fs-4 font-svn-apple">Trang Chủ</a>
-                        <a href="" class="text-decoration-none fw-semibold fs-4 font-svn-apple">Điều Khoản</a>
-                        <a href="{{ route('guide.show') }}" class="text-decoration-none fw-semibold fs-4 font-svn-apple">Hướng Dẫn</a>
+                        <a href="{{ route('home') }}" class="text-decoration-none fw-semibold fs-4 font-FzAstila">Trang Chủ</a>
+                        <a href="" class="text-decoration-none fw-semibold fs-4 font-FzAstila">Điều Khoản</a>
+                        <a href="{{ route('guide.show') }}" class="text-decoration-none fw-semibold fs-4 font-FzAstila">Hướng Dẫn</a>
                     </div>
 
                     <div class="py-3">
-                        <span class="copyright color-text text-sm fw-semibold fs-4 font-svn-apple">
+                        <span class="copyright color-text text-sm fw-semibold fs-4 font-FzAstila">
                             © {{ date('Y') }} - {{ config('app.name') }} Bảo Lưu Mọi Quyền
                         </span>
                     </div>
@@ -31,7 +31,7 @@
                     <!-- Facebook Page Plugin -->
                     <div class="mt-4">
                         <div class="w-100">
-                            <div class="fb-page" data-href="https://www.facebook.com/profile.php?id=61572454674711" data-small-header="false"
+                            <div class="fb-page" data-href="{{ \App\Models\Config::getConfig('facebook_page_url', 'https://www.facebook.com/profile.php?id=61572454674711') }}" data-small-header="false"
                                 data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true">
                             </div>
                         </div>

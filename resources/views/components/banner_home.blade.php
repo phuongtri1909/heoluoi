@@ -1,8 +1,8 @@
 @props(['banners'])
 
 @if ($banners && $banners->count() > 0)
-    <section class="banner-carousel-section py-4 container">
-        <div class="slider mt-5" id="bannerSlider">
+    <section class="banner-carousel-section container">
+        <div class="slider" id="bannerSlider">
             @foreach ($banners as $index => $banner)
                 <div class="slide">
                     <a href="{{ $banner->link ?? route('show.page.story', $banner->story->slug) }}"
@@ -26,14 +26,14 @@
                 .banner-carousel-section {
                     font-size: 3rem;
                     color: var(--primary);
-                    padding: 2rem 0;
+                    padding: 2rem 0 0 0;
                     overflow: hidden;
                 }
 
                 .slider {
                     position: relative;
                     width: 100%;
-                    height: 350px;
+                    height: 270px;
                     perspective: 1500px;
                     overflow: hidden;
                     user-select: none;
@@ -139,7 +139,7 @@
 
                 @media (max-width: 768px) {
                     .slider {
-                        height: 300px;
+                        height: 200px;
                     }
 
                     .slide {
@@ -174,7 +174,7 @@
 
                 @media (max-width: 576px) {
                     .slider {
-                        height: 250px;
+                        height: 170px;
                     }
 
                     .slide {
@@ -209,7 +209,7 @@
 
                 @media (max-width: 480px) {
                     .slider {
-                        height: 220px;
+                        height: 150px;
                     }
 
                     .slide {

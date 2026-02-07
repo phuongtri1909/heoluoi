@@ -30,6 +30,8 @@
     @else
         @if(isset($currentCategory))
             {{ $currentCategory->name }}
+        @elseif(isset($currentTag))
+            Chủ đề: {{ $currentTag->name }}
         @else
             Danh sách truyện
         @endif
@@ -151,6 +153,13 @@
                             @else
                                 Danh sách truyện theo thể loại
                             @endif
+                        @elseif(isset($query) && $query === 'tag')
+                            <i class="fa-solid fa-tags fa-lg text-primary"></i>
+                            @if(isset($currentTag))
+                                Truyện chủ đề: {{ $currentTag->name }}
+                            @else
+                                Danh sách truyện theo chủ đề
+                            @endif
                         @else
                             <i class="fa-solid fa-layer-group fa-lg text-primary"></i>
                             Danh sách truyện
@@ -244,11 +253,11 @@
                                     Bộ lọc đang áp dụng:
                                 </span>
                                 @foreach ($activeFilters as $filter)
-                                    <span class="badge bg-2 text-dark position-relative pe-4">
+                                    <span class="badge bg-11 text-dark position-relative pe-4">
                                         {{ $filter['label'] }}
                                         <a href="{{ $filter['remove_url'] }}" 
-                                           class="position-absolute top-0 end-0 p-1 text-dark"
-                                           style="font-size: 0.7rem; line-height: 1; text-decoration: none;"
+                                           class="position-absolute text-dark"
+                                           style="font-size: 0.7rem; line-height: 1; text-decoration: none; right: 8px; top: 14px; transform: translate(50%, -50%);"
                                            title="Xóa bộ lọc">
                                             <i class="fa-solid fa-times"></i>
                                         </a>
@@ -294,56 +303,16 @@
                                     @endif
 
                                     <div class="d-flex flex-wrap gap-1 my-2 text-sm">
-                                        @php
-                                            $mainCategories = $story->categories->where('is_main', true);
-                                            $subCategories = $story->categories->where('is_main', false);
-                                            $displayCategories = collect();
-
-                                            if ($mainCategories->isNotEmpty()) {
-                                                foreach ($mainCategories->take(2) as $category) {
-                                                    $displayCategories->push($category);
-                                                }
-
-                                                if ($displayCategories->count() === 1 && $subCategories->isNotEmpty()) {
-                                                    $displayCategories->push($subCategories->first());
-                                                }
-                                            } else {
-                                                foreach ($subCategories->take(2) as $category) {
-                                                    $displayCategories->push($category);
-                                                }
-                                            }
-                                        @endphp
-
-
-                                        @foreach ($displayCategories as $category)
+                                        @foreach ($story->categories as $category)
                                             <span
-                                                class="badge bg-1 text-white small rounded-pill d-flex align-items-center">{{ $category->name }}</span>
+                                                class="badge bg-1 text-dark small rounded-pill d-flex align-items-center">{{ $category->name }}</span>
                                         @endforeach
-
-                                    </div>
-
-                                    <div class="d-flex small text-muted">
-                                        <div class="me-3">
-                                            <i class="fas fa-eye me-1 text-primary"></i>
-                                            {{ number_format($story->total_views) }}
-                                        </div>
-                                        <div class="me-3">
-                                            <i class="fas fa-star me-1 text-warning"></i>
-                                            {{ number_format($story->average_rating ?? 0, 1) }}
-                                        </div>
-                                        <div class="me-3">
-                                            <i class="fas fa-bookmark me-1 text-danger"></i>
-                                            {{ number_format($story->bookmarks_count ?? 0) }}
-                                        </div>
-                                        
-                                    </div>
-                                    <div>
-                                        <i
-                                            class="fas fa-{{ $story->completed ? 'check-circle' : 'clock' }} me-1 {{ $story->completed ? 'text-success' : 'text-warning' }}"></i>
-                                        {{ $story->completed ? 'Hoàn thành' : 'Đang cập nhật' }}
                                     </div>
                                     <div class="story-description mt-2 small text-muted d-none d-md-block">
-                                        {{ cleanDescription($story->description, 200) }}
+                                        {{ cleanDescription($story->description, 590) }}
+                                    </div>
+                                    <div class="story-description mt-2 small text-muted d-md-none">
+                                        {{ cleanDescription($story->description, 120) }}
                                     </div>
                                 </div>
                             </div>
@@ -361,43 +330,16 @@
 
 @push('styles')
     <style>
-
          #mobileFilterToggle {
              display: flex;
              align-items: center;
              justify-content: space-between;
-             transition: all 0.3s ease;
              border-radius: 8px;
              padding: 12px 16px;
              color: white !important;
              border: none;
              background-color: #4e8ad8;
          }
-
-         #mobileFilterToggle:hover {
-             transform: translateY(-1px);
-             box-shadow: 0 2px 8px rgba(247, 148, 137, 0.3);
-         }
-
-        #mobileFilterToggle i {
-            transition: transform 0.3s ease;
-        }
-
-        #mobileAdvancedSearch {
-            animation: slideDown 0.3s ease-out;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
 
          @media (max-width: 767.98px) {
              #mobileAdvancedSearch .advanced-search-container {
@@ -407,40 +349,26 @@
              }
          }
 
-         /* Active Filter Tags Styles */
          .active-filters .badge {
-             transition: all 0.3s ease;
              border-radius: 20px;
              padding: 8px 12px;
              font-weight: 500;
          }
 
-         .active-filters .badge:hover {
-             transform: translateY(-1px);
-             box-shadow: 0 2px 8px rgba(252, 207, 212, 0.4);
-         }
-
-         .active-filters .badge a {
-             transition: all 0.2s ease;
-         }
-
          .active-filters .badge a:hover {
              color: var(--primary-color-3) !important;
-             transform: scale(1.2);
          }
 
          .active-filters .btn-outline-secondary {
              border-radius: 20px;
              font-size: 0.8rem;
              padding: 6px 12px;
-             transition: all 0.3s ease;
          }
 
          .active-filters .btn-outline-secondary:hover {
              background-color: var(--primary-color-2);
              border-color: var(--primary-color-3);
              color: var(--primary-color-3);
-             transform: translateY(-1px);
          }
     </style>
 @endpush
@@ -457,33 +385,13 @@
                     const isVisible = mobileSearch.style.display !== 'none';
 
                     if (isVisible) {
-                        // Hide the search with smooth animation
-                        mobileSearch.style.opacity = '0';
-                        mobileSearch.style.transform = 'translateY(-10px)';
-
-                        setTimeout(() => {
-                            mobileSearch.style.display = 'none';
-                            mobileSearch.style.opacity = '1';
-                            mobileSearch.style.transform = 'translateY(0)';
-                        }, 300);
-
-                         toggleIcon.classList.remove('fa-chevron-up');
-                         toggleIcon.classList.add('fa-chevron-down');
-                        
+                        mobileSearch.style.display = 'none';
+                        toggleIcon.classList.remove('fa-chevron-up');
+                        toggleIcon.classList.add('fa-chevron-down');
                     } else {
-                        // Show the search with smooth animation
                         mobileSearch.style.display = 'block';
-                        mobileSearch.style.opacity = '0';
-                        mobileSearch.style.transform = 'translateY(-10px)';
-
-                        setTimeout(() => {
-                            mobileSearch.style.opacity = '1';
-                            mobileSearch.style.transform = 'translateY(0)';
-                        }, 10);
-
-                         toggleIcon.classList.remove('fa-chevron-down');
-                         toggleIcon.classList.add('fa-chevron-up');
-                       
+                        toggleIcon.classList.remove('fa-chevron-down');
+                        toggleIcon.classList.add('fa-chevron-up');
                     }
                 });
             }

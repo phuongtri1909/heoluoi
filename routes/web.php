@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Client\AuthController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\UserController;
@@ -13,15 +13,17 @@ use App\Http\Controllers\Client\CommentController;
 use App\Http\Controllers\Client\DepositController;
 use App\Http\Controllers\Client\ReadingController;
 use App\Http\Controllers\Client\SitemapController;
+use App\Http\Controllers\Client\BankAutoController;
 use App\Http\Controllers\Client\BookmarkController;
+use App\Http\Controllers\Client\FacebookController;
 use App\Http\Controllers\Client\PurchaseController;
+use App\Http\Controllers\Client\ZaloAuthController;
 use App\Http\Controllers\Client\DailyTaskController;
 use App\Http\Controllers\Client\StoryComboController;
 use App\Http\Controllers\Client\CardDepositController;
 use App\Http\Controllers\Client\CoinHistoryController;
 use App\Http\Controllers\Client\PaypalDepositController;
 use App\Http\Controllers\Client\RequestPaymentController;
-use App\Http\Controllers\Client\BankAutoController;
 
 
 // Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
@@ -53,6 +55,7 @@ Route::middleware(['ban:login', 'block.devtools'])->group(function () {
     Route::get('story-completed', [HomeController::class, 'showCompletedStories'])->name('story.completed');
 
     Route::get('/categories-story/{slug}', [HomeController::class, 'showStoryCategories'])->name('categories.story.show');
+    Route::get('/tag/{slug}', [HomeController::class, 'showStoriesByTag'])->name('tag.stories');
 
     Route::get('story/{slug}', [HomeController::class, 'showStory'])->name('show.page.story');
     Route::get('/story/{storyId}/chapters', [HomeController::class, 'getStoryChapters'])->name('chapters.list');
@@ -105,6 +108,9 @@ Route::middleware(['ban:login', 'block.devtools'])->group(function () {
         Route::get('/daily-tasks/status', [DailyTaskController::class, 'getTodayStatus'])->name('daily-tasks.status');
         Route::get('/daily-tasks/history', [DailyTaskController::class, 'getHistory'])->name('daily-tasks.history');
 
+        Route::get('notifications/{notification}', [\App\Http\Controllers\Client\NotificationController::class, 'show'])->name('notifications.show');
+        Route::post('notifications/{notification}/mark-read', [\App\Http\Controllers\Client\NotificationController::class, 'markRead'])->name('notifications.mark-read');
+
         Route::withoutMiddleware('block.devtools')->group(function () {
             //đóng bank thủ công
             // Route::get('/deposit', [DepositController::class, 'index'])->name('deposit');
@@ -153,30 +159,23 @@ Route::middleware(['ban:login', 'block.devtools'])->group(function () {
     });
 
     Route::group(['middleware' => 'guest'], function () {
-        Route::get('/login', function (Request $request) {
-            $redirectUrl = $request->query('redirect');
-            if (!$redirectUrl) {
-                $redirectUrl = $request->headers->get('referer');
-            }
-            if ($redirectUrl && $redirectUrl !== route('login') && $redirectUrl !== route('register') && $redirectUrl !== route('forgot-password')) {
-                session(['url.intended' => $redirectUrl]);
-            }
-            return view('pages.auth.login');
-        })->name('login');
+        Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
         Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 
-        Route::get('/register', function () {
-            return view('pages.auth.register');
-        })->name('register');
+        Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
         Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 
-        Route::get('/forgot-password', function () {
-            return view('pages.auth.forgot-password');
-        })->name('forgot-password');
+        Route::get('/forgot-password', [AuthController::class, 'showForgotPassword'])->name('forgot-password');
         Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('forgot.password');
 
         Route::get('auth/google', [AuthController::class, 'redirectToGoogle'])->name('login.google');
         Route::get('auth/google/direct', [AuthController::class, 'redirectToGoogleDirect'])->name('login.google.direct');
         Route::get('auth/google/callback', [AuthController::class, 'handleGoogleCallback']);
+
+        Route::get('auth/facebook', [FacebookController::class, 'redirectToFacebook'])->name('login.facebook');
+        Route::get('auth/facebook/callback', [FacebookController::class, 'handleFacebookCallback'])->name('login.facebook.callback');
+        
+        Route::get('/auth/zalo', [ZaloAuthController::class, 'redirect'])->name('login.zalo');
+        Route::get('/auth/zalo/callback', [ZaloAuthController::class, 'callback'])->name('login.zalo.callback');
     });
 });

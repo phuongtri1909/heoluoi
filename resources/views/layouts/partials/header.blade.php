@@ -70,260 +70,98 @@
         <nav
             class="navbar navbar-expand-lg fixed-top transition-header chapter-header scrolled bg-site shadow-sm py-0 d-block">
             <div class="container">
-                <div class="d-flex align-items-center justify-content-between w-100">
-                    <a class="navbar-brand p-0" href="{{ route('home') }}">
-                        <img height="100" src="{{ $logoPath }}" alt="{{ config('app.name') }} logo">
+                <div class="d-flex align-items-center justify-content-between w-100 header-row-modern">
+                    <a class="navbar-brand p-0 header-brand" href="{{ route('home') }}">
+                        <img height="80" class="header-logo-img" src="{{ $logoPath }}" alt="{{ config('app.name') }} logo">
                     </a>
 
-                    <div class="list-menu d-none d-lg-block">
-                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
-                            <li class="nav-item">
-                                <a class="color-2 nav-link fw-bold fs-3 font-svn-apple" href="{{ route('home') }}">
-                                    Trang chủ
-                                </a>
-                            </li>
-                            <li class="nav-item dropdown">
-                                <a class="color-2 nav-link dropdown-toggle fw-bold fs-3 d-flex align-items-baseline font-svn-apple"
-                                    href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Thể loại
-                                </a>
-                                <ul class="dropdown-menu category-menu" style="max-height: 400px; overflow-y: auto;">
-                                    <div class="row px-2">
-                                        @foreach ($categories->chunk(ceil($categories->count() / 3)) as $categoryGroup)
-                                            <div class="col-4">
-                                                @foreach ($categoryGroup as $category)
-                                                    <li>
-                                                        <a class="dropdown-item"
-                                                            href="{{ route('categories.story.show', $category->slug) }}">
-                                                            {{ $category->name }}
-                                                            <span
-                                                                class="badge bg-secondary float-end">{{ $category->stories_count }}</span>
-                                                        </a>
-                                                    </li>
-                                                @endforeach
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </ul>
-                            </li>
-                            <li class="nav-item">
-                                <a class="color-2 nav-link fw-bold fs-3 font-svn-apple" href="{{ route('story.completed') }}">
-                                    Truyện Full
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="color-2 nav-link fw-bold fs-3 font-svn-apple" href="{{ route('guide.show') }}">
-                                    Hướng dẫn nạp
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div class="d-flex align-items-center d-none d-sm-block d-lg-none d-xl-block">
-                        <div class="search-container d-flex align-items-center me-2">
-                            <div class="position-relative">
-                                <form action="{{ route('searchHeader') }}" method="GET">
-                                    <input type="text" name="query" class="form-control search-input"
-                                        placeholder="Tìm kiếm ..." value="{{ request('query') }}">
-                                    <button type="submit" class="btn search-btn">
-                                        <i class="fas fa-search"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="align-items-center d-none d-lg-flex">
-
-                        <button type="button" class="btn border rounded-pill bg-primary-1 d-none d-lg-block d-xl-none me-2"
-                            style="width: 40px; height: 40px;" id="mobileSearchToggle">
+                    <div class="d-flex align-items-center header-icons gap-1 gap-sm-2">
+                        <a href="{{ route('searchHeader') }}" class="btn header-icon-btn text-dark rounded-circle d-flex align-items-center justify-content-center bg-4" title="Tìm kiếm">
                             <i class="fas fa-search"></i>
-                        </button>
+                        </a>
 
                         @auth
-                            <a class="color-2 fw-bold nav-link " href="{{ route('login') }}">
-                                <div class="dropdown">
-                                    <a href="#"
-                                        class="d-flex align-items-center text-decoration-none dropdown-toggle color-3 fs-3 fw-bold"
-                                        data-bs-toggle="dropdown">
-                                        <img src="{{ auth()->user()->avatar ? Storage::url(auth()->user()->avatar) : asset('images/defaults/avatar_default.jpg') }}"
-                                            class="rounded-circle" width="40" height="40" alt="avatar"
-                                            style="object-fit: cover;">
-
-                                        {{-- <span class="ms-2 font-svn-apple">{{ auth()->user()->name }}</span> --}}
-                                    </a>
-
-                                    <ul class="dropdown-menu dropdown-menu-end animate slideIn border-cl-shopee">
-                                        @if (auth()->user()->role === 'admin_main' || auth()->user()->role === 'admin_sub')
-                                            <li>
-                                                <a class="dropdown-item fw-semibold color-4"
-                                                    href="{{ route('admin.dashboard') }}">
-                                                    <i class="fas fa-tachometer-alt me-2 color-4"></i> Quản trị
-                                                </a>
-                                            </li>
-                                        @endif
-
+                            @php
+                                $userNotifications = \App\Models\Notification::forUserWithReadStatus(auth()->id())->latest('notifications.created_at')->limit(15)->get();
+                                $userNotificationsUnread = \App\Models\Notification::unreadCountForUser(auth()->id());
+                            @endphp
+                            <div class="dropdown position-relative">
+                                <a href="#" class="btn header-icon-btn rounded-circle d-flex align-items-center justify-content-center text-decoration-none color-2 position-relative" data-bs-toggle="dropdown" aria-expanded="false" title="Thông báo">
+                                    <i class="fa-regular fa-bell fa-xl"></i>
+                                    @if($userNotificationsUnread > 0)
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger notification-badge" style="font-size: 0.65rem;">{{ $userNotificationsUnread > 9 ? '9+' : $userNotificationsUnread }}</span>
+                                    @endif
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end animate slideIn border-cl-shopee notification-dropdown" style="min-width: 320px; max-width: 380px;">
+                                    <li class="px-3 py-2 border-bottom"><strong>Thông báo</strong></li>
+                                    @forelse($userNotifications as $notif)
                                         <li>
-                                            <a class="dropdown-item fw-semibold color-2"
-                                                href="{{ route('user.profile') }}">
-                                                <i class="fa-regular fa-circle-user me-2 color-2"></i> {{ auth()->user()->name }}</span>
+                                            <a href="#" class="notification-item d-block px-3 py-2 text-decoration-none text-dark {{ $notif->user_read_at ? '' : 'bg-light' }}"
+                                               data-notification-id="{{ $notif->id }}">
+                                                <div class="fw-semibold text-dark text-truncate" style="max-width: 100%;" title="{{ $notif->title }}">{{ $notif->title }}</div>
+                                                <div class="small text-muted text-truncate" style="max-width: 100%;" title="{{ Str::limit(strip_tags($notif->body), 100) }}">{{ Str::limit(strip_tags($notif->body), 50) }}</div>
+                                                <div class="small text-muted mt-1">{{ $notif->created_at->diffForHumans() }}</div>
                                             </a>
                                         </li>
-
-                                        <li>
-                                            <a class="dropdown-item fw-semibold color-3" href="{{ route('logout') }}">
-                                                <i class="fas fa-sign-out-alt me-2 color-3"></i> Đăng xuất
-                                            </a>
-                                        </li>
-                                    </ul>
+                                    @empty
+                                        <li><div class="dropdown-item-text text-muted px-3 py-3">Chưa có thông báo nào.</div></li>
+                                    @endforelse
+                                </ul>
+                            </div>
+                            <div class="modal fade notification-modal-modern" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
+                                <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                                    <div class="modal-content notification-modal-content">
+                                        <div class="modal-header notification-modal-header">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="notification-modal-icon"><i class="fas fa-bell"></i></div>
+                                                <h5 class="modal-title mb-0" id="notificationModalLabel">Thông báo</h5>
+                                            </div>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                                        </div>
+                                        <div class="modal-body notification-modal-body">
+                                            <div class="notification-modal-title fw-bold mb-2"></div>
+                                            <div class="notification-modal-meta small mb-3"></div>
+                                            <div class="notification-modal-body-text"></div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </a>
+                            </div>
+                            <div class="dropdown">
+                                <a href="#" class="btn header-icon-btn rounded-circle p-0 d-flex align-items-center justify-content-center text-decoration-none" data-bs-toggle="dropdown" title="Tài khoản">
+                                    <img src="{{ auth()->user()->avatar ? Storage::url(auth()->user()->avatar) : asset('images/defaults/avatar_default.jpg') }}"
+                                        class="rounded-circle header-avatar" width="36" height="36" alt="avatar"
+                                        style="object-fit: cover;">
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end animate slideIn border-cl-shopee">
+                                    @if (auth()->user()->role === 'admin_main' || auth()->user()->role === 'admin_sub')
+                                        <li>
+                                            <a class="dropdown-item fw-semibold color-4"
+                                                href="{{ route('admin.dashboard') }}">
+                                                <i class="fas fa-tachometer-alt me-2 color-4"></i> Quản trị
+                                            </a>
+                                        </li>
+                                    @endif
+                                    <li>
+                                        <a class="dropdown-item fw-semibold color-2"
+                                            href="{{ route('user.profile') }}">
+                                            <i class="fa-regular fa-circle-user me-2 color-2"></i> {{ auth()->user()->name }}
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item fw-semibold color-3" href="{{ route('logout') }}">
+                                            <i class="fas fa-sign-out-alt me-2 color-3"></i> Đăng xuất
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
                         @else
-                            <a href="{{ route('login') }}"
-                                class="btn align-items-center fw-bold color-3 fs-3 font-svn-apple"> <i
-                                    class="fa-regular fa-circle-user fa-lg me-2 color-3"></i> Đăng nhập</a>
+                            <a href="{{ route('login') }}" class="btn header-icon-btn rounded-circle d-flex align-items-center justify-content-center text-decoration-none color-2" title="Đăng nhập">
+                                <i class="fa-regular fa-circle-user"></i>
+                            </a>
                         @endauth
-                    </div>
-
-                    <div class="d-flex d-lg-none">
-                        <button type="button" class="btn border rounded-pill bg-primary-1 d-sm-none"
-                            style="width: 40px; height: 40px;" id="mobileSearchToggle">
-                            <i class="fas fa-search"></i>
-                        </button>
-
-                        <!-- Mobile Menu Toggle Button - Visible on screens smaller than lg -->
-                        <button class="navbar-toggler border-0 d-block d-lg-none" type="button"
-                            data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample">
-                            <i class="fa-solid fa-bars fa-xl"></i>
-                        </button>
                     </div>
                 </div>
         </nav>
-
-        <!-- Mobile Menu - Offcanvas -->
-        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasExample">
-            <div class="offcanvas-header">
-
-                <a class="navbar-brand" href="{{ route('home') }}">
-                    <img height="50" src="{{ $logoPath }}" alt="{{ config('app.name') }} logo">
-                </a>
-
-                <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
-            </div>
-            <div class="offcanvas-body">
-                <!-- Navigation Links -->
-                <div class="mobile-section">
-                    <div class="mobile-nav-links d-flex flex-column">
-
-                        <div class="search-container d-flex align-items-center d-md-none">
-                            <div class="position-relative">
-                                <form action="{{ route('searchHeader') }}" method="GET">
-                                    <input type="text" name="query" class="form-control search-input"
-                                        placeholder="Tìm kiếm truyện..." value="{{ request('query') }}">
-                                    <button type="submit" class="btn search-btn">
-                                        <i class="fas fa-search"></i>
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-
-                        <hr class="divider my-3">
-
-                        <a href="{{ route('home') }}" class="mobile-menu-item fw-semibold fs-3 color-2 font-svn-apple">
-                            Trang chủ
-                        </a>
-
-                        <hr class="divider my-3">
-
-                        <div class="accordion" id="categoryAccordion">
-                            <div class="accordion-item border-0">
-                                <h2 class="accordion-header" id="categoryHeading">
-                                    <button
-                                        class="accordion-button collapsed mobile-menu-item p-0 fw-semibold fs-3 color-2 font-svn-apple"
-                                        type="button" data-bs-toggle="collapse" data-bs-target="#categoryCollapse">
-                                        Thể loại
-                                    </button>
-                                </h2>
-                                <div id="categoryCollapse" class="accordion-collapse collapse"
-                                    data-bs-parent="#categoryAccordion">
-                                    <div class="accordion-body p-0 mt-2">
-                                        <div class="row g-0">
-                                            @foreach ($categories->chunk(ceil($categories->count() / 2)) as $categoryGroup)
-                                                <div class="col-6">
-                                                    @foreach ($categoryGroup as $category)
-                                                        <a class="mobile-menu-item ps-3 py-2 d-block color-2 fs-6"
-                                                            href="{{ route('categories.story.show', $category->slug) }}">
-                                                            {{ $category->name }}
-                                                        </a>
-                                                    @endforeach
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <hr class="divider my-3">
-
-                        <a href="{{ route('story.completed') }}" class="mobile-menu-item fw-semibold fs-3 color-2 font-svn-apple">
-                            Truyện Full
-                        </a>
-
-                        <hr class="divider my-3">
-
-                        <a href="{{ route('guide.show') }}" class="mobile-menu-item fw-semibold fs-3 color-2 font-svn-apple">
-                            Hướng dẫn nạp
-                        </a>
-
-                        <hr class="divider my-3">
-
-                        @auth
-                            <div class="accordion" id="userAccordion">
-                                <div class="accordion-item border-0">
-                                    <h2 class="accordion-header" id="userHeading">
-                                        <button class="accordion-button collapsed mobile-menu-item p-0 color-2 fs-3"
-                                            type="button" data-bs-toggle="collapse" data-bs-target="#userCollapse">
-                                            <img src="{{ auth()->user()->avatar ? Storage::url(auth()->user()->avatar) : asset('images/defaults/avatar_default.jpg') }}"
-                                                class="rounded-circle me-2" width="40" height="40" alt="avatar"
-                                                style="object-fit: cover;">
-                                            <span class="fw-semibold fs-3 font-svn-apple">{{ auth()->user()->name }}</span>
-                                        </button>
-                                    </h2>
-                                    <div id="userCollapse" class="accordion-collapse collapse"
-                                        data-bs-parent="#userAccordion">
-                                        <div class="accordion-body p-0 mt-2">
-                                            @if (auth()->user()->role === 'admin_main' || auth()->user()->role === 'admin_sub')
-                                                <a class="mobile-menu-item ps-3 py-2 d-block fw-semibold color-4"
-                                                    href="{{ route('admin.dashboard') }}">
-                                                    <i class="fas fa-tachometer-alt me-2 color-4"></i> Quản trị
-                                                </a>
-                                            @endif
-
-                                            <a class="mobile-menu-item ps-3 py-2 d-block fw-semibold color-2"
-                                                href="{{ route('user.profile') }}">
-                                                <i class="fas fa-user me-2 color-2"></i> Trang cá nhân
-                                            </a>
-
-                                            <a class="mobile-menu-item ps-3 py-2 d-block fw-semibold color-3"
-                                                href="{{ route('logout') }}">
-                                                <i class="fas fa-sign-out-alt me-2 color-3"></i> Đăng xuất
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @else
-                            <a href="{{ route('login') }}" class="mobile-menu-item fw-semibold color-3 fs-3">
-                                <i class="fa-regular fa-circle-user fa-lg me-2 color-3"></i> Đăng nhập
-                            </a>
-                        @endauth
-
-                    </div>
-                </div>
-            </div>
-        </div>
     </header>
 
     <script>
@@ -332,91 +170,77 @@
             const scrollThreshold = 50;
 
             function handleScroll() {
-                if (window.scrollY > scrollThreshold) {
-                    header.classList.add('scrolled');
-                } else {
-                    header.classList.remove('scrolled');
+                if (header) {
+                    if (window.scrollY > scrollThreshold) {
+                        header.classList.add('scrolled');
+                    } else {
+                        header.classList.remove('scrolled');
+                    }
                 }
             }
 
-            window.addEventListener('scroll', handleScroll);
-
+            window.addEventListener('scroll', handleScroll, { passive: true });
             handleScroll();
         });
-
 
         document.addEventListener('DOMContentLoaded', function() {
-
             const searchForm = document.querySelector('.search-container form');
-            const searchInput = searchForm.querySelector('input[name="query"]');
-
-            searchForm.addEventListener('submit', function(e) {
-                if (searchInput.value.trim() === '') {
-                    e.preventDefault();
-                    searchInput.focus();
-                }
-            });
-
-            document.querySelector('.search-container').addEventListener('click', function() {
-                searchInput.focus();
-            });
-        });
-
-        document.addEventListener("DOMContentLoaded", function() {
-            const header = document.querySelector(".transition-header");
-            const scrollThreshold = 300;
-
-            function handleScroll() {
-                if (window.scrollY > scrollThreshold) {
-                    header.classList.add("scrolled");
-                } else {
-                    header.classList.remove("scrolled");
-                }
-            }
-
-            window.addEventListener("scroll", handleScroll);
-            handleScroll();
-
-            const searchForm = document.querySelector(".search-container form");
             if (searchForm) {
                 const searchInput = searchForm.querySelector('input[name="query"]');
-
-                searchForm.addEventListener("submit", function(e) {
-                    if (searchInput.value.trim() === "") {
-                        e.preventDefault();
-                        searchInput.focus();
-                    }
-                });
-
-                document.querySelector(".search-container").addEventListener("click", function() {
-                    searchInput.focus();
-                });
-            }
-
-            const mobileSearchToggle = document.getElementById("mobileSearchToggle");
-            const mobileSearchContainer = document.getElementById("mobileSearchContainer");
-            const mobileSearchInput = document.getElementById("mobileSearchInput");
-
-            if (mobileSearchToggle && mobileSearchContainer) {
-                mobileSearchToggle.addEventListener("click", function() {
-                    if (mobileSearchContainer.style.display === "none" || mobileSearchContainer.style
-                        .display === "") {
-                        mobileSearchContainer.style.display = "block";
-
-                        window.scrollTo({
-                            top: 0,
-                            behavior: "smooth"
+                if (searchInput) {
+                    searchForm.addEventListener('submit', function(e) {
+                        if (searchInput.value.trim() === '') {
+                            e.preventDefault();
+                            searchInput.focus();
+                        }
+                    });
+                    const container = document.querySelector('.search-container');
+                    if (container) {
+                        container.addEventListener('click', function() {
+                            searchInput.focus();
                         });
-
-                        setTimeout(() => {
-                            if (mobileSearchInput) {
-                                mobileSearchInput.focus();
-                            }
-                        }, 500);
-                    } else {
-                        mobileSearchContainer.style.display = "none";
                     }
-                });
+                }
             }
+
+            document.querySelectorAll('.notification-item').forEach(function(el) {
+                el.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    var id = this.getAttribute('data-notification-id');
+                    if (!id) return;
+                    var showUrl = '{{ url("/user/notifications") }}/' + id;
+                    var markReadUrl = '{{ url("/user/notifications") }}/' + id + '/mark-read';
+                    var modal = document.getElementById('notificationModal');
+                    if (!modal) return;
+                    var modalTitle = modal.querySelector('.notification-modal-title');
+                    var modalMeta = modal.querySelector('.notification-modal-meta');
+                    var modalBody = modal.querySelector('.notification-modal-body-text');
+                    modalTitle.textContent = '';
+                    modalMeta.textContent = '';
+                    modalBody.textContent = 'Đang tải...';
+                    var bsModal = bootstrap.Modal.getOrCreateInstance(modal);
+                    bsModal.show();
+                    fetch(showUrl, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
+                        .then(function(r) { return r.json(); })
+                        .then(function(data) {
+                            modalTitle.textContent = data.title || '';
+                            modalMeta.textContent = data.created_at || '';
+                            modalBody.innerHTML = (data.body || '').replace(/\n/g, '<br>');
+                            fetch(markReadUrl, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'X-Requested-With': 'XMLHttpRequest' }
+                            }).then(function() {
+                                el.classList.remove('bg-light');
+                                var badge = document.querySelector('.notification-badge');
+                                if (badge) {
+                                    var n = parseInt(badge.textContent, 10) || 0;
+                                    if (n > 1) badge.textContent = (n - 1) > 9 ? '9+' : (n - 1);
+                                    else { badge.remove(); }
+                                }
+                            });
+                        })
+                        .catch(function() { modalBody.textContent = 'Không tải được nội dung.'; });
+                });
+            });
         });
     </script>

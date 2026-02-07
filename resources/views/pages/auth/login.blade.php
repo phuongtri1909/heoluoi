@@ -31,6 +31,18 @@
                             Đăng nhập với Google
                         </a>
 
+                        <a href="{{ route('login.facebook') }}" class="btn w-100 mb-3 border auth-btn text-dark">
+                            <img src="{{ asset('images/svg/facebook.svg') }}" alt="Facebook" class="me-2"
+                                height="30">
+                            Đăng nhập với Facebook
+                        </a>
+
+                        <a href="{{ route('login.zalo') }}" class="btn w-100 mb-3 border auth-btn text-dark">
+                            <img src="{{ asset('images/svg/zalo.svg') }}" alt="Zalo" class="me-2"
+                                height="30">
+                            Đăng nhập với Zalo
+                        </a>
+
                         <div class="d-flex align-items-center text-center my-4">
                             <hr class="flex-grow-1 border-top border-secondary">
                             <span class="px-2 text-dark">hoặc</span>
@@ -77,10 +89,12 @@
 
                             <button type="submit" class="auth-btn btn w-100 border">Đăng Nhập</button>
 
+                            @if($showRegisterLink ?? false)
                             <div class="text-center mt-4">
                                 <span>Chưa có tài khoản? </span>
                                 <a href="{{ route('register') }}" class="auth-link text-decoration-none color-3">Đăng ký ngay</a>
                             </div>
+                            @endif
                         </form>
                     </div>
                 </div>

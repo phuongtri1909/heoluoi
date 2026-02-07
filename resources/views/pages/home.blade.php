@@ -13,15 +13,19 @@
                 ])
 
             </div>
-            <div class="col-12 col-md-6">
+            <div class="col-12 col-md-6" style="border-left: 2px solid var(--primary-color-10);">
                 @include('components.hot_stories')
-                @include('components.currently_reading', ['currentlyReading' => $currentlyReading])
             </div>
         </div>
 
-        @if ($completedStories->count() > 0)
-            @include('components.list_story_full', ['completedStories' => $completedStories])
+        @if (isset($tagSections) && $tagSections->isNotEmpty())
+            @include('components.list_story_by_tag', ['tagSections' => $tagSections])
         @endif
 
+        @if (isset($categories) && $categories->count() > 0)
+            @include('components.list_categories', ['categories' => $categories])
+        @endif
+
+        
     </section>
 @endsection

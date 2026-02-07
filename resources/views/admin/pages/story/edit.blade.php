@@ -130,6 +130,17 @@
                                 </div>
 
                                 <div class="form-group mt-3">
+                                    <label for="search_keywords">Từ khóa tìm kiếm</label>
+                                    <textarea name="search_keywords" id="search_keywords" rows="3"
+                                        class="form-control @error('search_keywords') is-invalid @enderror"
+                                        placeholder="Phân cách bằng dấu phẩy. VD: Phù Liên Bất Vi Quân, Phù Liên, Bất Vi Quân">{{ old('search_keywords', $story->keywords->pluck('keyword')->join(', ')) }}</textarea>
+                                    <small class="form-text text-muted">Các từ khóa giúp người đọc tìm được truyện khi search (tên cũ, biệt danh,...). Khi đổi tên truyện, thêm tên cũ vào đây.</small>
+                                    @error('search_keywords')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="form-group mt-3">
                                     <label for="story_type">Loại truyện <span class="text-danger">*</span></label>
                                     <select name="story_type" id="story_type" class="form-control @error('story_type') is-invalid @enderror">
                                         <option value="">-- Chọn loại truyện --</option>
@@ -192,6 +203,19 @@
                                         <!-- Hidden inputs will be generated dynamically by JavaScript -->
                                     </div>
                                     @error('categories')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="tag_id">Chủ đề (Tag)</label>
+                                    <select name="tag_id" id="tag_id" class="form-control @error('tag_id') is-invalid @enderror">
+                                        <option value="">-- Không chọn --</option>
+                                        @foreach ($tags as $tag)
+                                            <option value="{{ $tag->id }}" {{ old('tag_id', $story->tag_id) == $tag->id ? 'selected' : '' }}>{{ $tag->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('tag_id')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>

@@ -23,7 +23,7 @@
                                     Nội dung sẽ được tự động phân tích và trích xuất theo định dạng:
                                     <strong>"Chương [số]: [tên chương]"</strong>
                                 </div>
-                                <textarea class="form-control" id="sampleContent" rows="10" placeholder="Paste nội dung từ file mẫu vào đây..."></textarea>
+                                <textarea class="form-control" id="sampleContent" rows="30" placeholder="Paste nội dung từ file mẫu vào đây..."></textarea>
                             </div>
 
                             <!-- Global Settings -->

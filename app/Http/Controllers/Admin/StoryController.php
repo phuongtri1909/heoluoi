@@ -99,7 +99,8 @@ class StoryController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('description', 'like', "%{$search}%")
-                    ->orWhere('author_name', 'like', "%{$search}%");
+                    ->orWhere('author_name', 'like', "%{$search}%")
+                    ->orWhereHas('keywords', fn ($kw) => $kw->where('keyword', 'like', "%{$search}%"));
             });
         }
 
@@ -131,8 +132,9 @@ class StoryController extends Controller
     public function create()
     {
         $categories = Category::all();
+        $tags = \App\Models\Tag::orderBy('name')->get();
         $adminUsers = \App\Models\User::whereIn('role', ['admin_main', 'admin_sub'])->get();
-        return view('admin.pages.story.create', compact('categories', 'adminUsers'));
+        return view('admin.pages.story.create', compact('categories', 'tags', 'adminUsers'));
     }
 
     public function store(Request $request)
@@ -149,6 +151,7 @@ class StoryController extends Controller
             'author_name' => 'nullable|string|max:100',
             'featured_order' => 'nullable|integer|min:1',
             'editor_id' => 'nullable|exists:users,id',
+            'tag_id' => 'nullable|exists:tags,id',
         ], [
             'title.required' => 'Tiêu đề không được để trống.',
             'title.max' => 'Tiêu đề không được quá 255 ký tự.',
@@ -170,6 +173,7 @@ class StoryController extends Controller
             'featured_order.integer' => 'Thứ tự đề cử phải là số nguyên.',
             'featured_order.min' => 'Thứ tự đề cử phải lớn hơn 0.',
             'editor_id.exists' => 'Biên tập viên không hợp lệ.',
+            'tag_id.exists' => 'Chủ đề không hợp lệ.',
         ]);
 
         // Validate editor_id if provided
@@ -235,6 +239,7 @@ class StoryController extends Controller
                 'is_featured' => $isFeatured,
                 'featured_order' => $featuredOrder,
                 'editor_id' => $editorId,
+                'tag_id' => $request->tag_id ?: null,
             ]);
 
             $story->categories()->attach($request->categories);
@@ -266,9 +271,10 @@ class StoryController extends Controller
         }
 
         $categories = Category::all();
+        $tags = \App\Models\Tag::orderBy('name')->get();
         $adminUsers = \App\Models\User::whereIn('role', ['admin_main', 'admin_sub'])->get();
         $chapters = $story->chapters()->orderBy('number', 'asc')->get();
-        return view('admin.pages.story.edit', compact('story', 'categories', 'adminUsers', 'chapters'));
+        return view('admin.pages.story.edit', compact('story', 'categories', 'tags', 'adminUsers', 'chapters'));
     }
 
     public function update(Request $request, Story $story)
@@ -290,6 +296,8 @@ class StoryController extends Controller
             'author_name' => 'nullable|string|max:100',
             'featured_order' => 'nullable|integer|min:1',
             'editor_id' => 'nullable|exists:users,id',
+            'search_keywords' => 'nullable|string|max:2000',
+            'tag_id' => 'nullable|exists:tags,id',
         ], [
             'title.required' => 'Tiêu đề không được để trống.',
             'title.max' => 'Tiêu đề không được quá 255 ký tự.',
@@ -310,6 +318,9 @@ class StoryController extends Controller
             'featured_order.integer' => 'Thứ tự đề cử phải là số nguyên.',
             'featured_order.min' => 'Thứ tự đề cử phải lớn hơn 0.',
             'editor_id.exists' => 'Biên tập viên không hợp lệ.',
+            'search_keywords.max' => 'Từ khóa tìm kiếm không được quá 2000 ký tự.',
+            'search_keywords.string' => 'Từ khóa tìm kiếm phải là chuỗi.',
+            'tag_id.exists' => 'Chủ đề không hợp lệ.',
         ]);
 
         // Validate editor_id if provided
@@ -373,6 +384,7 @@ class StoryController extends Controller
                 'is_featured' => $isFeatured,
                 'featured_order' => $featuredOrder,
                 'editor_id' => $editorId,
+                'tag_id' => $request->tag_id ?: null,
             ];
 
             if ($request->hasFile('cover')) {
@@ -389,6 +401,17 @@ class StoryController extends Controller
 
             $story->update($data);
             $story->categories()->sync($request->categories);
+
+            $story->keywords()->delete();
+            $keywordsInput = trim((string) ($request->search_keywords ?? ''));
+            if ($keywordsInput !== '') {
+                $keywords = array_filter(array_map('trim', preg_split('/[\s,;]+/u', $keywordsInput)));
+                foreach (array_unique($keywords) as $kw) {
+                    if ($kw !== '') {
+                        $story->keywords()->create(['keyword' => $kw]);
+                    }
+                }
+            }
 
             DB::commit();
             if (isset($oldImages)) {

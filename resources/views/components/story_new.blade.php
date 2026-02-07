@@ -9,19 +9,12 @@
     </a>
     <div class="story-info-section">
         <a href="{{ route('show.page.story', $story->slug) }}"
-            class="text-decoration-none color-hover fs-5 fw-semibold line-height-05">
+            class="text-decoration-none color-hover fs-5-5 fw-semibold line-height-05">
             {{ $story->title }}
         </a>
         <div class="story-chapter-inline">
 
             <div class="author-chapter-container">
-                @if ($story->author_name)
-                    <p class="mb-0 fs-6 fw-semibold text-dark">{{ $story->author_name }}</p>
-
-                    <span class="chapter-separator fs-6">|</span>
-                @endif
-
-
                 <span class="chapter-wrapper">
                     @if ($story->latestChapter)
                         <a href="{{ route('chapter', ['storySlug' => $story->slug, 'chapterSlug' => $story->latestChapter->slug]) }}"
@@ -87,8 +80,8 @@
             }
 
             .story-image-new {
-                width: 90px;
-                height: 120px;
+                width: 85px;
+                height: 125px;
                 object-fit: cover;
                 display: block;
                 flex-shrink: 0;

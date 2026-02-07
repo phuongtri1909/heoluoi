@@ -164,6 +164,19 @@
                                 </div>
 
                                 <div class="form-group">
+                                    <label for="tag_id">Chủ đề (Tag)</label>
+                                    <select name="tag_id" id="tag_id" class="form-control @error('tag_id') is-invalid @enderror">
+                                        <option value="">-- Không chọn --</option>
+                                        @foreach ($tags as $tag)
+                                            <option value="{{ $tag->id }}" {{ old('tag_id') == $tag->id ? 'selected' : '' }}>{{ $tag->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('tag_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="form-group">
                                     <label for="status">Trạng thái <span class="text-danger">*</span></label>
                                     <select name="status" id="status" class="form-control">
                                         <option value="draft">Bản nháp</option>

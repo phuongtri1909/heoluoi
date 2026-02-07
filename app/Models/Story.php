@@ -25,6 +25,7 @@ class Story extends Model
         'has_combo',
         'is_featured',
         'featured_order',
+        'tag_id',
     ];
 
     const STATUS_DRAFT = 'draft';
@@ -55,6 +56,11 @@ class Story extends Model
     {
         return $this->belongsToMany(Category::class)
             ->withTimestamps();
+    }
+
+    public function tag()
+    {
+        return $this->belongsTo(Tag::class);
     }
 
     public function scopePublished($query)
@@ -278,6 +284,11 @@ class Story extends Model
             return '<span class="badge bg-gradient-warning">Admin đề cử #' . $this->featured_order . '</span>';
         }
         return '';
+    }
+
+    public function keywords()
+    {
+        return $this->hasMany(StoryKeyword::class);
     }
 
     protected $with = ['categories'];

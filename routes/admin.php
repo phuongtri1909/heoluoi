@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
+use App\Http\Controllers\Admin\TagController;
 use App\Http\Controllers\Admin\BankController;
 use App\Http\Controllers\Admin\CoinController;
 use App\Http\Controllers\Admin\UserController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\CardDepositController;
 use App\Http\Controllers\Admin\CoinHistoryController;
 use App\Http\Controllers\Admin\CoinTransferController;
+use App\Http\Controllers\Admin\NotificationController;
 use App\Http\Controllers\Admin\ChapterReportController;
 use App\Http\Controllers\Admin\PaypalDepositController;
 use App\Http\Controllers\Admin\ManualPurchaseController;
@@ -56,6 +58,17 @@ Route::group(['as' => 'admin.', 'middleware' => 'block.devtools.admin'], functio
             Route::get('/users/{id}/load-more', [UserController::class, 'loadMoreData'])->name('users.load-more');
 
 
+            // Thông báo (gửi hàng loạt / gửi riêng)
+            Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+            Route::get('notifications/create', [NotificationController::class, 'create'])->name('notifications.create');
+            Route::post('notifications', [NotificationController::class, 'store'])->name('notifications.store');
+            Route::get('notifications/{notification}/edit', [NotificationController::class, 'edit'])->name('notifications.edit');
+            Route::put('notifications/{notification}', [NotificationController::class, 'update'])->name('notifications.update');
+            Route::delete('notifications/{notification}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+            Route::get('notifications/users-search', [NotificationController::class, 'usersSearch'])->name('notifications.users-search');
+            Route::get('notifications/users-search-count', [NotificationController::class, 'usersSearchCount'])->name('notifications.users-search-count');
+            Route::get('notifications/users-search-preview', [NotificationController::class, 'usersSearchPreview'])->name('notifications.users-search-preview');
+
             Route::middleware(['role:admin_main'])->group(function () {
                 Route::get('coins', [CoinController::class, 'index'])->name('coins.index');
                 Route::get('coin-history', [CoinHistoryController::class, 'index'])->name('coin-history.index');
@@ -69,6 +82,7 @@ Route::group(['as' => 'admin.', 'middleware' => 'block.devtools.admin'], functio
             });
 
             Route::resource('categories', CategoryController::class);
+            Route::resource('tags', TagController::class)->except(['show']);
             Route::resource('stories', StoryController::class);
             Route::patch('/stories/{story}/toggle-featured', [StoryController::class, 'toggleFeatured'])->name('stories.toggle-featured'); // NEW
             Route::post('/stories/bulk-featured', [StoryController::class, 'bulkUpdateFeatured'])->name('stories.bulk-featured');

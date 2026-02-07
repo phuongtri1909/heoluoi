@@ -47,4 +47,16 @@ return [
         'api_url' => env('CASSO_API_URL', 'https://api.casso.vn'),
     ],
 
+    'facebook' => [
+        'client_id' => env('FACEBOOK_CLIENT_ID'),
+        'client_secret' => env('FACEBOOK_CLIENT_SECRET'),
+        'redirect' => env('FACEBOOK_REDIRECT_URL'),
+    ],
+
+    'zalo' => [
+        'app_id'   => env('ZALO_APP_ID'),
+        'secret'   => env('ZALO_APP_SECRET'),
+        'redirect' => env('ZALO_REDIRECT_URI'),
+    ],
+
 ];

@@ -64,6 +64,17 @@
             </li>
 
             <li class="nav-item">
+                <a class="nav-link {{ Route::currentRouteNamed('admin.tags.*') ? 'active' : '' }}"
+                    href="{{ route('admin.tags.index') }}">
+                    <div
+                        class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="fa-solid fa-tags text-dark icon-sidebar"></i>
+                    </div>
+                    <span class="nav-link-text ms-1">Chủ đề (Tag)</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
                 <a class="nav-link {{ Route::currentRouteNamed('admin.stories.*', 'admin.stories.chapters.*') ? 'active' : '' }}"
                     href="{{ route('admin.stories.index') }}">
                     <div
@@ -239,6 +250,17 @@
                         <i class="fa-solid fa-users text-dark icon-sidebar"></i>
                     </div>
                     <span class="nav-link-text ms-1">Danh sách User</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('admin.notifications.*') ? 'active' : '' }}"
+                    href="{{ route('admin.notifications.index') }}">
+                    <div
+                        class="icon icon-shape icon-sm shadow border-radius-md bg-white text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="fa-solid fa-bell text-dark icon-sidebar"></i>
+                    </div>
+                    <span class="nav-link-text ms-1">Gửi thông báo</span>
                 </a>
             </li>
 

@@ -85,7 +85,7 @@
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <label for="content">Nội dung</label>
-                                    <textarea name="content" id="content" class="form-control" rows="5" required>{{ old('content') }}</textarea>
+                                    <textarea name="content" id="content" class="form-control" rows="20" required>{{ old('content') }}</textarea>
                                     @error('content-')
                                         <div class="text-danger">{{ $message }}</div>
                                     @enderror

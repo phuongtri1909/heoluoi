@@ -29,37 +29,39 @@ class AuthController
     }
 
     /**
-     * Check if email is super admin
-     * 
-     * @param string $email
-     * @return bool
+     * Check if registration (đăng ký) is enabled
+     * Login bằng mật khẩu luôn được phép, chỉ đóng đăng ký tài khoản mới khi config = 0
      */
-    private function isSuperAdmin(string $email): bool
+    public static function isRegisterEnabled(): bool
     {
-        $superAdminEmails = env('SUPER_ADMIN_EMAILS', '');
-        if (empty($superAdminEmails)) {
-            return false;
-        }
-        
-        $emails = array_map('trim', explode(',', $superAdminEmails));
-        return in_array(strtolower(trim($email)), array_map('strtolower', $emails));
+        return (int)Config::getConfig('enable_register', 0) === 1;
     }
 
-    /**
-     * Check if email/password login is enabled or user is super admin
-     * 
-     * @param string|null $email
-     * @return bool
-     */
-    private function isEmailPasswordLoginEnabled(?string $email = null): bool
+    public function showLogin(Request $request)
     {
-        // Super admin can always login
-        if ($email && $this->isSuperAdmin($email)) {
-            return true;
+        $redirectUrl = $request->query('redirect');
+        if (!$redirectUrl) {
+            $redirectUrl = $request->headers->get('referer');
         }
-        
-        // Check config for regular users
-        return (int)Config::getConfig('enable_email_password_login', 0) === 1;
+        if ($redirectUrl && $redirectUrl !== route('login') && $redirectUrl !== route('register') && $redirectUrl !== route('forgot-password')) {
+            session(['url.intended' => $redirectUrl]);
+        }
+        return view('pages.auth.login', [
+            'showRegisterLink' => self::isRegisterEnabled(),
+        ]);
+    }
+
+    public function showRegister()
+    {
+        if (!self::isRegisterEnabled()) {
+            return redirect()->route('login')->with('info', 'Tạm thời đóng đăng ký tài khoản mới. Vui lòng đăng nhập với tài khoản đã có.');
+        }
+        return view('pages.auth.register');
+    }
+
+    public function showForgotPassword()
+    {
+        return view('pages.auth.forgot-password');
     }
 
     public function redirectToGoogle(Request $request)
@@ -110,9 +112,19 @@ class AuthController
     {
         try {
             $googleUser = Socialite::driver('google')->user();
-            $existingUser = User::where('email', $googleUser->getEmail())->first();
+            $existingUser = User::where('google_id', $googleUser->getId())->first();
+            if (!$existingUser && $googleUser->getEmail()) {
+                $existingUser = User::where('email', $googleUser->getEmail())
+                    ->whereNull('google_id')
+                    ->whereNull('facebook_id')
+                    ->whereNull('zalo_id')
+                    ->first();
+            }
 
             if ($existingUser) {
+                if (!$existingUser->google_id) {
+                    $existingUser->google_id = $googleUser->getId();
+                }
                 $existingUser->active = 'active';
                 $existingUser->save();
                 
@@ -121,7 +133,6 @@ class AuthController
                 $existingUser->remember_token_expires_at = Carbon::now()->addWeeks(2);
                 $existingUser->save();
                 
-                // Complete daily login task
                 \App\Models\UserDailyTask::completeTask(
                     $existingUser->id,
                     \App\Models\DailyTask::TYPE_LOGIN,
@@ -146,6 +157,7 @@ class AuthController
                 $user = new User();
                 $user->name = $googleUser->getName();
                 $user->email = $googleUser->getEmail();
+                $user->google_id = $googleUser->getId();
                 $user->password = bcrypt(Str::random(16)); 
                 $user->active = 'active';
                 
@@ -170,7 +182,6 @@ class AuthController
                 $user->remember_token_expires_at = Carbon::now()->addWeeks(2);
                 $user->save();
 
-                // Complete daily login task for new Google user
                 \App\Models\UserDailyTask::completeTask(
                     $user->id,
                     \App\Models\DailyTask::TYPE_LOGIN,
@@ -218,11 +229,10 @@ class AuthController
 
     public function register(Request $request)
     {
-        $email = $request->input('email');
-        if (!$this->isEmailPasswordLoginEnabled($email)) {
+        if (!self::isRegisterEnabled()) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Tạm thời đóng đăng ký bằng email mật khẩu, vui lòng đăng nhập bằng Google.',
+                'message' => 'Tạm thời đóng đăng ký tài khoản mới. Vui lòng đăng nhập với tài khoản đã có.',
             ], 403);
         }
 
@@ -343,7 +353,12 @@ class AuthController
 
             $otp = generateRandomOTP();
             $user->save();
-
+            if (empty($user->email)) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Không thể gửi OTP vì tài khoản chưa có email.',
+                ], 422);
+            }
             Mail::to($user->email)->send(new OTPMail($otp));
             $user->key_active = bcrypt($otp);
             $user->save();
@@ -373,11 +388,6 @@ class AuthController
         ]);
 
         try {
-            // Check if email/password login is enabled (or user is super admin)
-            if (!$this->isEmailPasswordLoginEnabled($request->email)) {
-                return redirect()->back()->withInput()->with('error', 'Tạm thời đóng login bằng email mật khẩu, vui lòng đăng nhập bằng Google.');
-            }
-
             $user = User::where('email', $request->email)->first();
             if (!$user) {
                 return redirect()->back()->withInput()->withErrors([
@@ -453,14 +463,6 @@ class AuthController
 
     public function forgotPassword(Request $request)
     {
-        $email = $request->input('email');
-        if (!$this->isEmailPasswordLoginEnabled($email)) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Tạm thời đóng chức năng quên mật khẩu, vui lòng đăng nhập bằng Google.',
-            ], 403);
-        }
-        
         if ($request->has('email')) {
             try {
                 $request->validate([
@@ -567,7 +569,12 @@ class AuthController
                 $user->key_reset_password = bcrypt($randomOTPForgotPW);
                 $user->reset_password_at = Carbon::now();
                 $user->save();
-
+                if (empty($user->email)) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Tài khoản này không có email, không thể gửi OTP. Vui lòng đăng nhập bằng Google/Facebook/Zalo.',
+                    ], 422);
+                }
                 Mail::to($user->email)->send(new OTPForgotPWMail($randomOTPForgotPW));
                 return response()->json([
                     'status' => 'success',

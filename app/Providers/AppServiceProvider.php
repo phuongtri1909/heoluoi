@@ -229,7 +229,7 @@ class AppServiceProvider extends ServiceProvider
                 $story->latest_purchase_at = null;
                 $story->latest_purchase_diff = 'Chưa có ai mua';
             }
-            foreach (['chapters', 'categories', 'user', 'latestChapter', 'ratings', 'bookmarks'] as $relation) {
+            foreach (['chapters', 'user', 'latestChapter', 'ratings', 'bookmarks'] as $relation) {
                 if ($story->relationLoaded($relation)) {
                     $story->unsetRelation($relation);
                 }

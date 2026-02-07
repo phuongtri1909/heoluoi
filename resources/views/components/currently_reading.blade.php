@@ -2,7 +2,7 @@
 <div class="sidebar-widget recent-reads rounded-4 border-5 border border-color-7 shadow-sm mt-4">
     <div class="widget-header border-bottom-0">
         <div class="text-center">
-            <h2 class="fs-3 text-center m-0 text-dark fw-bold title-dark font-svn-apple">ĐANG ĐỌC</h2>
+            <h2 class="fs-3 text-center m-0 text-dark fw-bold title-dark font-FzAstila">ĐANG ĐỌC</h2>
         </div>
     </div>
     <div class="widget-content px-md-4 px-2">

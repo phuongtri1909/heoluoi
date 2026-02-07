@@ -27,6 +27,8 @@ class User extends Authenticatable
         'key_reset_password',
         'reset_password_at',
         'google_id',
+        'facebook_id',
+        'zalo_id',
         'ip_address',
         'recently_read',
         'coins',
@@ -36,6 +38,9 @@ class User extends Authenticatable
     const ROLE_USER = 'user';
     const ROLE_ADMIN_MAIN = 'admin_main';
     const ROLE_ADMIN_SUB = 'admin_sub';
+
+    const ACTIVE_ACTIVE = 'active';
+    const ACTIVE_INACTIVE = 'inactive';
 
     /**
      * Get all chapter purchases made by this user
@@ -280,5 +285,10 @@ class User extends Authenticatable
     public function userDailyTasks()
     {
         return $this->hasMany(UserDailyTask::class);
+    }
+
+    public function keywords()
+    {
+        return $this->hasMany(StoryKeyword::class);
     }
 }

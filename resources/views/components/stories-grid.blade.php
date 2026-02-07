@@ -22,13 +22,13 @@
         </a>
     </div>
     <div class="story-info text-sm text-gray-600 fw-semibold">
-        <div>
+        {{-- <div>
             <h5 class="story-title mb-0 text-sm fw-semibold lh-base text-center">
                 <a href="{{ route('show.page.story', $story->slug) }}" class="text-decoration-none text-dark fw-bold fs-6 text-center">
                     {{ $story->title }}
                 </a>
             </h5>
-        </div>
+        </div> --}}
         {{-- <div class="story-views-time-container mt-1">
             <span class="story-views">
                 <i class="fas fa-eye eye fs-8 text-primary"></i>
