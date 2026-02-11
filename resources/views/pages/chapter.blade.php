@@ -684,7 +684,8 @@
             window.canvasChapterRenderer = {
                 cachedContent: null,
                 isRendering: false,
-                updateTimer: null
+                updateTimer: null,
+                lastRenderWidth: null
             };
 
             function renderContentWithCanvas() {
@@ -758,6 +759,8 @@
                     const containerPaddingRight = parseFloat(containerStyle.paddingRight) || 0;
                     const containerWidth = chapterContentContainer.offsetWidth;
                     const maxWidth = containerWidth - containerPaddingLeft - containerPaddingRight;
+
+                    window.canvasChapterRenderer.lastRenderWidth = maxWidth;
                     
                     const fragment = document.createDocumentFragment();
                     const canvasElements = [];
@@ -901,9 +904,28 @@
                 window.addEventListener('resize', function() {
                     clearTimeout(resizeTimer);
                     resizeTimer = setTimeout(function() {
-                        if (window.canvasChapterRenderer.cachedContent) {
-                            window.updateCanvasContent(true);
+                        if (!window.canvasChapterRenderer.cachedContent) {
+                            return;
                         }
+
+                        const canvasContent = document.getElementById('chapter-canvas-content');
+                        if (!canvasContent) return;
+
+                        const chapterContentContainer = canvasContent.closest('.chapter-content');
+                        if (!chapterContentContainer) return;
+
+                        const containerStyle = window.getComputedStyle(chapterContentContainer);
+                        const containerPaddingLeft = parseFloat(containerStyle.paddingLeft) || 0;
+                        const containerPaddingRight = parseFloat(containerStyle.paddingRight) || 0;
+                        const containerWidth = chapterContentContainer.offsetWidth;
+                        const currentWidth = containerWidth - containerPaddingLeft - containerPaddingRight;
+
+                        if (window.canvasChapterRenderer.lastRenderWidth !== null &&
+                            Math.abs(currentWidth - window.canvasChapterRenderer.lastRenderWidth) < 5) {
+                            return;
+                        }
+
+                        window.updateCanvasContent(true);
                     }, 250);
                 });
             });
